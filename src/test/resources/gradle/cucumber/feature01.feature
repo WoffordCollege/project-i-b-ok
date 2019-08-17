@@ -21,6 +21,16 @@ Feature: Allow administrators to add users to the database.
   currently in the database.
 
 
+  Instructor's Note
+  -----------------
+  You will want to use the sqlite-jdbc library for this feature. You will need
+  to find the documentation and learn how to interact with a sqlite database.
+  The Utilities.java file contains the schema for the database in the static
+  method createNewDatabase. This schema should not be changed in any way; it is
+  a requirement of the product owner.
+
+
+
   Scenario: The user requests to perform as administrator with the wrong password.
     Given the feature is 1
     And I attempt to perform as administrator with password "wrong"
