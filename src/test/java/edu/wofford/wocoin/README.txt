@@ -1,0 +1,1 @@
+This is only a placeholder so that Git will keep the folder here. You can remove this after you add actual files to this directory.
