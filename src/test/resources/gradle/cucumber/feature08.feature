@@ -38,18 +38,17 @@ Feature: Allow administrators to transfer WoCoins to a user's wallet.
   
   Also, when you run the cucumber tests, you will need to make sure that the
   Ethereum node is running (and has started afresh) before the scenarios tagged
-  as @rungeth run. I have included a file (startblockchain.sh) that will reset
-  and then start the node, if your setup matches mine and you are on a Linux
-  machine. Otherwise, you will need to adapt that script or draw inspiration
-  from it for your own setup. Assuming that script works for you, you would
-  run the cucumber tests separately as follows:
+  as @rungeth run. You will need to develop a way to reset and then start the
+  node, ideally as a bash script or batch file. Assuming that you run such a
+  script to reset/restart the node, you would run the cucumber tests separately
+  as follows:
   
   JAVA_TOOL_OPTIONS="-Xmx512m" CUCUMBER_OPTIONS='--tags "not @rungeth"' ./gradlew --no-daemon cucumber
   
   This command runs all the non-Ethereum-required acceptance tests. After that,
   you would start the Ethereum node (in a different terminal) by running the
-  startblockchain.sh (or your own) script, and then you would run the cucumber
-  test for the geth scenarios:
+  script you have created, and then you would run the cucumber test for the geth
+  scenarios:
   
   JAVA_TOOL_OPTIONS="-Xmx512m" CUCUMBER_OPTIONS='--tags "@rungeth"' ./gradlew --no-daemon cucumber
   
