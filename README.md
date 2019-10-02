@@ -168,8 +168,8 @@ etc.). The most important things here are as follows:
 **build/reports/tests/index.html**
 : This file holds the results of all of the unit tests.
 
-**build/libs/<name>.jar**
-: This file (where *name* is specified in the jar settings of **build.gradle**, 
+**build/libs/*name*.jar**
+: This file (where *name* is specified in the jar settings of **build.gradle**) 
   is the fully bundled code for the project. You can run this by saying
   `java -jar build/libs/<name>.jar`
   from the project root. However, if you intend to run the program this way, you
