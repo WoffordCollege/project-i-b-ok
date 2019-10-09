@@ -1,4 +1,5 @@
 package edu.wofford.wocoin.main;
 
-public class UIController {
+public interface UIController {
+    public void updateDisplay();
 }
