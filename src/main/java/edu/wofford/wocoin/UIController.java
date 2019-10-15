@@ -1,6 +1,4 @@
-package edu.wofford.wocoin.main;
-
-import java.util.ArrayList;
+package edu.wofford.wocoin;
 
 public interface UIController {
     public void updateDisplay(AccessController.Result actionResult, AccessController.AccessOptions[] userOptions);

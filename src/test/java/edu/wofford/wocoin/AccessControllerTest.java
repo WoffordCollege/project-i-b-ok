@@ -1,7 +1,5 @@
 package edu.wofford.wocoin;
 
-import edu.wofford.wocoin.main.AccessController;
-import edu.wofford.wocoin.main.UIController;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;

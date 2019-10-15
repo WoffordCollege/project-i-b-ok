@@ -1,6 +1,4 @@
-package edu.wofford.wocoin.main;
-
-import java.util.ArrayList;
+package edu.wofford.wocoin;
 
 public class ConsoleMain implements UIController {
 

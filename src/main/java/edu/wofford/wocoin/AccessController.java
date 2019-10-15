@@ -1,4 +1,4 @@
-package edu.wofford.wocoin.main;
+package edu.wofford.wocoin;
 
 import java.util.ArrayList;
 
