@@ -22,8 +22,14 @@ public class AccessControllerTest implements UIController {
     @Test
     public void testAdminLogin(){
         ac.login("", "adminpwd");
-        assertEquals(result, AccessController.Result.SUCCESS);
-        assertArrayEquals(accessOptions, new AccessController.AccessOptions[]{AccessController.AccessOptions.ADDUSER});
+        AccessController.AccessOptions[] compareArray = new AccessController.AccessOptions[1];
+        compareArray[0] = AccessController.AccessOptions.ADDUSER;
+        assertEquals(AccessController.Result.SUCCESS, result);
+        assertArrayEquals(compareArray, accessOptions);
+        ac.login("", "notadminpwd");
+        compareArray = new AccessController.AccessOptions[0];
+        assertEquals(AccessController.Result.WRONG_PASSWORD, result);
+        assertArrayEquals(compareArray, accessOptions);
     }
 
     @Override

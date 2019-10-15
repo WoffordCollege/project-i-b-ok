@@ -34,7 +34,7 @@ public class AccessController {
             ui.updateDisplay(Result.SUCCESS, getUIOptions());
         }
         else {
-            ui.updateDisplay(Result.INVALID_PASSWORD, getUIOptions());
+            ui.updateDisplay(Result.WRONG_PASSWORD, getUIOptions());
         }
     }
 
@@ -48,6 +48,7 @@ public class AccessController {
 
 
     public AccessOptions[] getUIOptions() {
-        return (AccessOptions[]) uiOptions.toArray();
+        AccessOptions[] unfilledArray = new AccessOptions[uiOptions.size()];
+        return uiOptions.toArray(unfilledArray);
     }
 }
