@@ -42,7 +42,6 @@ public class AccessController {
     public void addUser(String username, String password){
         // SQLDB.addUser
 
-        uiOptions.add(AccessOptions.ADDUSER);
         ui.updateDisplay(Result.SUCCESS, getUIOptions());
     }
 
