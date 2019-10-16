@@ -18,6 +18,12 @@ public class AccessController {
         sqlController = new SQLController();
     }
 
+    public AccessController(UIController currentUI, String dbFilename) {
+        ui = currentUI;
+        uiOptions = new ArrayList<AccessOptions>();
+        sqlController = new SQLController(dbFilename);
+    }
+
     public void login(String username, String password){
         uiOptions.clear();
 
@@ -41,8 +47,17 @@ public class AccessController {
 
     public void addUser(String username, String password){
         // SQLDB.addUser
+        SQLController.sqlResult result = sqlController.insertUser(username, password);
 
-        ui.updateDisplay(Result.SUCCESS, getUIOptions());
+        switch (result){
+            case ADDED:
+                ui.updateDisplay(Result.SUCCESS, getUIOptions());
+                break;
+            case NOTADDED:
+                ui.updateDisplay(Result.INVALID_USERNAME, getUIOptions());
+                break;
+        }
+
     }
 
 
