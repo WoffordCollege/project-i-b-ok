@@ -1,6 +1,5 @@
 package edu.wofford.wocoin;
 
-import edu.wofford.wocoin.main.SQLController;
 import org.junit.*;
 import static org.junit.Assert.*;
 import java.sql.*;
