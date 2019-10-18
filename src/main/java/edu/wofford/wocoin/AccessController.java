@@ -13,18 +13,32 @@ public class AccessController {
 
     private ArrayList<AccessOptions> uiOptions;
 
+    /**
+     * Constructor
+     * @param currentUI an instance of an UI object
+     */
     public AccessController(UIController currentUI) {
         ui = currentUI;
         uiOptions = new ArrayList<AccessOptions>();
         sqlController = new SQLController();
     }
 
+    /**
+     * Constructor
+     * @param currentUI an instance of an UI object
+     * @param dbFilename the database to access
+     */
     public AccessController(UIController currentUI, String dbFilename) {
         ui = currentUI;
         uiOptions = new ArrayList<AccessOptions>();
         sqlController = new SQLController(dbFilename);
     }
 
+    /**
+     *
+     * @param username the name of the user
+     * @param password the associated password
+     */
     public void login(String username, String password){
         uiOptions.clear();
 
@@ -45,7 +59,11 @@ public class AccessController {
         }
     }
 
-
+    /**
+     *
+     * @param username the name of the user to add
+     * @param password the associated password for the user
+     */
     public void addUser(String username, String password){
         // SQLDB.addUser
 
@@ -68,7 +86,10 @@ public class AccessController {
 
     }
 
-
+    /**
+     *
+     * @param username the name of the user to be removed
+     */
     public void removeUser(String username) {
         SQLController.sqlResult result = sqlController.removeUser(username);
 
@@ -91,7 +112,10 @@ public class AccessController {
         }
     }
 
-
+    /**
+     *
+     * @return 
+     */
     public AccessOptions[] getUIOptions() {
         AccessOptions[] unfilledArray = new AccessOptions[uiOptions.size()];
         return uiOptions.toArray(unfilledArray);
