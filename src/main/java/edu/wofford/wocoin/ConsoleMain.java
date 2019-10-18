@@ -19,6 +19,7 @@ public class ConsoleMain implements UIController {
         this("wocoinDatabase.sqlite3");
     }
 
+    
     public ConsoleMain(String dbName) {
         ac = new AccessController(this, dbName);
         acResult = null;
@@ -26,6 +27,10 @@ public class ConsoleMain implements UIController {
         currentState = UIState.START;
     }
 
+    /**
+    * displays initial screen 
+    * If administrator, then displays for add or remove users
+    */
     private void takeInput() {
         switch (currentState){
             case START:
@@ -63,12 +68,19 @@ public class ConsoleMain implements UIController {
                     String[] newUser = this.takeArgumentInput(2);
                     ac.addUser(newUser[0], newUser[1]);
                 }
+                else if (chosenOption == 3) {
+                    String[] removedUser = this.takeArgumentInput(1);
+                    ac.removeUser(removedUser[0]);
+                }
                 break;
             case STANDARD:
                 break;
         }
     }
-
+    
+    /**
+    * takes in arguments from users
+    */
     private String[] takeArgumentInput(int argLength) {
         //Scanner inputScanner = new Scanner(System.in);
         String currentLine = inputScanner.nextLine();
@@ -81,25 +93,40 @@ public class ConsoleMain implements UIController {
 
         return returnVal;
     }
-
+    
+    /**
+    * Display initial screen
+    */
     private void printLogin() {
         System.out.println("1: exit\n2: administrator");
     }
 
+    /**
+    * display administrator screen
+    */
     private void printAdministratorLoggedIn() {
-        System.out.println("1: back\n2: add user");
+        System.out.println("1: back\n2: add user\n3. remove user");
     }
-
+    
+    /**
+    * scans user inputScanner
+    */
     private int takeOptionInput() {
         //Scanner inputScanner = new Scanner(System.in);
         return inputScanner.nextInt();
     }
 
+    /**
+    * displays accesscontrollers ResultS
+    */
     @Override
     public void updateDisplay(AccessController.Result actionResult, AccessController.AccessOptions[] userOptions) {
         this.updateDisplay(actionResult, userOptions, new String[0]);
     }
 
+    /**
+    * displays accesscontrollers ResultS
+    */
     @Override
     public void updateDisplay(AccessController.Result actionResult, AccessController.AccessOptions[] userOptions, String[] args) {
         acResult = actionResult;
@@ -118,13 +145,23 @@ public class ConsoleMain implements UIController {
                 break;
             case ADMINISTRATOR:
                 if (acResult == AccessController.Result.SUCCESS){
-                    if (args.length >= 1) {
-                        System.out.println(args[0] + " was added.");
+                    if (args.length >= 2) {
+                        if (args[0].equals("add")){
+                            System.out.println(args[1] + " was added.");
+                        }
+                        else if (args[0].equals("remove")){
+                            System.out.println(args[1] + " was removed.");
+                        }
                     }
                 }
                 else if (acResult == AccessController.Result.INVALID_USERNAME) {
-                    if (args.length >= 1) {
-                        System.out.println(args[0] + " already exists.");
+                    if (args.length >= 2) {
+                        if (args[0].equals("add")){
+                            System.out.println(args[1] + " already exists.");
+                        }
+                        else if (args[0].equals("remove")){
+                            System.out.println(args[1] + " does not exist.");
+                        }
                     }
                 }
                 else {
@@ -149,3 +186,4 @@ public class ConsoleMain implements UIController {
         consoleMain.takeInput();
     }
 }
+
