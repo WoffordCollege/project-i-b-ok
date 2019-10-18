@@ -22,7 +22,7 @@ public class ConsoleMainTest {
             System.setIn(new ByteArrayInputStream(programInput.getBytes()));
             ByteArrayOutputStream outContent = new ByteArrayOutputStream();
             System.setOut(new PrintStream(outContent));
-            String[] args = {"wocoinDatabase.sqlite3"};
+            String[] args = {};
             ConsoleMain.main(args);
             actualOutput = outContent.toString();
         } finally {
