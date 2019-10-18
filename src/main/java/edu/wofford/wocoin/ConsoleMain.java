@@ -9,6 +9,8 @@ public class ConsoleMain implements UIController {
     private AccessController.Result acResult;
     private AccessController.AccessOptions[] acOptions;
 
+    private Scanner inputScanner = new Scanner(System.in);
+
     private enum UIState {START, LOGIN, ADMINISTRATOR, STANDARD}
 
     private UIState currentState;
@@ -68,7 +70,7 @@ public class ConsoleMain implements UIController {
     }
 
     private String[] takeArgumentInput(int argLength) {
-        Scanner inputScanner = new Scanner(System.in);
+        //Scanner inputScanner = new Scanner(System.in);
         String currentLine = inputScanner.nextLine();
         String[] returnVal = currentLine.split(" ");
 
@@ -89,7 +91,7 @@ public class ConsoleMain implements UIController {
     }
 
     private int takeOptionInput() {
-        Scanner inputScanner = new Scanner(System.in);
+        //Scanner inputScanner = new Scanner(System.in);
         return inputScanner.nextInt();
     }
 
