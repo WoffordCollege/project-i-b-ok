@@ -103,7 +103,20 @@ public class ConsoleMain implements UIController {
     * display administrator screen
     */
     private void printAdministratorLoggedIn() {
-        System.out.println("1: back\n2: add user\n3. remove user");
+        StringBuilder sb = new StringBuilder("1. back");
+
+        for (AccessController.AccessOptions option : acOptions) {
+            switch (option) {
+                case ADDUSER:
+                    sb.append("\n2. add user");
+                    break;
+                case DELETEUSER:
+                    sb.append("\n3. remove user");
+                    break;
+            }
+        }
+
+        System.out.println(sb);
     }
     
     /**

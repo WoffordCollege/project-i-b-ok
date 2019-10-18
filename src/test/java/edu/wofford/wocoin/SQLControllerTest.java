@@ -63,5 +63,13 @@ public class SQLControllerTest {
         foo.closeConnection();
     }
 
+    @Test
+    public final void testExceptionsInFunctions() {
+        SQLController badDBConnect = new SQLController("notadb.sqllite3");
+        badDBConnect.lookupUser("testuser");
+        badDBConnect.insertUser("testuser", "testpw");
+        badDBConnect.removeUser("testuser");
+    }
+
 
 }

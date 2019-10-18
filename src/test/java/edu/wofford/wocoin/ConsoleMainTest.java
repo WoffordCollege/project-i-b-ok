@@ -55,7 +55,7 @@ public class ConsoleMainTest {
 
     @Test
     public void testAddUser() {
-        String programInput = "2\ntest adminpwd\n2\ntestuser testpass";
+        String programInput = "2\nadminpwd\n2\ntestuser testpass";
         InputStream originalIn = System.in;
         PrintStream originalOut = System.out;
         String actualOutput;
