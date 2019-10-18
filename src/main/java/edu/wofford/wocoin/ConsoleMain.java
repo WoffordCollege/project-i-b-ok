@@ -61,6 +61,10 @@ public class ConsoleMain implements UIController {
                     String[] newUser = this.takeArgumentInput(2);
                     ac.addUser(newUser[0], newUser[1]);
                 }
+                else if (chosenOption == 3) {
+                    String[] removedUser = this.takeArgumentInput(1);
+                    ac.removeUser(removedUser[0]);
+                }
                 break;
             case STANDARD:
                 break;
@@ -85,7 +89,7 @@ public class ConsoleMain implements UIController {
     }
 
     private void printAdministratorLoggedIn() {
-        System.out.println("1: back\n2: add user");
+        System.out.println("1: back\n2: add user\n3. remove user");
     }
 
     private int takeOptionInput() {
@@ -116,13 +120,23 @@ public class ConsoleMain implements UIController {
                 break;
             case ADMINISTRATOR:
                 if (acResult == AccessController.Result.SUCCESS){
-                    if (args.length >= 1) {
-                        System.out.println(args[0] + " was added.");
+                    if (args.length >= 2) {
+                        if (args[0].equals("add")){
+                            System.out.println(args[1] + " was added.");
+                        }
+                        else if (args[0].equals("remove")){
+                            System.out.println(args[1] + " was removed.");
+                        }
                     }
                 }
                 else if (acResult == AccessController.Result.INVALID_USERNAME) {
-                    if (args.length >= 1) {
-                        System.out.println(args[0] + " already exists.");
+                    if (args.length >= 2) {
+                        if (args[0].equals("add")){
+                            System.out.println(args[1] + " already exists.");
+                        }
+                        else if (args[0].equals("remove")){
+                            System.out.println(args[1] + " does not exist.");
+                        }
                     }
                 }
                 else {

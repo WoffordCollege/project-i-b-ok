@@ -3,6 +3,7 @@ package edu.wofford.wocoin;
 import java.util.ArrayList;
 
 public class AccessController {
+
     public enum AccessOptions {ADDUSER, DELETEUSER}
 
     public enum Result {SUCCESS, INVALID_PASSWORD, WRONG_PASSWORD, INVALID_USERNAME, UNKNOWN_USERNAME, UNHANDLED}
@@ -52,10 +53,10 @@ public class AccessController {
 
         switch (result){
             case ADDED:
-                ui.updateDisplay(Result.SUCCESS, getUIOptions(), new String[] {username});
+                ui.updateDisplay(Result.SUCCESS, getUIOptions(), new String[] {"add", username});
                 break;
             case DUPLICATE:
-                ui.updateDisplay(Result.INVALID_USERNAME, getUIOptions(), new String[] {username});
+                ui.updateDisplay(Result.INVALID_USERNAME, getUIOptions(), new String[] {"add", username});
                 break;
             case NORECORD:
             case NOTREMOVED:
@@ -65,6 +66,29 @@ public class AccessController {
                 break;
         }
 
+    }
+
+
+    public void removeUser(String username) {
+        SQLController.sqlResult result = sqlController.removeUser(username);
+
+        switch (result){
+
+            case ADDED:
+                break;
+            case NOTADDED:
+                break;
+            case DUPLICATE:
+                break;
+            case REMOVED:
+                ui.updateDisplay(Result.SUCCESS, getUIOptions(), new String[] {"remove", username});
+                break;
+            case NOTREMOVED:
+                break;
+            case NORECORD:
+                ui.updateDisplay(Result.INVALID_USERNAME, getUIOptions(), new String[] {"remove", username});
+                break;
+        }
     }
 
 
