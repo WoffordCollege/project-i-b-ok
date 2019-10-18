@@ -92,5 +92,14 @@ public class SQLControllerTest {
         badDBConnect.removeUser("testuser");
     }
 
+    @Test
+    public final void testCloseConnection() {
+        SQLController goodConnect = new SQLController();
+        goodConnect.closeConnection();
+
+        SQLController badDBConnect = new SQLController("notadb.sqllite3");
+        badDBConnect.closeConnection();
+    }
+
 
 }
