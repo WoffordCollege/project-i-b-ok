@@ -1,5 +1,6 @@
 package edu.wofford.wocoin.main;
 
+import edu.wofford.wocoin.ConsoleMain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Arrays;
@@ -13,7 +14,11 @@ public class Main {
             String[] realArgs = Arrays.copyOfRange(args, 1, args.length);
             if (args[0].equals("0")) {
                 Feature00Main.main(realArgs);
-            } else {
+            }
+            else if (args[0].equals("1")){
+                ConsoleMain.main(new String[] {args[1]});
+            }
+            else {
                 System.out.println("Feature " + args[0] + " is not valid.");
             }
 

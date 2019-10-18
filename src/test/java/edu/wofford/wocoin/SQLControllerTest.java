@@ -31,7 +31,7 @@ public class SQLControllerTest {
         SQLController.sqlResult tmp = foo.insertUser("Connor","password");
         assertEquals(SQLController.sqlResult.ADDED,tmp);
         foo.closeConnection();
-        try{
+        try {
             Connection connWocoin = DriverManager.getConnection("jdbc:sqlite:wocoinDatabase.sqlite3");
             String cmdSelect = "select Count(*) from users where id = 'Connor'";
             Statement stmSelect = connWocoin.createStatement();

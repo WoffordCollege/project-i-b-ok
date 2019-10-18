@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class AccessController {
     public enum AccessOptions {ADDUSER, DELETEUSER}
 
-    public enum Result {SUCCESS, INVALID_PASSWORD, WRONG_PASSWORD, INVALID_USERNAME, UNKNOWN_USERNAME}
+    public enum Result {SUCCESS, INVALID_PASSWORD, WRONG_PASSWORD, INVALID_USERNAME, UNKNOWN_USERNAME, UNHANDLED}
 
     private UIController ui;
     private SQLController sqlController;
@@ -47,14 +47,21 @@ public class AccessController {
 
     public void addUser(String username, String password){
         // SQLDB.addUser
+
         SQLController.sqlResult result = sqlController.insertUser(username, password);
 
         switch (result){
             case ADDED:
-                ui.updateDisplay(Result.SUCCESS, getUIOptions());
+                ui.updateDisplay(Result.SUCCESS, getUIOptions(), new String[] {username});
                 break;
+            case DUPLICATE:
+                ui.updateDisplay(Result.INVALID_USERNAME, getUIOptions(), new String[] {username});
+                break;
+            case NORECORD:
+            case NOTREMOVED:
             case NOTADDED:
-                ui.updateDisplay(Result.INVALID_USERNAME, getUIOptions());
+            case REMOVED:
+                ui.updateDisplay(Result.UNHANDLED, getUIOptions());
                 break;
         }
 

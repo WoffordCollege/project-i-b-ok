@@ -41,6 +41,7 @@ public class AccessControllerTest implements UIController {
 
         ac.addUser("testuser", "testpassword");
         assertEquals(AccessController.Result.SUCCESS, result);
+        assertTrue(new SQLController().lookupUser("testuser"));
         assertArrayEquals(compareArray, accessOptions);
 
     }
@@ -49,5 +50,10 @@ public class AccessControllerTest implements UIController {
     public void updateDisplay(AccessController.Result actionResult, AccessController.AccessOptions[] userOptions) {
         this.result = actionResult;
         this.accessOptions = userOptions;
+    }
+
+    @Override
+    public void updateDisplay(AccessController.Result actionResult, AccessController.AccessOptions[] userOptions, String[] args) {
+        this.updateDisplay(actionResult, accessOptions);
     }
 }
