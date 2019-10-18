@@ -17,6 +17,7 @@ public class ConsoleMain implements UIController {
         this("wocoinDatabase.sqlite3");
     }
 
+    
     public ConsoleMain(String dbName) {
         ac = new AccessController(this, dbName);
         acResult = null;
@@ -24,6 +25,10 @@ public class ConsoleMain implements UIController {
         currentState = UIState.START;
     }
 
+    /**
+    * displays initial screen 
+    * If administrator, then displays for add or remove users
+    */
     private void takeInput() {
         switch (currentState){
             case START:
@@ -70,7 +75,10 @@ public class ConsoleMain implements UIController {
                 break;
         }
     }
-
+    
+    /**
+    * takes in arguments from users
+    */
     private String[] takeArgumentInput(int argLength) {
         Scanner inputScanner = new Scanner(System.in);
         String currentLine = inputScanner.nextLine();
@@ -83,25 +91,40 @@ public class ConsoleMain implements UIController {
 
         return returnVal;
     }
-
+    
+    /**
+    * Display initial screen
+    */
     private void printLogin() {
         System.out.println("1: exit\n2: administrator");
     }
 
+    /**
+    * display administrator screen
+    */
     private void printAdministratorLoggedIn() {
         System.out.println("1: back\n2: add user\n3. remove user");
     }
-
+    
+    /**
+    * scans user inputScanner
+    */
     private int takeOptionInput() {
         Scanner inputScanner = new Scanner(System.in);
         return inputScanner.nextInt();
     }
 
+    /**
+    * displays accesscontrollers ResultS
+    */
     @Override
     public void updateDisplay(AccessController.Result actionResult, AccessController.AccessOptions[] userOptions) {
         this.updateDisplay(actionResult, userOptions, new String[0]);
     }
 
+    /**
+    * displays accesscontrollers ResultS
+    */
     @Override
     public void updateDisplay(AccessController.Result actionResult, AccessController.AccessOptions[] userOptions, String[] args) {
         acResult = actionResult;
@@ -161,3 +184,4 @@ public class ConsoleMain implements UIController {
         consoleMain.takeInput();
     }
 }
+
