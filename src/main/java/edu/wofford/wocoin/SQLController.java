@@ -1,49 +1,25 @@
 package edu.wofford.wocoin;
 import java.sql.*;
-import edu.wofford.wocoin.Utilities;
 
 public class SQLController {
 
-    private Connection dataConn;
     private String url;
-    public enum sqlResult {ADDED, NOTADDED, DUPLICATE, REMOVED, NOTREMOVED, NORECORD}
+    public enum AddUserResult {ADDED, DUPLICATE, NOTADDED}
+    public enum RemoveUserResult {REMOVED, NORECORD, NOTREMOVED}
 
     /**
      * Constructor that takes the name of the file
      * @param filename
      */
     public SQLController(String filename) {
-        try{
-            url = filename;
-            dataConn = DriverManager.getConnection("jdbc:sqlite:" + filename);
-        }
-        catch(Exception e) {
-            System.out.println(e.toString());
-        }
+        url = "jdbc:sqlite:" + filename;
     }
 
     /**
      * Constructor where the database defaults to wocoinDatabase.sqlite3
      */
     public SQLController() {
-        try {
-            url = "wocoinDatabase.sqlite3";
-            dataConn = DriverManager.getConnection("jdbc:sqlite:wocoinDatabase.sqlite3");
-        }
-        catch(Exception e) {
-            System.out.println("Error");
-        }
-    }
-
-    /**
-     * Closes the connection to the database
-     */
-    public void closeConnection(){
-        try{
-            dataConn.close();
-        } catch(Exception e){
-            System.out.println(e.toString());
-        }
+        url = "jdbc:sqlite:wocoinDatabase.sqlite3";
     }
 
     /**
@@ -60,15 +36,16 @@ public class SQLController {
      * @return true if the user has a recod in the table
      */
     public boolean lookupUser(String name){
-        try{
-            PreparedStatement stSelect = dataConn.prepareStatement("Select count(*) from users where id = ?");
-            stSelect.setString(1,name);
+        boolean returnVal = false;
+        try (Connection dataConn = DriverManager.getConnection(url)) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT count(*) FROM users WHERE id = ?");
+            stSelect.setString(1, name);
             ResultSet dtr = stSelect.executeQuery();
-            return dtr.getInt(1)>0;
-        } catch(Exception e){
+            returnVal = dtr.getInt(1) > 0;
+        } catch (Exception e) {
             System.out.println(e.toString());
         }
-        return false;
+        return returnVal;
     }
 
     /**
@@ -79,28 +56,30 @@ public class SQLController {
      * if successful returns ADDED
      * if unsuccessful, returns why
      */
-    public sqlResult insertUser(String name, String password){
+    public AddUserResult insertUser(String name, String password){
         if(lookupUser(name)){
-            return sqlResult.DUPLICATE;
+            return AddUserResult.DUPLICATE;
         }
-        
-        try {
-            PreparedStatement stInsert = dataConn.prepareStatement("INSERT INTO users (id, salt, hash) VALUES (?, ?, ?)");
-            int salt = Utilities.generateSalt();
-            String strHash = Utilities.applySha256(password+salt);
 
+        int salt = Utilities.generateSalt();
+        String strHash = Utilities.applySha256(password+salt);
+
+        AddUserResult result = AddUserResult.NOTADDED;
+
+        try (Connection dataConn = DriverManager.getConnection(url)) {
+            PreparedStatement stInsert = dataConn.prepareStatement("INSERT INTO users (id, salt, hash) VALUES (?, ?, ?)");
             stInsert.setString(1, name);
             stInsert.setInt(2, salt);
             stInsert.setString(3, strHash);
 
             stInsert.execute();
-            return sqlResult.ADDED;
-        }
-        catch(Exception e) {
+            dataConn.close();
+            result = AddUserResult.ADDED;
+        } catch (Exception e) {
             System.out.println(e.toString());
         }
 
-        return sqlResult.NOTADDED;
+        return result;
     }
 
     /**
@@ -110,23 +89,24 @@ public class SQLController {
      * if successful returns REMOVED
      * if unsuccessful, returns why
      */
-    public sqlResult removeUser(String name){
+    public RemoveUserResult removeUser(String name){
         if(!lookupUser(name)){
-            return sqlResult.NORECORD;
+            return RemoveUserResult.NORECORD;
         }
 
-        try {
-            PreparedStatement stDelete = dataConn.prepareStatement("delete from users where id = ?");
-            stDelete.setString(1, name);
+        RemoveUserResult result = RemoveUserResult.NOTREMOVED;
 
+        try (Connection dataConn = DriverManager.getConnection(url)){
+            PreparedStatement stDelete = dataConn.prepareStatement("DELETE FROM users WHERE id = ?");
+            stDelete.setString(1, name);
             stDelete.execute();
-            return sqlResult.REMOVED;
+            result = RemoveUserResult.REMOVED;
         }
         catch(Exception e) {
             System.out.println(e.toString());
         }
 
-        return sqlResult.NOTREMOVED;
+        return result;
     }
 
 }
