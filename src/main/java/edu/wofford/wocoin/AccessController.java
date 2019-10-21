@@ -52,6 +52,7 @@ public class AccessController {
 
         if (password.equals("adminpwd")){
             uiOptions.add(AccessOptions.ADDUSER);
+            uiOptions.add(AccessOptions.DELETEUSER);
             ui.updateDisplay(Result.SUCCESS, getUIOptions());
         }
         else {

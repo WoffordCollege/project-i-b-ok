@@ -44,6 +44,27 @@ public class SQLControllerTest {
     }
 
     @Test
+    public final void removeUserTest(){
+        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
+
+        foo.insertUser("Connor","password");
+
+        SQLController.sqlResult tmp = foo.removeUser("Connor");
+        assertEquals(SQLController.sqlResult.REMOVED,tmp);
+        foo.closeConnection();
+        try {
+            Connection connWocoin = DriverManager.getConnection("jdbc:sqlite:wocoinDatabase.sqlite3");
+            String cmdSelect = "select Count(*) from users where id = 'Connor'";
+            Statement stmSelect = connWocoin.createStatement();
+            ResultSet dtr = stmSelect.executeQuery(cmdSelect);
+            assertEquals(0,dtr.getInt(1));
+            connWocoin.close();
+        }catch(Exception e){
+            System.out.println(e.toString());
+        }
+    }
+
+    @Test
     public final void duplicateUserTestDiffPass(){
         SQLController foo = new SQLController("wocoinDatabase.sqlite3");
         foo.removeUser("Garrett");
@@ -61,6 +82,23 @@ public class SQLControllerTest {
         SQLController.sqlResult tmp = foo.insertUser("Garrett","password");
         assertEquals(SQLController.sqlResult.DUPLICATE, tmp);
         foo.closeConnection();
+    }
+
+    @Test
+    public final void testExceptionsInFunctions() {
+        SQLController badDBConnect = new SQLController("notadb.sqllite3");
+        badDBConnect.lookupUser("testuser");
+        badDBConnect.insertUser("testuser", "testpw");
+        badDBConnect.removeUser("testuser");
+    }
+
+    @Test
+    public final void testCloseConnection() {
+        SQLController goodConnect = new SQLController();
+        goodConnect.closeConnection();
+
+        SQLController badDBConnect = new SQLController("notadb.sqllite3");
+        badDBConnect.closeConnection();
     }
 
 

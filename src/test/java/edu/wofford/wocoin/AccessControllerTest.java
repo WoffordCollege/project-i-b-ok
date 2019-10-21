@@ -83,6 +83,8 @@ public class AccessControllerTest implements UIController {
             e.printStackTrace();
         }
 
+        SQLController sqlController = new SQLController();
+
         ac.login(adminLogin[0], adminLogin[1]);
         AccessController.AccessOptions[] compareArray = new AccessController.AccessOptions[2];
         compareArray[0] = AccessController.AccessOptions.ADDUSER;
@@ -90,21 +92,19 @@ public class AccessControllerTest implements UIController {
         assertEquals(AccessController.Result.SUCCESS, result);
         assertArrayEquals(compareArray, accessOptions);
 
-        //ac.addUser("testuser", "testPWD");
-
         ac.removeUser("notindb");
         assertEquals(AccessController.Result.INVALID_USERNAME, result);
-        assertTrue(new SQLController().lookupUser("testuser"));
+        assertTrue(sqlController.lookupUser("testuser"));
         assertArrayEquals(compareArray, accessOptions);
 
         ac.removeUser("testuser");
         assertEquals(AccessController.Result.SUCCESS, result);
-        assertFalse(new SQLController().lookupUser("testuser"));
+        assertFalse(sqlController.lookupUser("testuser"));
         assertArrayEquals(compareArray, accessOptions);
 
         ac.removeUser("testuser");
         assertEquals(AccessController.Result.INVALID_USERNAME, result);
-        assertFalse(new SQLController().lookupUser("testuser"));
+        assertFalse(sqlController.lookupUser("testuser"));
         assertArrayEquals(compareArray, accessOptions);
     }
 

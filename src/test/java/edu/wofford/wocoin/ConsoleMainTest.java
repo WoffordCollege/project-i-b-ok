@@ -22,7 +22,7 @@ public class ConsoleMainTest {
             System.setIn(new ByteArrayInputStream(programInput.getBytes()));
             ByteArrayOutputStream outContent = new ByteArrayOutputStream();
             System.setOut(new PrintStream(outContent));
-            String[] args = {"wocoinDatabase.sqlite3"};
+            String[] args = {};
             ConsoleMain.main(args);
             actualOutput = outContent.toString();
         } finally {
@@ -55,7 +55,7 @@ public class ConsoleMainTest {
 
     @Test
     public void testAddUser() {
-        String programInput = "2\ntest adminpwd\n2\ntestuser testpass";
+        String programInput = "2\nadminpwd\n2\ntestuser testpass";
         InputStream originalIn = System.in;
         PrintStream originalOut = System.out;
         String actualOutput;
