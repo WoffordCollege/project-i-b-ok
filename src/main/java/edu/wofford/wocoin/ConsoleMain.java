@@ -18,7 +18,6 @@ public class ConsoleMain {
     private void beginUI() {
         int login = printLogin();
         if (login == 1) {
-            System.exit(0);
         } else {
             String password = scanner.next();
             boolean state = administratorLogIn(password);
