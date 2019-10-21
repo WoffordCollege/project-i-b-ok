@@ -1,6 +1,5 @@
 package edu.wofford.wocoin.main;
 
-import edu.wofford.wocoin.ConsoleMain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Arrays;
@@ -16,6 +15,9 @@ public class Main {
                 Feature00Main.main(realArgs);
             }
             else if (args[0].equals("1")){
+                ConsoleMain.main(new String[] {args[1]});
+            }
+            else if (args[0].equals("2")){
                 ConsoleMain.main(new String[] {args[1]});
             }
             else {
