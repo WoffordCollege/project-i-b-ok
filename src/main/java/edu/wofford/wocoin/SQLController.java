@@ -1,9 +1,11 @@
 package edu.wofford.wocoin;
+import java.io.File;
 import java.sql.*;
 
 public class SQLController {
 
     private String url;
+
     public enum AddUserResult {ADDED, DUPLICATE, NOTADDED}
     public enum RemoveUserResult {REMOVED, NORECORD, NOTREMOVED}
 
@@ -12,6 +14,11 @@ public class SQLController {
      * @param filename
      */
     public SQLController(String filename) {
+
+        if (!new File(filename).exists()) {
+            Utilities.createNewDatabase(filename);
+        }
+
         url = "jdbc:sqlite:" + filename;
     }
 
@@ -19,7 +26,7 @@ public class SQLController {
      * Constructor where the database defaults to wocoinDatabase.sqlite3
      */
     public SQLController() {
-        url = "jdbc:sqlite:wocoinDatabase.sqlite3";
+        this("wocoinDatabase.sqlite3");
     }
 
     /**
@@ -33,7 +40,7 @@ public class SQLController {
     /**
      *
      * @param name: the name of the user
-     * @return true if the user has a recod in the table
+     * @return true if the user has a record in the table
      */
     public boolean lookupUser(String name){
         boolean returnVal = false;

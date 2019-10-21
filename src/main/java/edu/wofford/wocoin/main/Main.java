@@ -15,8 +15,8 @@ public class Main {
             if (args[0].equals("0")) {
                 Feature00Main.main(realArgs);
             }
-            else if (args[0].equals("1")) {
-                ConsoleMain.main(new String[0]);
+            else if (args[0].equals("1") || args[0].equals("2") ) {
+                ConsoleMain.main(new String[] {args[1]});
             }
             else {
                 System.out.println("Feature " + args[0] + " is not valid.");

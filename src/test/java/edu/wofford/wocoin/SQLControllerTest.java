@@ -51,7 +51,7 @@ public class SQLControllerTest {
         foo.insertUser("Connor","password");
 
         SQLController.RemoveUserResult tmp = foo.removeUser("Connor");
-        assertEquals(SQLController.RemoveUserResult.REMOVED,tmp);
+        assertEquals(SQLController.RemoveUserResult.REMOVED, tmp);
 
         try (Connection connWocoin = DriverManager.getConnection("jdbc:sqlite:wocoinDatabase.sqlite3");){
 
