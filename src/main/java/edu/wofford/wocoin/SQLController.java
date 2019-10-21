@@ -54,7 +54,8 @@ public class SQLController {
      * @param password: the associated password for the user
      * @return
      * if successful returns ADDED
-     * if unsuccessful, returns why
+     * if duplicate username, returns DUPLICATE
+     * if unsuccessful, returns NOTADDED
      */
     public AddUserResult insertUser(String name, String password){
         if(lookupUser(name)){
