@@ -9,7 +9,7 @@ public class SQLControllerTest {
     @Test
     public final void testConstructor(){
         SQLController foo = new SQLController("testDB.sqlite3");
-        assertEquals("jdbc:sqlite:wocoinDatabase.sqlite3", foo.getPath());
+        assertEquals("jdbc:sqlite:testDB.sqlite3", foo.getPath());
 
         foo = new SQLController();
         assertEquals("jdbc:sqlite:wocoinDatabase.sqlite3", foo.getPath());
@@ -85,7 +85,7 @@ public class SQLControllerTest {
 
     @Test
     public final void testExceptionsInFunctions() {
-        SQLController badDBConnect = new SQLController("notadb.sqllite3");
+        SQLController badDBConnect = new SQLController("notadb.sqlite3");
         badDBConnect.lookupUser("testuser");
         badDBConnect.insertUser("testuser", "testpw");
         badDBConnect.removeUser("testuser");
