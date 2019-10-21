@@ -33,7 +33,7 @@ public class ConsoleMainTest {
 
     @Test
     public void testLoginScreen() {
-        String output = sendProgramInput("");
+        String output = sendProgramInput("1");
         assertEquals("1. exit\n2. administrator\n", output);
     }
 

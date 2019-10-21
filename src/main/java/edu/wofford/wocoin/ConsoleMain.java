@@ -4,13 +4,23 @@ import java.util.Scanner;
 
 public class ConsoleMain {
 
-    public static void main(String[] args) {
+    private Scanner scanner;
+
+    public ConsoleMain() {
+        this(new Scanner(System.in));
+    }
+
+    public ConsoleMain(Scanner scanner) {
+        this.scanner = scanner;
+    }
+
+
+    private void beginUI() {
         int login = printLogin();
         if (login == 1) {
             System.exit(0);
         } else {
-            Scanner inputPassword = new Scanner(System.in);
-            String password = inputPassword.next();
+            String password = scanner.next();
             boolean state = administratorLogIn(password);
             if (state) {
                 int adminInput = administratorLoggedIn();
@@ -19,16 +29,20 @@ public class ConsoleMain {
     }
 
 
-    private static int printLogin() {
-        System.out.println("1: exit\n2: administrator");
-        Scanner inputScanner = new Scanner(System.in);
-        return inputScanner.nextInt();
+    public static void main(String[] args) {
+        ConsoleMain cm = new ConsoleMain();
+        cm.beginUI();
     }
 
-    private static int administratorLoggedIn() {
+
+    private int printLogin() {
+        System.out.println("1: exit\n2: administrator");
+        return scanner.nextInt();
+    }
+
+    private int administratorLoggedIn() {
         System.out.println("1: back\n2: add user\n3. remove user");
-        Scanner inputScanner = new Scanner(System.in);
-        return inputScanner.nextInt();
+        return scanner.nextInt();
     }
 
     private static boolean administratorLogIn (String password) {
