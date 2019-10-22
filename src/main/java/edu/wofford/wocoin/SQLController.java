@@ -70,7 +70,7 @@ public class SQLController {
         }
 
         int salt = Utilities.generateSalt();
-        String strHash = Utilities.applySha256(password+salt);
+        String strHash = Utilities.applySha256(password + salt);
 
         AddUserResult result = AddUserResult.NOTADDED;
 

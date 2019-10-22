@@ -8,6 +8,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.assertEquals;
 
 public class ConsoleMainTest {
@@ -35,6 +37,14 @@ public class ConsoleMainTest {
     public void testLoginScreen() {
         String output = sendProgramInput("1");
         assertEquals("1: exit\n2: administrator\n", output);
+    }
+
+
+    @Test
+    public void testAdministratorScreen() {
+        String output = sendProgramInput("2\nadminpwd\n1\n1");
+        String expectedOutput = "1: back\n2: add user\n3: remove user";
+        assertThat(output, containsString(expectedOutput));
     }
 
 }
