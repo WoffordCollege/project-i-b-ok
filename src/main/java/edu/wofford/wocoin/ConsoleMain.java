@@ -12,27 +12,45 @@ public class ConsoleMain {
 
     private UIState currentState;
 
+    /**
+     *
+     */
     public ConsoleMain() {
         this(new Scanner(System.in));
     }
 
+    /**
+     *
+     * @param scanner
+     */
     public ConsoleMain(Scanner scanner) {
         this.scanner = scanner;
         this.currentState = UIState.LOGIN;
         this.sqlController = new SQLController();
     }
 
+    /**
+     *
+     * @param dbname
+     */
     public ConsoleMain(String dbname) {
         this(new Scanner(System.in), dbname);
     }
 
+    /**
+     *
+     * @param scanner
+     * @param dbname
+     */
     public ConsoleMain(Scanner scanner, String dbname) {
         this.scanner = scanner;
         this.currentState = UIState.LOGIN;
         this.sqlController = new SQLController(dbname);
     }
 
-
+    /**
+     *
+     */
     private void showUI() {
         switch (currentState) {
             case LOGIN:
@@ -44,7 +62,9 @@ public class ConsoleMain {
         }
     }
 
-
+    /**
+     *
+     */
     private void doLoginUI() {
         System.out.println("1: exit\n2: administrator");
 
@@ -65,8 +85,11 @@ public class ConsoleMain {
         showUI();
     }
 
+    /**
+     *
+     */
     private void doAdministratorUI() {
-        System.out.println("1: back\n2: add user\n3. remove user");
+        System.out.println("1: back\n2: add user\n3: remove user");
         while (currentState == UIState.ADMINISTRATOR) {
             int option = scanner.nextInt();
             if (option == 1) {
@@ -108,15 +131,10 @@ public class ConsoleMain {
         showUI();
     }
 
-    private int administratorLoggedIn() {
-        return scanner.nextInt();
-    }
-
-    private static boolean administratorLogIn (String password) {
-        return password.equals("adminpwd");
-    }
-
-
+    /**
+     *
+     * @param args
+     */
     public static void main(String[] args) {
         ConsoleMain cm = null;
         if (args.length == 1) {
