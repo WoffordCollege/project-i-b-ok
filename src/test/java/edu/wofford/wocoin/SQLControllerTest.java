@@ -122,9 +122,22 @@ public class SQLControllerTest {
     }
 
     @Test
+    public final void walletNotExists(){
+        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
+        assertTrue(!foo.findWallet("tstark"));
+    }
+
+    @Test
     public final void addWallet(){
         SQLController foo = new SQLController("wocoinDatabase.sqlite3");
         assertEquals(SQLController.AddWalletResult.ADDED, foo.addWallet("test","8675309"));
+    }
+
+    @Test
+    public final void addWalletDuplicate(){
+        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
+        foo.addWallet("test","8675309");
+        assertEquals(SQLController.AddWalletResult.ALREADYEXISTS, foo.addWallet("test","8675309"));
     }
 
     @Test
@@ -132,6 +145,26 @@ public class SQLControllerTest {
         SQLController foo = new SQLController("wocoinDatabase.sqlite3");
         foo.addWallet("test","8675309");
         assertEquals(SQLController.ReplaceWalletResult.REPLACED, foo.replaceWallet("test","867530"));
+    }
+
+    @Test
+    public final void replaceNonExistentWallet(){
+        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
+        assertEquals(SQLController.ReplaceWalletResult.NOSUCHWALLET, foo.replaceWallet("tstark","867530"));
+    }
+
+    @Test
+    public final void removeWallet(){
+        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
+        foo.addWallet("bbanner","q8675309");
+        assertEquals(SQLController.RemoveWalletResult.REMOVED,foo.removeWallet("bbanner"));
+    }
+
+    @Test
+    public final void removeNonExistentWallet(){
+        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
+        foo.removeWallet("bbanner");
+        assertEquals(SQLController.RemoveWalletResult.NOSUCHWALLET,foo.removeWallet("bbanner"));
     }
 
 }

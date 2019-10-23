@@ -11,6 +11,7 @@ public class SQLController {
     public enum LoginResult{SUCCESS, NOSUCHUSER, WRONGPASSWORD, UNSET}
     public enum AddWalletResult {ADDED, ALREADYEXISTS, NOTADDED}
     public enum ReplaceWalletResult {REPLACED, NOTREPLACED, NOSUCHWALLET}
+    public enum RemoveWalletResult {REMOVED, NOSUCHWALLET, NOTREMOVED}
 
     /**
      * Constructor that takes the name of the file
@@ -193,5 +194,25 @@ public class SQLController {
         }
 
         return retVal;
+    }
+
+    public RemoveWalletResult removeWallet(String name){
+        if(!findWallet(name)){
+            return RemoveWalletResult.NOSUCHWALLET;
+        }
+
+        RemoveWalletResult result = RemoveWalletResult.NOTREMOVED;
+
+        try (Connection dataConn = DriverManager.getConnection(url)){
+            PreparedStatement stDelete = dataConn.prepareStatement("DELETE FROM wallets WHERE id = ?");
+            stDelete.setString(1, name);
+            stDelete.execute();
+            result = RemoveWalletResult.REMOVED;
+        }
+        catch(Exception e) {
+            System.out.println(e.toString());
+        }
+
+        return result;
     }
 }
