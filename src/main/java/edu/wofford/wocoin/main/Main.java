@@ -1,6 +1,6 @@
 package edu.wofford.wocoin.main;
 
-import edu.wofford.wocoin.ConsoleMain;
+import edu.wofford.wocoin.ConsoleController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Arrays;
