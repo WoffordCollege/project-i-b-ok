@@ -130,6 +130,7 @@ public class SQLControllerTest {
     @Test
     public final void addWallet(){
         SQLController foo = new SQLController("wocoinDatabase.sqlite3");
+        foo.removeWallet("test");
         assertEquals(SQLController.AddWalletResult.ADDED, foo.addWallet("test","8675309"));
     }
 
