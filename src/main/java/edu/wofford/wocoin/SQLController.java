@@ -8,6 +8,9 @@ public class SQLController {
 
     public enum AddUserResult {ADDED, DUPLICATE, NOTADDED}
     public enum RemoveUserResult {REMOVED, NORECORD, NOTREMOVED}
+    public enum LoginResult{SUCCESS, NOSUCHUSER, WRONGPASSWORD, UNSET}
+    public enum AddWalletResult {ADDED, ALREADYEXISTS, NOTADDED}
+    public enum ReplaceWalletResult {REPLACED, NOTREPLACED, NOSUCHWALLET}
 
     /**
      * Constructor that takes the name of the file
@@ -18,7 +21,6 @@ public class SQLController {
         if (!new File(filename).exists()) {
             Utilities.createNewDatabase(filename);
         }
-
         url = "jdbc:sqlite:" + filename;
     }
 
@@ -117,4 +119,79 @@ public class SQLController {
         return result;
     }
 
+    public LoginResult userLogin(String user, String password){
+        LoginResult retVal = LoginResult.UNSET;
+        if(this.lookupUser(user)){
+            try (Connection dataConn = DriverManager.getConnection(url)) {
+                PreparedStatement stSelect = dataConn.prepareStatement("SELECT * FROM users WHERE id = ?");
+                stSelect.setString(1, user);
+                ResultSet dtr = stSelect.executeQuery();
+                int salt = dtr.getInt(2);
+                String hash = dtr.getString(3);
+                String strHash = Utilities.applySha256(password + salt);
+                if(hash.equals(strHash)){
+                    retVal = LoginResult.SUCCESS;
+                } else{
+                    retVal = LoginResult.WRONGPASSWORD;
+                }
+            } catch (Exception e) {
+                System.out.println(e.toString());
+            }
+        } else{
+            retVal = LoginResult.NOSUCHUSER;
+        }
+        return retVal;
+    }
+
+    public boolean findWallet(String user){
+        boolean retVal = false;
+        try (Connection dataConn = DriverManager.getConnection(url)) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT count(*) FROM wallets WHERE id = ?");
+            stSelect.setString(1, user);
+            ResultSet dtr = stSelect.executeQuery();
+            retVal = dtr.getInt(1) > 0;
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
+        return retVal;
+    }
+
+    public AddWalletResult addWallet(String user, String pubKey){
+        AddWalletResult retVal;
+        if(findWallet(user)){
+            retVal = AddWalletResult.ALREADYEXISTS;
+        } else {
+            try (Connection dataConn = DriverManager.getConnection(url)) {
+                PreparedStatement stInsert = dataConn.prepareStatement("Insert into wallets (id, publickey) values (?,?)");
+                stInsert.setString(1, user);
+                stInsert.setString(2, pubKey);
+                stInsert.execute();
+                retVal = AddWalletResult.ADDED;
+            } catch (Exception e) {
+                System.out.println(e.toString());
+                retVal = AddWalletResult.NOTADDED;
+            }
+        }
+        return retVal;
+    }
+
+    public ReplaceWalletResult replaceWallet(String user, String pubKey){
+        ReplaceWalletResult retVal = ReplaceWalletResult.NOTREPLACED;
+        if(findWallet(user)){
+            try (Connection dataConn = DriverManager.getConnection(url)) {
+                PreparedStatement stUpdate = dataConn.prepareStatement("Update wallets set publickey = ? WHERE id = ?");
+                stUpdate.setString(1, user);
+                stUpdate.setString(2, pubKey);
+                stUpdate.execute();
+                retVal = ReplaceWalletResult.REPLACED;
+            } catch (Exception e) {
+                System.out.println(e.toString());
+                retVal = ReplaceWalletResult.NOTREPLACED;
+            }
+        } else{
+            retVal = ReplaceWalletResult.NOSUCHWALLET;
+        }
+
+        return retVal;
+    }
 }

@@ -91,5 +91,47 @@ public class SQLControllerTest {
         badDBConnect.removeUser("testuser");
     }
 
+    @Test
+    public final void userLoginSuccess(){
+        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
+        foo.removeUser("testUser");
+        foo.insertUser("testUser","asecret");
+        assertEquals(SQLController.LoginResult.SUCCESS, foo.userLogin("testUser","asecret"));
+    }
+
+    @Test
+    public final void userLoginWrongPassword(){
+        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
+        foo.removeUser("testUser");
+        foo.insertUser("testUser","asecret");
+        assertEquals(SQLController.LoginResult.WRONGPASSWORD, foo.userLogin("testUser","x"));
+    }
+
+    @Test
+    public final void userLoginInvalidUser(){
+        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
+        foo.removeUser("testUser");
+        assertEquals(SQLController.LoginResult.NOSUCHUSER, foo.userLogin("testUser","asecret"));
+    }
+
+    @Test
+    public final void walletExists(){
+        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
+        //foo.insertUser("testUser","testing");
+        assertTrue(foo.findWallet("srogers"));
+    }
+
+    @Test
+    public final void addWallet(){
+        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
+        assertEquals(SQLController.AddWalletResult.ADDED, foo.addWallet("test","8675309"));
+    }
+
+    @Test
+    public final void replaceWallet(){
+        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
+        foo.addWallet("test","8675309");
+        assertEquals(SQLController.ReplaceWalletResult.REPLACED, foo.replaceWallet("test","867530"));
+    }
 
 }
