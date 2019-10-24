@@ -1,6 +1,7 @@
 package edu.wofford.wocoin;
 
 import edu.wofford.wocoin.main.ConsoleMain;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,6 +21,14 @@ public class ConsoleControllerTest {
         }
 
         Utilities.createNewDatabase("test.db");
+    }
+
+    @After
+    public void tearDown() {
+        File file = new File("test.db");
+        if (file.exists()) {
+            boolean delete = file.delete();
+        }
     }
 
     private String sendProgramInput(String input) {
