@@ -1,7 +1,5 @@
 package edu.wofford.wocoin;
 
-import java.util.Scanner;
-
 public class ConsoleController {
 
     private SQLController sqlController;
@@ -39,14 +37,16 @@ public class ConsoleController {
      * @return true if the UIState is already administrator or if the password is correct, and returns false otherwise
      */
     public boolean adminLogin(String password) {
-        if (currentState == UIState.ADMINISTRATOR || password.equals("adminpwd")) {
+        if (currentState == UIState.ADMINISTRATOR) {
+            return true;
+        }
+        else if (password.equals("adminpwd")) {
             currentState = UIState.ADMINISTRATOR;
             return true;
         }
         else {
             return false;
         }
-
     }
 
     /**
