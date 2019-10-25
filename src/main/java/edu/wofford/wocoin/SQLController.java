@@ -120,6 +120,12 @@ public class SQLController {
         return result;
     }
 
+    /**
+     * Verifies that the password is associated with that user.
+     * @param user The user name
+     * @param password The password
+     * @return 
+     */
     public LoginResult userLogin(String user, String password){
         LoginResult retVal = LoginResult.UNSET;
         if(this.lookupUser(user)){
@@ -144,6 +150,11 @@ public class SQLController {
         return retVal;
     }
 
+    /**
+     * Checks to see if the user has an associated wallet in the database.
+     * @param user The user name to check for.
+     * @return True if the user has a wallet
+     */
     public boolean findWallet(String user){
         boolean retVal = false;
         try (Connection dataConn = DriverManager.getConnection(url)) {
@@ -157,6 +168,13 @@ public class SQLController {
         return retVal;
     }
 
+    /**
+     * This method takes a user name and the the public key of the user's wallet.
+     * It then adds this to the wallets table.
+     * @param user The user name to be added
+     * @param pubKey the public key of the wallet
+     * @return
+     */
     public AddWalletResult addWallet(String user, String pubKey){
         AddWalletResult retVal;
         if(findWallet(user)){
