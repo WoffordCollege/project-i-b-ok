@@ -34,6 +34,19 @@ public class ConsoleMain {
                             System.out.println("Incorrect administrator password.");
                     }
                     break;
+                case USER:
+                    option = scanner.nextInt();
+                    if (option == 1) {
+                        cm.exit();
+                    }
+                    if (option == 2){
+                        if (cm.userHasWallet()) {
+                            String deleteWallet = scanner.nextLine();
+                            if (deleteWallet.equals("y")) {
+                                cm.deleteUserWallet();
+                            }
+                        }
+                    }
                 case ADMINISTRATOR:
                     option = scanner.nextInt();
                     if (option == 1) {

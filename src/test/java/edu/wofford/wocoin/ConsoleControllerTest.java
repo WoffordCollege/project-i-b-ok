@@ -9,9 +9,13 @@ import java.io.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 public class ConsoleControllerTest {
+    public final String loginScreenString = "1: exit\n2: administrator\n3: user";
 
     @Before
     public void setUp(){
@@ -53,7 +57,7 @@ public class ConsoleControllerTest {
     @Test
     public void testLoginScreenConsole() {
         String output = sendProgramInput("1");
-        assertEquals("1: exit\n2: administrator\n", output);
+        assertEquals("1: exit\n2: administrator\n3: user\n", output);
     }
 
 
@@ -81,5 +85,79 @@ public class ConsoleControllerTest {
         assertThat(output, containsString(expectedOutput));
     }
 
+    @Test
+    public void testUIStateString() {
+        SQLController sqlController = new SQLController("test.db");
+        sqlController.insertUser("testuser", "testpass");
+        ConsoleController cm = new ConsoleController(sqlController);
+        assertEquals(cm.getCurrentUIString(), loginScreenString);
+        cm.adminLogin("badpass");
+        assertEquals(cm.getCurrentUIString(), loginScreenString);
+        cm.adminLogin("adminpwd");
+        assertEquals(cm.getCurrentUIString(), "1: back\n2: add user\n3: remove user");
+        cm.doLogout();
+        assertEquals(cm.getCurrentUIString(), loginScreenString);
+        cm.userLogin("testuser", "testpass");
+        assertEquals(cm.getCurrentUIString(), "1: back\n2: create wallet");
+        cm.doLogout();
+        assertEquals(cm.getCurrentUIString(), loginScreenString);
+        cm.exit();
+        assertEquals(cm.getCurrentUIString(), "");
+    }
 
+    @Test
+    public void testAdminLogin() {
+        ConsoleController cm = new ConsoleController(new SQLController("test.db"));
+        assertEquals(cm.getCurrentState(), ConsoleController.UIState.LOGIN);
+        assertFalse(cm.adminLogin("badpass"));
+        assertEquals(cm.getCurrentState(), ConsoleController.UIState.LOGIN);
+        assertTrue(cm.adminLogin("adminpwd"));
+        assertEquals(cm.getCurrentState(), ConsoleController.UIState.ADMINISTRATOR);
+        cm.doLogout();
+        assertEquals(cm.getCurrentState(), ConsoleController.UIState.LOGIN);
+        cm.exit();
+        assertEquals(cm.getCurrentState(), ConsoleController.UIState.EXIT);
+    }
+
+    @Test
+    public void testAddUser() {
+        ConsoleController cm = new ConsoleController(new SQLController("test.db"));
+        assertNull(cm.addUser("testadduser", "test"));
+        cm.adminLogin("adminpwd");
+        assertEquals(cm.addUser("testadduser", "test"), "testadduser was added.");
+        assertEquals(cm.addUser("testadduser", "test"), "testadduser already exists.");
+    }
+
+    @Test
+    public void testRemoveUser() {
+        ConsoleController cm = new ConsoleController(new SQLController("test.db"));
+        assertNull(cm.removeUser("testadduser"));
+        cm.adminLogin("adminpwd");
+        cm.addUser("testadduser", "test");
+        assertEquals(cm.removeUser("testadduser"), "testadduser was removed.");
+        assertEquals(cm.removeUser("testadduser"), "testadduser does not exist.");
+    }
+
+    @Test
+    public void testUserLogin() {
+        SQLController sqlController = new SQLController("test.db");
+        sqlController.insertUser("testlogin", "testpass");
+        ConsoleController cm = new ConsoleController(sqlController);
+        assertFalse(cm.userLogin("baduser", "badpass"));
+        assertEquals(cm.getCurrentState(), ConsoleController.UIState.LOGIN);
+        assertTrue(cm.userLogin("testlogin", "testpass"));
+        assertEquals(cm.getCurrentState(), ConsoleController.UIState.USER);
+        cm.doLogout();
+        assertEquals(cm.getCurrentState(), ConsoleController.UIState.LOGIN);
+    }
+
+    @Test
+    public void testAddWallet() {
+        SQLController sqlController = new SQLController("test.db");
+        sqlController.insertUser("testwallet", "testpass");
+        ConsoleController cm = new ConsoleController(sqlController);
+        cm.userLogin("testwallet", "testpass");
+        assertEquals(cm.getCurrentState(), ConsoleController.UIState.USER);
+        assertEquals(cm.getCurrentUser(), "testwallet");
+    }
 }
