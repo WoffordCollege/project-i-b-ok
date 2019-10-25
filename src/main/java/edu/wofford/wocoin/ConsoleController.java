@@ -91,6 +91,7 @@ public class ConsoleController {
 
 
     public String addWalletToUser(String filepath) {
+
         return null;
     }
 

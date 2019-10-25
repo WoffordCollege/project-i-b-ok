@@ -28,25 +28,44 @@ public class ConsoleMain {
                     if (option == 1) {
                         cm.exit();
                     }
-                    if (option == 2){
+                    else if (option == 2){
                         String password = scanner.next();
                         if (!cm.adminLogin(password))
                             System.out.println("Incorrect administrator password.");
+                    }
+                    else if (option == 3) {
+                        String username = scanner.next();
+                        String password = scanner.next();
+                        if (!cm.userLogin(username, password))
+                            System.out.println("No such user.");
                     }
                     break;
                 case USER:
                     option = scanner.nextInt();
                     if (option == 1) {
-                        cm.exit();
+                        cm.doLogout();
                     }
-                    if (option == 2){
+                    else if (option == 2){
                         if (cm.userHasWallet()) {
                             String deleteWallet = scanner.nextLine();
                             if (deleteWallet.equals("y")) {
                                 cm.deleteUserWallet();
                             }
+                            else {
+                                System.out.println("Action canceled.");
+                            }
+                        }
+
+                        String path = scanner.nextLine();
+                        if (path.length() > 0) {
+                            path = path.substring(0, path.length() - 1);
+                        }
+                        else {
+                            path = cm.getCurrentUser();
+
                         }
                     }
+                    break;
                 case ADMINISTRATOR:
                     option = scanner.nextInt();
                     if (option == 1) {
