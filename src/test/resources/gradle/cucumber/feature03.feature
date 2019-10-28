@@ -1,7 +1,7 @@
 Feature: Allow users to generate a WoCoin wallet.
   
   A user should be able to create a WoCoin wallet.
-  The program should take a single command-line argument for the databse file.
+  The program should take a single command-line argument for the database file.
   It should then present a menu with the following options:
   
   1: exit
