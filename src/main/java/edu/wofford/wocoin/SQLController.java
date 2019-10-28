@@ -41,7 +41,7 @@ public class SQLController {
     }
 
     /**
-     *
+     * Queries the database to see if the user exists
      * @param name: the name of the user
      * @return true if the user has a record in the table
      */
@@ -59,7 +59,7 @@ public class SQLController {
     }
 
     /**
-     *
+     * Tries to add the user to the database
      * @param name: the name of the user to be added
      * @param password: the associated password for the user
      * @return
@@ -94,7 +94,7 @@ public class SQLController {
     }
 
     /**
-     *
+     * Removes the specified user from the database
      * @param name: the user to be removed
      * @return
      * if successful returns REMOVED
@@ -173,7 +173,7 @@ public class SQLController {
      * It then adds this to the wallets table.
      * @param user The user name to be added
      * @param pubKey the public key of the wallet
-     * @return
+     * @return whether the wallet was successfully added or that the wallet already exists
      */
     public AddWalletResult addWallet(String user, String pubKey){
         AddWalletResult retVal;
