@@ -57,13 +57,15 @@ public class ConsoleMain {
                         }
 
                         String path = scanner.nextLine();
-                        if (path.length() > 0) {
+                        if (path.length() > 1) {
                             path = path.substring(0, path.length() - 1);
                         }
                         else {
-                            path = cm.getCurrentUser();
-
+                            path = "";
                         }
+
+//                        WalletUtilities.CreateWalletResult = cm.addWalletToUser(path);
+
                     }
                     break;
                 case ADMINISTRATOR:

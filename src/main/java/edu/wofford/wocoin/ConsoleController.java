@@ -91,7 +91,9 @@ public class ConsoleController {
 
 
     public String addWalletToUser(String filepath) {
-
+//        Pair<String, WalletUtilities.CreateWalletResult> keyAndResult = WalletUtilities.createWallet(filepath);
+//        sqlController.addWallet(this.currentUser, keyAndResult.getValue(0));
+//        return keyAndResult.getValue(1);
         return null;
     }
 
