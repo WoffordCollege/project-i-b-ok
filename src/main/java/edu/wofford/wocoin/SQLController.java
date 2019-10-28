@@ -15,7 +15,7 @@ public class SQLController {
 
     /**
      * Constructor that takes the name of the file
-     * @param filename
+     * @param filename The name of the file.
      */
     public SQLController(String filename) {
 
@@ -33,7 +33,7 @@ public class SQLController {
     }
 
     /**
-     *
+     *Get the path to the database.
      * @return the path to the database
      */
     public String getPath(){
@@ -194,6 +194,12 @@ public class SQLController {
         return retVal;
     }
 
+    /**
+     * This method is used to replace a wallet that already exists
+     * @param user the user name associated with the wallet
+     * @param pubKey the public key of the wallet
+     * @return whether the wallet was successfully replaced or that the wallet did not exist
+     */
     public ReplaceWalletResult replaceWallet(String user, String pubKey){
         ReplaceWalletResult retVal = ReplaceWalletResult.NOTREPLACED;
         if(findWallet(user)){
@@ -214,6 +220,11 @@ public class SQLController {
         return retVal;
     }
 
+    /**
+     * This method removes a wallet from the database
+     * @param name the user name
+     * @return whether the wallet was successfully removed or that the wallet did not exist
+     */
     public RemoveWalletResult removeWallet(String name){
         if(!findWallet(name)){
             return RemoveWalletResult.NOSUCHWALLET;
