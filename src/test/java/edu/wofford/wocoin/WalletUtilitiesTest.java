@@ -4,19 +4,19 @@ import org.junit.*;
 import static org.junit.Assert.*;
 import java.sql.*;
 
-public class WalletTest {
+public class WalletUtilitiesTest {
     @Test
-    public final Void  publicPrivateKeyTest() {
+    public final void  publicPrivateKeyTest() {
 
     }
 
     @Test
-    public final Void subDirectoryCreatedTest() {
+    public final void subDirectoryCreatedTest() {
 
     }
 
     @Test
-    public final Void rootDirectoryTest() {
+    public final void rootDirectoryTest() {
 
     }
     /*

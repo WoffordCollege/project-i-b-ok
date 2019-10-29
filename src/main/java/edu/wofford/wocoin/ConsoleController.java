@@ -90,11 +90,17 @@ public class ConsoleController {
     }
 
 
-    public String addWalletToUser(String filepath) {
-//        Pair<String, WalletUtilities.CreateWalletResult> keyAndResult = WalletUtilities.createWallet(filepath);
-//        sqlController.addWallet(this.currentUser, keyAndResult.getValue(0));
-//        return keyAndResult.getValue(1);
-        return null;
+    public WalletUtilities.CreateWalletResult addWalletToUser(String filepath) {
+        Pair<String, WalletUtilities.CreateWalletResult> keyAndResult = WalletUtilities.createWallet(filepath, currentUser);
+        if (keyAndResult.getSecond() == WalletUtilities.CreateWalletResult.SUCCESS) {
+            if (sqlController.findWallet(this.currentUser)){
+                sqlController.replaceWallet(this.currentUser, keyAndResult.getFirst());
+            }
+            else {
+                sqlController.addWallet(this.currentUser, keyAndResult.getFirst());
+            }
+        }
+        return keyAndResult.getSecond();
     }
 
     /**

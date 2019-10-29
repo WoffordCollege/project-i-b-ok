@@ -2,6 +2,7 @@ package edu.wofford.wocoin.main;
 
 import edu.wofford.wocoin.ConsoleController;
 import edu.wofford.wocoin.SQLController;
+import edu.wofford.wocoin.WalletUtilities;
 
 import java.util.Scanner;
 
@@ -45,28 +46,27 @@ public class ConsoleMain {
                     if (option == 1) {
                         cm.doLogout();
                     }
-                    else if (option == 2){
+                    else if (option == 2) {
+                        boolean userStillCreatingWallet = true;
+
                         if (cm.userHasWallet()) {
-                            String deleteWallet = scanner.nextLine();
-                            if (deleteWallet.equals("y")) {
-                                cm.deleteUserWallet();
-                            }
-                            else {
+                            String deleteWallet = scanner.next();
+                            if (!deleteWallet.equals("y")) {
                                 System.out.println("Action canceled.");
+                                userStillCreatingWallet = false;
                             }
                         }
 
-                        String path = scanner.nextLine();
-                        if (path.length() > 1) {
-                            path = path.substring(0, path.length() - 1);
-                        }
-                        else {
-                            path = "";
-                        }
+                        if (userStillCreatingWallet) {
+                            String path = scanner.next();
 
-//                        WalletUtilities.CreateWalletResult = cm.addWalletToUser(path);
+                            WalletUtilities.CreateWalletResult result = cm.addWalletToUser(path);
 
+                            System.out.println(result == WalletUtilities.CreateWalletResult.SUCCESS ? "Wallet added." : "Action Canceled");
+
+                        }
                     }
+
                     break;
                 case ADMINISTRATOR:
                     option = scanner.nextInt();
