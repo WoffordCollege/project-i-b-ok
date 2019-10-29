@@ -205,8 +205,8 @@ public class SQLController {
         if(findWallet(user)){
             try (Connection dataConn = DriverManager.getConnection(url)) {
                 PreparedStatement stUpdate = dataConn.prepareStatement("Update wallets set publickey = ? WHERE id = ?");
-                stUpdate.setString(1, user);
-                stUpdate.setString(2, pubKey);
+                stUpdate.setString(1, pubKey);
+                stUpdate.setString(2, user);
                 stUpdate.execute();
                 retVal = ReplaceWalletResult.REPLACED;
             } catch (Exception e) {
