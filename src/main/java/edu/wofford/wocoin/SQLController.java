@@ -96,9 +96,7 @@ public class SQLController {
     /**
      * Removes the specified user from the database
      * @param name: the user to be removed
-     * @return
-     * if successful returns REMOVED
-     * if unsuccessful, returns why
+     * @return if successful returns REMOVED and if unsuccessful, returns why
      */
     public RemoveUserResult removeUser(String name){
         if(!lookupUser(name)){
@@ -124,7 +122,7 @@ public class SQLController {
      * Verifies that the password is associated with that user.
      * @param user The user name
      * @param password The password
-     * @return 
+     * @return the {@link LoginResult} corresponding to the behavior of the attempted login
      */
     public LoginResult userLogin(String user, String password){
         LoginResult retVal = LoginResult.UNSET;
