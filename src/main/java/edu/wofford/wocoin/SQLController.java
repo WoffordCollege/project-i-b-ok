@@ -124,7 +124,7 @@ public class SQLController {
      * Verifies that the password is associated with that user.
      * @param user The user name
      * @param password The password
-     * @return 
+     * @return whether the user was successfully removed or that the user did not exist
      */
     public LoginResult userLogin(String user, String password){
         LoginResult retVal = LoginResult.UNSET;
@@ -176,7 +176,7 @@ public class SQLController {
      * @return whether the wallet was successfully added or that the wallet already exists
      */
     public AddWalletResult addWallet(String user, String pubKey){
-        AddWalletResult retVal;
+        AddWalletResult retVal = AddWalletResult.NOTADDED;
         if(findWallet(user)){
             retVal = AddWalletResult.ALREADYEXISTS;
         } else {
@@ -188,7 +188,6 @@ public class SQLController {
                 retVal = AddWalletResult.ADDED;
             } catch (Exception e) {
                 System.out.println(e.toString());
-                retVal = AddWalletResult.NOTADDED;
             }
         }
         return retVal;
@@ -211,7 +210,6 @@ public class SQLController {
                 retVal = ReplaceWalletResult.REPLACED;
             } catch (Exception e) {
                 System.out.println(e.toString());
-                retVal = ReplaceWalletResult.NOTREPLACED;
             }
         } else{
             retVal = ReplaceWalletResult.NOSUCHWALLET;
@@ -237,11 +235,28 @@ public class SQLController {
             stDelete.setString(1, name);
             stDelete.execute();
             result = RemoveWalletResult.REMOVED;
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             System.out.println(e.toString());
         }
 
         return result;
+    }
+
+    /**
+     * Retrieves the public key from the database for the provided user name
+     * @param user The name of the user
+     * @return The public key or an empty string if the user is not in the database
+     */
+    public String RetrievePublicKey(String user){
+        String retVal = "";
+        try (Connection dataConn = DriverManager.getConnection(url)) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT publickey FROM wallets WHERE id = ?");
+            stSelect.setString(1, user);
+            ResultSet dtr = stSelect.executeQuery();
+            retVal = dtr.getString(1);
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
+        return retVal;
     }
 }

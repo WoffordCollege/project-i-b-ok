@@ -117,7 +117,6 @@ public class SQLControllerTest {
     @Test
     public final void walletExists(){
         SQLController foo = new SQLController("wocoinDatabase.sqlite3");
-        //foo.insertUser("testUser","testing");
         assertTrue(foo.findWallet("srogers"));
     }
 
@@ -146,6 +145,7 @@ public class SQLControllerTest {
         SQLController foo = new SQLController("wocoinDatabase.sqlite3");
         foo.addWallet("test","8675309");
         assertEquals(SQLController.ReplaceWalletResult.REPLACED, foo.replaceWallet("test","867530"));
+
     }
 
     @Test
@@ -168,4 +168,18 @@ public class SQLControllerTest {
         assertEquals(SQLController.RemoveWalletResult.NOSUCHWALLET,foo.removeWallet("bbanner"));
     }
 
+    @Test
+    public final void getPublicKeyTest(){
+        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
+        foo.removeWallet("nfury");
+        foo.addWallet("nfury","nf675309");
+        assertEquals("nf675309",foo.RetrievePublicKey("nfury"));
+    }
+
+    @Test
+    public final void publicKeyDoesNotExist(){
+        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
+        foo.removeWallet("nfury");
+        assertEquals("",foo.RetrievePublicKey("nfury"));
+    }
 }
