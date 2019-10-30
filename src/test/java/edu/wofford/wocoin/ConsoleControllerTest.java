@@ -1,6 +1,7 @@
 package edu.wofford.wocoin;
 
 import edu.wofford.wocoin.main.ConsoleMain;
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,8 +10,7 @@ import java.io.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
@@ -147,6 +147,8 @@ public class ConsoleControllerTest {
         assertEquals(cm.getCurrentState(), ConsoleController.UIState.LOGIN);
         assertTrue(cm.userLogin("testlogin", "testpass"));
         assertEquals(cm.getCurrentState(), ConsoleController.UIState.USER);
+        assertTrue(cm.userLogin("testlogin", "testpass"));
+        assertEquals(cm.getCurrentState(), ConsoleController.UIState.USER);
         cm.doLogout();
         assertEquals(cm.getCurrentState(), ConsoleController.UIState.LOGIN);
     }
@@ -159,5 +161,38 @@ public class ConsoleControllerTest {
         cm.userLogin("testwallet", "testpass");
         assertEquals(cm.getCurrentState(), ConsoleController.UIState.USER);
         assertEquals(cm.getCurrentUser(), "testwallet");
+    }
+
+    @Test
+    public void testUserWithWallet() {
+        SQLController sqlController = new SQLController("test.db");
+        sqlController.insertUser("testuserwithwallet", "testpassword");
+        ConsoleController cm = new ConsoleController(sqlController);
+        assertFalse(cm.userHasWallet());
+        assertTrue(cm.userLogin("testuserwithwallet", "testpassword"));
+        assertFalse(cm.userHasWallet());
+        sqlController.addWallet("testuserwithwallet", "testkey");
+        assertTrue(cm.userHasWallet());
+        assertTrue(cm.deleteUserWallet());
+        cm.doLogout();
+        cm.removeUser("testuserwithwallet");
+    }
+
+    @Test
+    public void testWalletCreation() {
+        SQLController sqlController = new SQLController("test.db");
+        sqlController.insertUser("testwalletcreate", "test");
+        ConsoleController cm = new ConsoleController(sqlController);
+        assertSame(WalletUtilities.CreateWalletResult.FAILED, cm.addWalletToUser("nouser"));
+        assertTrue(cm.userLogin("testwalletcreate", "test"));
+        assertSame(WalletUtilities.CreateWalletResult.SUCCESS, cm.addWalletToUser("test/"));
+        assertSame(WalletUtilities.CreateWalletResult.FILEALREADYEXISTS, cm.addWalletToUser("test/"));
+        assertTrue(sqlController.findWallet("testwalletcreate"));
+
+        try {
+            FileUtils.deleteDirectory(new File("test/"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

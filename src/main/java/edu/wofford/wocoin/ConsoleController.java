@@ -85,12 +85,15 @@ public class ConsoleController {
     }
 
 
-    public void deleteUserWallet() {
-        sqlController.removeWallet(currentUser);
+    public boolean deleteUserWallet() {
+        return sqlController.removeWallet(currentUser) == SQLController.RemoveWalletResult.REMOVED;
     }
 
 
     public WalletUtilities.CreateWalletResult addWalletToUser(String filepath) {
+        if (currentUser == null || currentUser.length() == 0) {
+            return WalletUtilities.CreateWalletResult.FAILED;
+        }
         Pair<String, WalletUtilities.CreateWalletResult> keyAndResult = WalletUtilities.createWallet(filepath, currentUser);
         if (keyAndResult.getSecond() == WalletUtilities.CreateWalletResult.SUCCESS) {
             if (sqlController.findWallet(this.currentUser)){
