@@ -113,6 +113,9 @@ public class ConsoleControllerTest {
         assertEquals(cm.getCurrentState(), ConsoleController.UIState.LOGIN);
         assertTrue(cm.adminLogin("adminpwd"));
         assertEquals(cm.getCurrentState(), ConsoleController.UIState.ADMINISTRATOR);
+
+        assertTrue(cm.adminLogin("adminpwd"));
+        assertEquals(cm.getCurrentState(), ConsoleController.UIState.ADMINISTRATOR);
         cm.doLogout();
         assertEquals(cm.getCurrentState(), ConsoleController.UIState.LOGIN);
         cm.exit();
@@ -187,6 +190,7 @@ public class ConsoleControllerTest {
         assertTrue(cm.userLogin("testwalletcreate", "test"));
         assertSame(WalletUtilities.CreateWalletResult.SUCCESS, cm.addWalletToUser("test/"));
         assertSame(WalletUtilities.CreateWalletResult.FILEALREADYEXISTS, cm.addWalletToUser("test/"));
+        assertSame(WalletUtilities.CreateWalletResult.SUCCESS, cm.addWalletToUser("test/test/"));
         assertTrue(sqlController.findWallet("testwalletcreate"));
 
         try {

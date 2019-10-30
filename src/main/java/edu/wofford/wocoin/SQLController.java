@@ -96,9 +96,7 @@ public class SQLController {
     /**
      * Removes the specified user from the database
      * @param name: the user to be removed
-     * @return
-     * if successful returns REMOVED
-     * if unsuccessful, returns why
+     * @return if successful returns REMOVED and if unsuccessful, returns why
      */
     public RemoveUserResult removeUser(String name){
         if(!lookupUser(name)){

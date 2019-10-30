@@ -1,26 +1,36 @@
 package edu.wofford.wocoin;
 
+import java.io.File;
+import java.io.IOException;
+
+import java.io.FileWriter;
+
+import org.json.simple.JSONObject;
+import org.web3j.crypto.ECKeyPair;
+import org.web3j.crypto.Keys;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import org.junit.*;
 import static org.junit.Assert.*;
 import java.sql.*;
 
 public class WalletUtilitiesTest {
-    @Test
-    public final void  publicPrivateKeyTest() {
-
-    }
 
     @Test
-    public final void subDirectoryCreatedTest() {
+    public final void createWalletSUCCESSTest(){
+        Pair<String,WalletUtilities.CreateWalletResult> val = WalletUtilities.createWallet("Test","Khan");
+        assertTrue (val.getFirst().length() > 0 );
+        assertEquals(WalletUtilities.CreateWalletResult.SUCCESS, val.getSecond());
 
     }
-
     @Test
-    public final void rootDirectoryTest() {
-
+    public final void createWalletFILEEXISTSTest() {
+        Pair<String, WalletUtilities.CreateWalletResult> val = WalletUtilities.createWallet("Test", "Khan");
+        assertTrue(val.getFirst().length() > 0);
+        assertEquals(WalletUtilities.CreateWalletResult.FILEALREADYEXISTS, val.getSecond());
     }
-    /*
-    test json creation?
-     */
-
-}
+   }

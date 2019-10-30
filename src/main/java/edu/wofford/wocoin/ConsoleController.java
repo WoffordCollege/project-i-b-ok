@@ -1,5 +1,9 @@
 package edu.wofford.wocoin;
 
+/**
+ * This class stores the helper methods that can be used to create a Console style GUI
+ * It stores a SQLController which is used to perform the necessary operations on the database
+ */
 public class ConsoleController {
 
     private SQLController sqlController;
@@ -10,6 +14,10 @@ public class ConsoleController {
 
     private String currentUser;
 
+    /**
+     * Constructs a new ConsoleController with the given {@link SQLController}. Sets the current state of the UI to Login
+     * @param sqlController The {@link SQLController} with a given WocoinDatabase that is modified with the Controller
+     */
     public ConsoleController(SQLController sqlController) {
         this.currentState = UIState.LOGIN;
         this.sqlController = sqlController;
@@ -56,11 +64,11 @@ public class ConsoleController {
     /**
      * This function updates the state of the display to User if the username and password combination is correct.
      * If the login is successful, we store the username of the current user for wallet interaction
-     * returns true if the UIState is already User, or if the username and password combination is correct.
+     * returns true if the {@link UIState} is already User, or if the username and password combination is correct.
      * returns false otherwise
      * @param username the username of the user logging in
      * @param password the password of the user logging in
-     * @return true if the UIState is already User, or if the username and password combination is correct and false otherwise.
+     * @return true if the {@link UIState} is already User, or if the username and password combination is correct and false otherwise.
      */
     public boolean userLogin(String username, String password) {
         if (currentState == UIState.USER) {
@@ -77,19 +85,28 @@ public class ConsoleController {
     }
 
     /**
-     * This is a helper method for use in checking if a user has a wallet.
+     * This is a helper method for use in checking if a user has a Wocoin wallet.
      * @return if there is a currentUser and they have a wallet, returns true, else false
      */
     public boolean userHasWallet() {
         return this.currentUser != null && sqlController.findWallet(this.currentUser);
     }
 
-
+    /**
+     * Deletes the Wocoin wallet of the currently logged in user. If there is no user logged in, returns false
+     * @return true if the deletion was successful, false otherwise.
+     */
     public boolean deleteUserWallet() {
-        return sqlController.removeWallet(currentUser) == SQLController.RemoveWalletResult.REMOVED;
+        return currentUser != null && sqlController.removeWallet(currentUser) == SQLController.RemoveWalletResult.REMOVED;
     }
 
-
+    /**
+     * This function takes the currently logged in user and generates a Wallet file (see {@link WalletUtilities})
+     * at the given filepath combined with the username. (if filepath=tmp, then generated directory is tmp/currentuser)
+     * If no user is logged in, returns failed, otherwise returns the result from {@link WalletUtilities}
+     * @param filepath the main directory in which a subdirectory with the current user can be placed
+     * @return a {@link WalletUtilities.CreateWalletResult} relating to the result of the executed operation (see {@link WalletUtilities}).
+     */
     public WalletUtilities.CreateWalletResult addWalletToUser(String filepath) {
         if (currentUser == null || currentUser.length() == 0) {
             return WalletUtilities.CreateWalletResult.FAILED;
@@ -180,7 +197,7 @@ public class ConsoleController {
 
     /**
      * This function can be used to determine what display type is currently
-     * @return returns the state of the UI
+     * @return returns a {@link UIState} reflecting the state of the UI
      */
     public UIState getCurrentState() {
         return currentState;
