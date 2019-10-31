@@ -145,13 +145,13 @@ public class SQLControllerTest {
         SQLController foo = new SQLController("wocoinDatabase.sqlite3");
         foo.addWallet("test","8675309");
         assertEquals(SQLController.ReplaceWalletResult.REPLACED, foo.replaceWallet("test","867530"));
-
+        assertEquals("867530",foo.RetrievePublicKey("test"));
     }
 
     @Test
     public final void replaceNonExistentWallet(){
         SQLController foo = new SQLController("wocoinDatabase.sqlite3");
-        assertEquals(SQLController.ReplaceWalletResult.NOSUCHWALLET, foo.replaceWallet("tstark","867530"));
+        assertEquals(SQLController.ReplaceWalletResult.NOSUCHWALLET, foo.replaceWallet("tstark","86753099"));
     }
 
     @Test
