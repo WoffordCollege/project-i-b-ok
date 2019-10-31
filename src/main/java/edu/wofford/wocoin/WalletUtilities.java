@@ -4,8 +4,9 @@ import java.io.File;
 import java.io.IOException;
 
 import java.io.FileWriter;
-
+import java.io.FileReader;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
 
@@ -18,6 +19,14 @@ import java.security.NoSuchProviderException;
 public class WalletUtilities {
     public enum CreateWalletResult{SUCCESS, FILEALREADYEXISTS, FAILED}
 
+    /**
+     * This function creates a public and private key for a user's wallet which will be stored in a JSON File. The function
+     * returns a pair which is the public key and SUCCESS if the wallet was created, ALREADYEXSITS if the file is already exists,
+     * and FAILED if a file cannot be created
+     * @param path the path of the user directory where the JSON file will go
+     * @param username the username for which the wallet will be created for
+     * @return SUCCESS if the wallet was created, ALREADYEXSITS if the file is already exists, and FAILED if a file cannot be created
+     */
     public static Pair<String, CreateWalletResult> createWallet (String path, String username) {
         CreateWalletResult result = CreateWalletResult.SUCCESS;
 
@@ -26,7 +35,14 @@ public class WalletUtilities {
         File file = filePath.toFile();
 
         if(file.exists()) {
-            return new Pair<>(null, CreateWalletResult.FILEALREADYEXISTS);
+            try {
+                JSONParser parser = new JSONParser();
+                Object obj = parser.parse(new FileReader(filePath.toString()));
+                JSONObject jsonObject = (JSONObject) obj;
+                return new Pair<>((String) jsonObject.get("Public Key"), CreateWalletResult.FILEALREADYEXISTS);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         else {
             try {

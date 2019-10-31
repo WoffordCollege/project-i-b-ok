@@ -20,17 +20,19 @@ import java.sql.*;
 
 public class WalletUtilitiesTest {
 
+
     @Test
-    public final void createWalletSUCCESSTest(){
+    public final void createWalletSUCCESSTest() {
+        Pair<String, WalletUtilities.CreateWalletResult> val = WalletUtilities.createWallet("Test", "Burdick");
+        assertTrue(val.getFirst().length() > 0);
+        assertEquals(WalletUtilities.CreateWalletResult.SUCCESS, val.getSecond());
+    }
+
+    @Test
+    public final void createWalletALREADYEXISTSTest(){
+        WalletUtilities.createWallet("Test","Khan");
         Pair<String,WalletUtilities.CreateWalletResult> val = WalletUtilities.createWallet("Test","Khan");
         assertTrue (val.getFirst().length() > 0 );
-        assertEquals(WalletUtilities.CreateWalletResult.SUCCESS, val.getSecond());
-
-    }
-    @Test
-    public final void createWalletFILEEXISTSTest() {
-        Pair<String, WalletUtilities.CreateWalletResult> val = WalletUtilities.createWallet("Test", "Khan");
-        assertTrue(val.getFirst().length() > 0);
         assertEquals(WalletUtilities.CreateWalletResult.FILEALREADYEXISTS, val.getSecond());
     }
    }
