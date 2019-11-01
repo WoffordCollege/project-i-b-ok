@@ -2,9 +2,16 @@ package edu.wofford.wocoin;
 
 import org.junit.*;
 import static org.junit.Assert.*;
+
+import java.io.File;
 import java.sql.*;
 
 public class SQLControllerTest {
+    @After
+    public final void teardown() {
+        new File("notadb.sqlite3").delete();
+        new File("testDB.sqlite3").delete();
+    }
 
     @Test
     public final void testConstructor(){
