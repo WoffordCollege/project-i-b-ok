@@ -33,15 +33,15 @@ public class WalletUtilitiesTest {
 
     @Test
     public final void createWalletSUCCESSTest() {
-        Pair<String, WalletUtilities.CreateWalletResult> val = WalletUtilities.createWallet("test", "Burdick");
+        Pair<String, WalletUtilities.CreateWalletResult> val = WalletUtilities.createWallet("test", "Burdick", "");
         assertTrue(val.getFirst().length() > 0);
         assertEquals(WalletUtilities.CreateWalletResult.SUCCESS, val.getSecond());
     }
 
     @Test
     public final void createWalletALREADYEXISTSTest(){
-        WalletUtilities.createWallet("test","Khan");
-        Pair<String,WalletUtilities.CreateWalletResult> val = WalletUtilities.createWallet("test","Khan");
+        WalletUtilities.createWallet("test","Khan", "");
+        Pair<String,WalletUtilities.CreateWalletResult> val = WalletUtilities.createWallet("test","Khan", "");
         assertTrue (val.getFirst().length() > 0 );
         assertEquals(WalletUtilities.CreateWalletResult.FILEALREADYEXISTS, val.getSecond());
     }

@@ -94,11 +94,11 @@ public class ConsoleControllerTest {
         cm.adminLogin("badpass");
         assertEquals(cm.getCurrentUIString(), loginScreenString);
         cm.adminLogin("adminpwd");
-        assertEquals(cm.getCurrentUIString(), "Please select from the following options:\n1: back\n2: add user\n3: remove user");
+        assertThat(cm.getCurrentUIString(), containsString("1: back\n2: add user\n3: remove user"));
         cm.doLogout();
         assertEquals(cm.getCurrentUIString(), loginScreenString);
         cm.userLogin("testuser", "testpass");
-        assertEquals(cm.getCurrentUIString(), "Please select from the following options:\n1: back\n2: create wallet");
+        assertThat(cm.getCurrentUIString(), containsString("1: back\n2: create wallet"));
         cm.doLogout();
         assertEquals(cm.getCurrentUIString(), loginScreenString);
         cm.exit();
