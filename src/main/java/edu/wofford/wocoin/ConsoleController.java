@@ -111,7 +111,7 @@ public class ConsoleController {
         if (currentUser == null || currentUser.length() == 0) {
             return WalletUtilities.CreateWalletResult.FAILED;
         }
-        Pair<String, WalletUtilities.CreateWalletResult> keyAndResult = WalletUtilities.createWallet(filepath, currentUser);
+        Pair<String, WalletUtilities.CreateWalletResult> keyAndResult = WalletUtilities.createWallet(filepath, currentUser, "");
         if (keyAndResult.getSecond() == WalletUtilities.CreateWalletResult.SUCCESS) {
             if (sqlController.findWallet(this.currentUser)){
                 sqlController.replaceWallet(this.currentUser, keyAndResult.getFirst());
