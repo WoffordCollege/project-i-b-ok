@@ -13,6 +13,7 @@ public class ConsoleController {
     private UIState currentState;
 
     private String currentUser;
+    private String currentPassword;
 
     /**
      * Constructs a new ConsoleController with the given {@link SQLController}. Sets the current state of the UI to Login
@@ -77,6 +78,7 @@ public class ConsoleController {
         else if (sqlController.userLogin(username, password) == SQLController.LoginResult.SUCCESS) {
                 currentState = UIState.USER;
                 this.currentUser = username;
+                this.currentPassword = password;
                 return true;
         }
         else{
@@ -111,7 +113,7 @@ public class ConsoleController {
         if (currentUser == null || currentUser.length() == 0) {
             return WalletUtilities.CreateWalletResult.FAILED;
         }
-        Pair<String, WalletUtilities.CreateWalletResult> keyAndResult = WalletUtilities.createWallet(filepath, currentUser, "");
+        Pair<String, WalletUtilities.CreateWalletResult> keyAndResult = WalletUtilities.createWallet(filepath, this.currentUser, this.currentPassword);
         if (keyAndResult.getSecond() == WalletUtilities.CreateWalletResult.SUCCESS) {
             if (sqlController.findWallet(this.currentUser)){
                 sqlController.replaceWallet(this.currentUser, keyAndResult.getFirst());
@@ -128,6 +130,7 @@ public class ConsoleController {
      */
     public void doLogout() {
         this.currentUser = null;
+        this.currentPassword = null;
         currentState = UIState.LOGIN;
     }
 

@@ -20,29 +20,29 @@ import static org.junit.Assert.*;
 import java.sql.*;
 
 public class WalletUtilitiesTest {
-    @After
-    public final void tearDown() {
-        File index = new File("test");
-        try {
-            FileUtils.deleteDirectory(index);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    @After
+//    public final void tearDown() {
+//        File index = new File("test");
+//        try {
+//            FileUtils.deleteDirectory(index);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
 
     @Test
     public final void createWalletSUCCESSTest() {
         Pair<String, WalletUtilities.CreateWalletResult> val = WalletUtilities.createWallet("test", "Burdick", "");
-        assertTrue(val.getFirst().length() > 0);
         assertEquals(WalletUtilities.CreateWalletResult.SUCCESS, val.getSecond());
+        assertTrue(val.getFirst().length() > 0);
     }
 
     @Test
     public final void createWalletALREADYEXISTSTest(){
         WalletUtilities.createWallet("test","Khan", "");
         Pair<String,WalletUtilities.CreateWalletResult> val = WalletUtilities.createWallet("test","Khan", "");
-        assertTrue (val.getFirst().length() > 0 );
+        assertEquals(0, val.getFirst().length());
         assertEquals(WalletUtilities.CreateWalletResult.FILEALREADYEXISTS, val.getSecond());
     }
    }
