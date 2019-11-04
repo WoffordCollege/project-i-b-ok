@@ -15,7 +15,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
 public class ConsoleControllerTest {
-    public final String loginScreenString = "1: exit\n2: administrator\n3: user";
+    public final String loginScreenString = "Please select from the following options:\n1: exit\n2: administrator\n3: user";
 
     @Before
     public void setUp(){
@@ -94,11 +94,11 @@ public class ConsoleControllerTest {
         cm.adminLogin("badpass");
         assertEquals(cm.getCurrentUIString(), loginScreenString);
         cm.adminLogin("adminpwd");
-        assertEquals(cm.getCurrentUIString(), "1: back\n2: add user\n3: remove user");
+        assertEquals(cm.getCurrentUIString(), "Please select from the following options:\n1: back\n2: add user\n3: remove user");
         cm.doLogout();
         assertEquals(cm.getCurrentUIString(), loginScreenString);
         cm.userLogin("testuser", "testpass");
-        assertEquals(cm.getCurrentUIString(), "1: back\n2: create wallet");
+        assertEquals(cm.getCurrentUIString(), "Please select from the following options:\n1: back\n2: create wallet");
         cm.doLogout();
         assertEquals(cm.getCurrentUIString(), loginScreenString);
         cm.exit();
