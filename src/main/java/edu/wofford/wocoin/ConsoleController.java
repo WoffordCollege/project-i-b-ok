@@ -33,11 +33,11 @@ public class ConsoleController {
             case EXIT:
                 return "";
             case LOGIN:
-                return "1: exit\n2: administrator\n3: user";
+                return "Please select from the following options:\n1: exit\n2: administrator\n3: user";
             case USER:
-                return "1: back\n2: create wallet";
+                return "Please select from the following options:\n1: back\n2: create wallet";
             case ADMINISTRATOR:
-                return "1: back\n2: add user\n3: remove user";
+                return "Please select from the following options:\n1: back\n2: add user\n3: remove user";
         }
         return null;
     }

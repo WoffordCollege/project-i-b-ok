@@ -57,7 +57,7 @@ public class ConsoleControllerTest {
     @Test
     public void testLoginScreenConsole() {
         String output = sendProgramInput("1");
-        assertEquals("1: exit\n2: administrator\n3: user\n", output);
+        assertThat(output, containsString("1: exit\n2: administrator\n3: user\n"));
     }
 
 

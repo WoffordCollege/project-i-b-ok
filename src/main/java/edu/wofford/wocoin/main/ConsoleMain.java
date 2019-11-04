@@ -30,11 +30,13 @@ public class ConsoleMain {
                         cm.exit();
                     }
                     else if (option == 2){
+                        System.out.print("Enter the administrator password: ");
                         String password = scanner.next();
                         if (!cm.adminLogin(password))
                             System.out.println("Incorrect administrator password.");
                     }
                     else if (option == 3) {
+                        System.out.println("Please enter your username and password separated by a space.");
                         String username = scanner.next();
                         String password = scanner.next();
                         if (!cm.userLogin(username, password))
@@ -44,20 +46,27 @@ public class ConsoleMain {
                 case USER:
                     option = scanner.nextInt();
                     if (option == 1) {
+                        System.out.println("");
                         cm.doLogout();
                     }
                     else if (option == 2) {
                         boolean userStillCreatingWallet = true;
 
                         if (cm.userHasWallet()) {
+                            System.out.println("Your account has an associated wallet.");
+                            System.out.println("Would you like to delete this wallet and create a new wallet? [y/N]");
                             String deleteWallet = scanner.next();
                             if (!deleteWallet.equals("y")) {
                                 System.out.println("Action canceled.");
                                 userStillCreatingWallet = false;
                             }
+                            else {
+                                System.out.println("Wallet deleted.");
+                            }
                         }
 
                         if (userStillCreatingWallet) {
+                            System.out.println("Enter the file path for the wallet: ");
                             String path = scanner.next();
 
                             WalletUtilities.CreateWalletResult result = cm.addWalletToUser(path);
@@ -73,10 +82,12 @@ public class ConsoleMain {
                     if (option == 1) {
                         cm.doLogout();
                     } else if (option == 2) {
+                        System.out.println("Enter a username and password separated by a space for the user to add.");
                         String username = scanner.next();
                         String password = scanner.next();
                         System.out.println(cm.addUser(username, password));
                     } else if (option == 3) {
+                        System.out.print("Please enter the username of the account to be removed: ");
                         String username = scanner.next();
                         System.out.println(cm.removeUser(username));
                     }
