@@ -7,11 +7,6 @@ import java.io.File;
 import java.sql.*;
 
 public class SQLControllerTest {
-    @After
-    public final void teardown() {
-        new File("notadb.sqlite3").delete();
-        new File("testDB.sqlite3").delete();
-    }
 
     @Test
     public final void testConstructor(){
@@ -22,104 +17,6 @@ public class SQLControllerTest {
         assertEquals("jdbc:sqlite:wocoinDatabase.sqlite3", foo.getPath());
     }
 
-    @Test
-    public final void lookupUser(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
-        foo.removeUser("Marshall");
-        foo.insertUser("Marshall","password");
-        assertTrue(foo.lookupUser("Marshall"));
-    }
-
-    @Test
-    public final void addUserTest(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
-
-        foo.removeUser("Connor");
-
-        SQLController.AddUserResult insertUserResult = foo.insertUser("Connor","password");
-        assertEquals(SQLController.AddUserResult.ADDED, insertUserResult);
-
-        try {
-            Connection connWocoin = DriverManager.getConnection("jdbc:sqlite:wocoinDatabase.sqlite3");
-            String cmdSelect = "SELECT Count(*) FROM users WHERE id = 'Connor'";
-            Statement stmSelect = connWocoin.createStatement();
-            ResultSet dtr = stmSelect.executeQuery(cmdSelect);
-            assertEquals(1,dtr.getInt(1));
-            connWocoin.close();
-        }catch(Exception e){
-            System.out.println(e.toString());
-        }
-    }
-
-    @Test
-    public final void removeUserTest(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
-
-        foo.insertUser("Connor","password");
-
-        SQLController.RemoveUserResult tmp = foo.removeUser("Connor");
-        assertEquals(SQLController.RemoveUserResult.REMOVED, tmp);
-
-        try (Connection connWocoin = DriverManager.getConnection("jdbc:sqlite:wocoinDatabase.sqlite3");){
-
-            String cmdSelect = "SELECT Count(*) FROM users WHERE id = 'Connor'";
-            Statement stmSelect = connWocoin.createStatement();
-            ResultSet dtr = stmSelect.executeQuery(cmdSelect);
-            assertEquals(0, dtr.getInt(1));
-            connWocoin.close();
-        }catch(Exception e){
-            System.out.println(e.toString());
-        }
-    }
-
-    @Test
-    public final void duplicateUserTestDiffPass(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
-        foo.removeUser("Garrett");
-        foo.insertUser("Garrett","password");
-        SQLController.AddUserResult tmp = foo.insertUser("Garrett","password1");
-        assertEquals(SQLController.AddUserResult.DUPLICATE, tmp);
-    }
-
-    @Test
-    public final void duplicateUserTestSamePass(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
-        foo.removeUser("Garrett");
-        foo.insertUser("Garrett","password");
-        SQLController.AddUserResult tmp = foo.insertUser("Garrett","password");
-        assertEquals(SQLController.AddUserResult.DUPLICATE, tmp);
-    }
-
-    @Test
-    public final void testExceptionsInFunctions() {
-        SQLController badDBConnect = new SQLController("notadb.sqlite3");
-        badDBConnect.lookupUser("testuser");
-        badDBConnect.insertUser("testuser", "testpw");
-        badDBConnect.removeUser("testuser");
-    }
-
-    @Test
-    public final void userLoginSuccess(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
-        foo.removeUser("testUser");
-        foo.insertUser("testUser","asecret");
-        assertEquals(SQLController.LoginResult.SUCCESS, foo.userLogin("testUser","asecret"));
-    }
-
-    @Test
-    public final void userLoginWrongPassword(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
-        foo.removeUser("testUser");
-        foo.insertUser("testUser","asecret");
-        assertEquals(SQLController.LoginResult.WRONGPASSWORD, foo.userLogin("testUser","x"));
-    }
-
-    @Test
-    public final void userLoginInvalidUser(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
-        foo.removeUser("testUser");
-        assertEquals(SQLController.LoginResult.NOSUCHUSER, foo.userLogin("testUser","asecret"));
-    }
 
     @Test
     public final void walletExists(){
