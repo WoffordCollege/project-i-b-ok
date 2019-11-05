@@ -86,4 +86,49 @@ public class SQLControllerTest {
         foo.removeWallet("nfury");
         assertEquals("",foo.RetrievePublicKey("nfury"));
     }
+
+    @Ignore
+    @Test
+    public final void successfulProductAdd(){
+        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
+        foo.insertUser("john","Wofford1854");
+        foo.addWallet("john","j12345");
+        assertEquals(SQLController.AddProductResult.ADDED,foo.addProduct("john","x","This is the description.", 20));
+    }
+
+    @Ignore
+    @Test
+    public final void ProductAddWithoutWallet(){
+
+    }
+
+    @Ignore
+    @Test
+    public final void ProductAddNoName(){
+
+    }
+
+    @Ignore
+    @Test
+    public final void ProductAddNoDescription(){
+
+    }
+
+    @Ignore
+    @Test
+    public final void ProductAddNegativePrice(){
+
+    }
+
+    @Ignore
+    @Test
+    public final void ProductAddZeroPrice(){
+
+    }
+
+    @Ignore
+    @Test
+    public final void ProductAddNoUser(){
+
+    }
 }
