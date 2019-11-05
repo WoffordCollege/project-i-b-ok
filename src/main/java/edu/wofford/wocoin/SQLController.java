@@ -12,6 +12,7 @@ public class SQLController {
     public enum AddWalletResult {ADDED, ALREADYEXISTS, NOTADDED}
     public enum ReplaceWalletResult {REPLACED, NOTREPLACED, NOSUCHWALLET}
     public enum RemoveWalletResult {REMOVED, NOSUCHWALLET, NOTREMOVED}
+    public enum AddProductResult {ADDED, NOTADDED, NOWALLET}
 
     /**
      * Constructor that takes the name of the file
@@ -255,6 +256,12 @@ public class SQLController {
         } catch (Exception e) {
             System.out.println(e.toString());
         }
+        return retVal;
+    }
+
+    public AddProductResult addProduct(String user, String item, String desc, int price){
+        AddProductResult retVal = AddProductResult.NOTADDED;
+
         return retVal;
     }
 }
