@@ -259,6 +259,25 @@ public class SQLController {
         return retVal;
     }
 
+    /**
+     * Retrieves the user name from the database for the provided public key
+     * @param publicKey The public key for the user
+     * @return The user name or an empty string if the user is not in the database
+     */
+    public String getName(String publicKey){
+        String retVal = "";
+        try (Connection dataConn = DriverManager.getConnection(url)) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT id FROM wallets WHERE publickey = ?");
+            stSelect.setString(1, publicKey);
+            ResultSet dtr = stSelect.executeQuery();
+            retVal = dtr.getString(1);
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
+        return retVal;
+    }
+
+
     public AddProductResult addProduct(String user, String item, String desc, int price){
         AddProductResult retVal = AddProductResult.NOTADDED;
 

@@ -87,6 +87,16 @@ public class SQLControllerTest {
         assertEquals("",foo.RetrievePublicKey("nfury"));
     }
 
+    @Test
+    public final void getName(){
+        assertEquals("jdoe", foo.getName("587888ea2b080656816aad7e0bc8f1cf3cf0bced"));
+    }
+
+    @Test
+    public final void getNameInvalidPublicKey(){
+        assertEquals("", foo.getName("test"));
+    }
+
     @Ignore
     @Test
     public final void successfulProductAdd(){
