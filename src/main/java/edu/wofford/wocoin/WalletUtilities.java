@@ -27,25 +27,28 @@ public class WalletUtilities {
      * @return SUCCESS if the wallet was created, ALREADYEXSITS if the file is already exists, and FAILED if a file cannot be created
      */
     public static Pair<String, CreateWalletResult> createWallet (String path, String username, String password) {
-        Path filePath = Paths.get(path, username);
+        Path directoryPath = Paths.get(path, username);
+        Path finalFilePath = Paths.get(path, username, "mykeyfile.json");
 
-        File file = filePath.toFile();
+        File finalKeyFile = finalFilePath.toFile();
 
-        if (file.exists()) {
+        if (finalKeyFile.exists()) {
             return new Pair<>("", CreateWalletResult.FILEALREADYEXISTS);
         }
         else {
-            file.mkdirs();
+            directoryPath.toFile().mkdirs();
         }
 
-        String wPath = filePath.toString();
+        String wPath = directoryPath.toString();
 
         String walletName = null;
         Credentials credentials = null;
 
         try {
-            walletName = WalletUtils.generateNewWalletFile(password, new File(wPath));
-            credentials = WalletUtils.loadCredentials(password, Paths.get(wPath, walletName).toString());
+            walletName = WalletUtils.generateNewWalletFile(password, directoryPath.toFile());
+            File walletFile = Paths.get(path, username, walletName).toFile();
+            credentials = WalletUtils.loadCredentials(password, walletFile);
+            walletFile.renameTo(finalKeyFile);
         } catch (Exception e) {
             e.printStackTrace();
             return new Pair<>("", CreateWalletResult.FAILED);

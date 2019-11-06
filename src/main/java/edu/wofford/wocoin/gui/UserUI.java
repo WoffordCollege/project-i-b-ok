@@ -42,7 +42,7 @@ public class UserUI extends CustomActionView {
 
             this.parentView = parentView;
 
-            CustomActionView createWalletAction = new CustomActionView("Create a Wallet", "create wallet") {
+            CustomActionView createWalletAction = new CustomActionView("Create a Wallet", "create wallet", viewConfig, keyboard) {
                 @Override
                 public void executeCustomAction() {
                     boolean userStillCreatingWallet = true;
@@ -68,7 +68,6 @@ public class UserUI extends CustomActionView {
             };
 
             this.addMenuItem(createWalletAction);
-            this.setParentView(new MainMenu(cc, this.keyboard));
         }
 
 
