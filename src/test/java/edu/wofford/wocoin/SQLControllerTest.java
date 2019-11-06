@@ -15,6 +15,17 @@ public class SQLControllerTest {
         foo = new SQLController();
     }
 
+    @BeforeClass
+    public static void setupDB(){
+        new File("wocoinDatabase.sqlite3").delete();
+        Utilities.createTestDatabase("wocoinDatabase.sqlite3");
+    }
+
+    /*@AfterClass
+    public static void destroyDB(){
+        new File("wocoinDatabase.sqlite3").delete();
+    }*/
+
     @Test
     public final void testConstructor(){
         SQLController bar = new SQLController("testDB.sqlite3");
@@ -117,31 +128,27 @@ public class SQLControllerTest {
     }
 
     @Test
-    public final void ProductAddNoName(){
+    public final void ProductAddNoUser(){
         assertEquals(SQLController.AddProductResult.NOWALLET,foo.addProduct("noName","x","This is the description.", 20));
     }
 
-    @Ignore
     @Test
     public final void ProductAddNoDescription(){
-
+        assertEquals(SQLController.AddProductResult.EMPTYDESCRIPTION,foo.addProduct("jsmith","x","", 20));
     }
 
-    @Ignore
     @Test
     public final void ProductAddNegativePrice(){
-
+        assertEquals(SQLController.AddProductResult.NONPOSITIVEPRICE,foo.addProduct("jsmith","x","This is the description.", -2));
     }
 
-    @Ignore
     @Test
     public final void ProductAddZeroPrice(){
-
+        assertEquals(SQLController.AddProductResult.NONPOSITIVEPRICE,foo.addProduct("jsmith","x","This is the description.", 0));
     }
 
-    @Ignore
     @Test
-    public final void ProductAddNoUser(){
-
+    public final void ProductAddNoName(){
+        assertEquals(SQLController.AddProductResult.EMPTYNAME,foo.addProduct("jsmith","","This is the description.", 20));
     }
 }
