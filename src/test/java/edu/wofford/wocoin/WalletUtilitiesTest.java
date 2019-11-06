@@ -5,7 +5,8 @@ import java.io.IOException;
 
 import java.io.FileWriter;
 
-import org.codehaus.plexus.util.FileUtils;
+import org.apache.commons.io.FileUtils;
+
 import org.json.simple.JSONObject;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
@@ -20,16 +21,15 @@ import static org.junit.Assert.*;
 import java.sql.*;
 
 public class WalletUtilitiesTest {
-//    @After
-//    public final void tearDown() {
-//        File index = new File("test");
-//        try {
-//            FileUtils.deleteDirectory(index);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
+    @AfterClass
+    public static void destroy(){
+        try{
+            FileUtils.deleteDirectory(new File("test"));
+        } catch(Exception e){
+            System.out.println(e.toString());
+        }
+    }
 
     @Test
     public final void createWalletSUCCESSTest() {
