@@ -12,7 +12,7 @@ public class SQLController {
     public enum AddWalletResult {ADDED, ALREADYEXISTS, NOTADDED}
     public enum ReplaceWalletResult {REPLACED, NOTREPLACED, NOSUCHWALLET}
     public enum RemoveWalletResult {REMOVED, NOSUCHWALLET, NOTREMOVED}
-    public enum AddProductResult {ADDED, NOTADDED, NOWALLET}
+    public enum AddProductResult {ADDED, NOTADDED, NOWALLET, EMPTYDESCRIPTION, EMPTYNAME, NONPOSITIVEPRICE}
 
     /**
      * Constructor that takes the name of the file
@@ -281,6 +281,27 @@ public class SQLController {
     public AddProductResult addProduct(String user, String item, String desc, int price){
         AddProductResult retVal = AddProductResult.NOTADDED;
 
+        if(!findWallet(user)){
+            retVal = AddProductResult.NOWALLET;
+        } else if(price<=0){
+            retVal = AddProductResult.NONPOSITIVEPRICE;
+        } else if(item.trim().isEmpty()){
+            retVal = AddProductResult.EMPTYNAME;
+        } else if(desc.trim().isEmpty()){
+            retVal = AddProductResult.EMPTYDESCRIPTION;
+        } else {
+            try (Connection dataConn = DriverManager.getConnection(url)) {
+                PreparedStatement stInsert = dataConn.prepareStatement("Insert into products (seller, price, name, description) values (?,?,?,?)");
+                stInsert.setString(1, this.RetrievePublicKey(user));
+                stInsert.setInt(2,price);
+                stInsert.setString(3, item);
+                stInsert.setString(4, desc);
+                stInsert.execute();
+                retVal = AddProductResult.ADDED;
+            } catch (Exception e) {
+                System.out.println(e.toString());
+            }
+        }
         return retVal;
     }
 }

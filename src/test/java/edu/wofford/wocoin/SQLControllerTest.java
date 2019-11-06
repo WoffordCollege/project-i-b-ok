@@ -93,25 +93,32 @@ public class SQLControllerTest {
         assertEquals("", foo.getName("test"));
     }
 
-    @Ignore
     @Test
     public final void successfulProductAdd(){
         foo.insertUser("john","Wofford1854");
         foo.addWallet("john","j12345");
         assertEquals(SQLController.AddProductResult.ADDED,foo.addProduct("john","x","This is the description.", 20));
-        //assertEquals("j12345",);
+        try (Connection dataConn = DriverManager.getConnection(foo.getPath())) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT * FROM products order by id desc limit 1");
+            ResultSet dtr = stSelect.executeQuery();
+            assertEquals("j12345", dtr.getString(2));
+            assertEquals(20, dtr.getInt(3));
+            assertEquals("x", dtr.getString(4));
+            assertEquals("This is the description.", dtr.getString(5));
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
     }
 
-    @Ignore
     @Test
     public final void ProductAddWithoutWallet(){
-
+        foo.insertUser("newUser","password");
+        assertEquals(SQLController.AddProductResult.NOWALLET,foo.addProduct("newUser","x","This is the description.", 20));
     }
 
-    @Ignore
     @Test
     public final void ProductAddNoName(){
-
+        assertEquals(SQLController.AddProductResult.NOWALLET,foo.addProduct("noName","x","This is the description.", 20));
     }
 
     @Ignore
