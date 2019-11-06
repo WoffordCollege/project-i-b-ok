@@ -42,6 +42,7 @@ public class WalletUtilities {
 
         String walletName = null;
         Credentials credentials = null;
+
         try {
             walletName = WalletUtils.generateNewWalletFile(password, new File(wPath));
             credentials = WalletUtils.loadCredentials(password, Paths.get(wPath, walletName).toString());
@@ -50,10 +51,14 @@ public class WalletUtilities {
             return new Pair<>("", CreateWalletResult.FAILED);
         }
 
+        if (credentials.getAddress().length() >= 2){
+            String accountAddress = credentials.getAddress().substring(2);
+            return new Pair<>(accountAddress, CreateWalletResult.SUCCESS);
+        }
+        else {
+            return new Pair<>("", CreateWalletResult.FAILED);
+        }
 
-        String accountAddress = credentials.getAddress();
-
-        return new Pair<>(accountAddress, CreateWalletResult.SUCCESS);
 
     }
 }

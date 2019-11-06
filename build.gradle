@@ -54,6 +54,7 @@ dependencies {
     compile 'org.beryx:text-io:3.3.0'
     compile 'org.web3j:core:4.2.0'
     compile 'com.googlecode.json-simple:json-simple:1.1.1'
+    compile 'io.bretty:console-view:3.4'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
