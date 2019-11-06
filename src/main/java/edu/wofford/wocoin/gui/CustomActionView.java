@@ -4,9 +4,16 @@ import io.bretty.console.view.ActionView;
 import io.bretty.console.view.MenuView;
 import io.bretty.console.view.ViewConfig;
 
+import java.util.Scanner;
+
 public abstract class CustomActionView extends ActionView {
     public CustomActionView(String runningTitle, String nameInParentMenu) {
         super(runningTitle, nameInParentMenu);
+    }
+
+    public CustomActionView(String runningTitle, String nameInParentMenu, ViewConfig viewConfig, Scanner keyboard) {
+        super(runningTitle, nameInParentMenu, viewConfig);
+        this.keyboard = keyboard;
     }
 
     public CustomActionView(String runningTitle, String nameInParentMenu, ViewConfig viewConfig) {

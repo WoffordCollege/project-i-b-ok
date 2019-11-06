@@ -16,9 +16,8 @@ public class AdminUI extends CustomActionView {
     }
 
     public AdminUI(ConsoleController cc, ViewConfig viewConfig, Scanner keyboard) {
-        super("Enter the administrator password: ", "administrator", viewConfig);
+        super("Enter the administrator password: ", "administrator", viewConfig, keyboard);
         this.cc = cc;
-        this.keyboard = keyboard;
     }
 
 
@@ -45,20 +44,18 @@ public class AdminUI extends CustomActionView {
             this.parentView = parentView;
             this.keyboard = keyboard;
 
-            CustomActionView addUserAction = new CustomActionView("Add User", "add user", viewConfig) {
+            CustomActionView addUserAction = new CustomActionView("Add User", "add user", viewConfig, keyboard) {
                 @Override
                 public void executeCustomAction() {
-                    Validator<String> customValidator = s -> s.split(" ").length == 2;
-                    String usernameAndPassword = this.prompt("Enter a username and password separated by a space for the user to add.", String.class, customValidator);
-                    String username = usernameAndPassword.split(" ")[0];
-                    String password = usernameAndPassword.split(" ")[1];
+                    String username = this.prompt("Enter your username: ", String.class);
+                    String password = this.prompt("Enter your password: ", String.class);
 
                     this.println(cc.addUser(username, password));
                     this.println("Invalid input");
                 }
             };
 
-            CustomActionView removeUserAction = new CustomActionView("Remove User", "remove user", viewConfig) {
+            CustomActionView removeUserAction = new CustomActionView("Remove User", "remove user", viewConfig, keyboard) {
                 @Override
                 public void executeCustomAction() {
                     String username = this.prompt("Please enter the username of the account to be removed: ", String.class);

@@ -4,6 +4,8 @@ import io.bretty.console.view.MenuView;
 import io.bretty.console.view.Validator;
 import io.bretty.console.view.ViewConfig;
 
+import java.util.Scanner;
+
 public class CustomMenuView extends MenuView {
     public CustomMenuView(String runningTitle, String nameInParentMenu) {
         super(runningTitle, nameInParentMenu);
@@ -11,6 +13,11 @@ public class CustomMenuView extends MenuView {
 
     public CustomMenuView(String runningTitle, String nameInParentMenu, ViewConfig viewConfig) {
         super(runningTitle, nameInParentMenu, viewConfig);
+    }
+
+    public CustomMenuView(String runningTitle, String nameInParentMenu, ViewConfig viewConfig, Scanner keyboard) {
+        super(runningTitle, nameInParentMenu, viewConfig);
+        this.keyboard = keyboard;
     }
 
     private boolean isValidIndex(int index) {

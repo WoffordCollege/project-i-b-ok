@@ -17,18 +17,14 @@ public class UserUI extends CustomActionView {
     }
 
     public UserUI(ConsoleController cc, ViewConfig viewConfig, Scanner keyboard) {
-        super("Please enter your username and password separated by a space.", "user", viewConfig);
+        super("Please enter your username and password separated by a space.", "user", viewConfig, keyboard);
         this.cc = cc;
-        this.keyboard = keyboard;
     }
 
     @Override
     public void executeCustomAction() {
-        Validator<String> customValidator = s -> s.split(" ").length == 2;
-        String usernameAndPassword = this.prompt("", String.class, customValidator);
-
-        String username = usernameAndPassword.split(" ")[0];
-        String password = usernameAndPassword.split(" ")[1];
+        String username = this.prompt("Enter your username: ", String.class);
+        String password = this.prompt("Enter your password: ", String.class);
 
         if (!cc.userLogin(username, password)){
             this.println("No such user.");
@@ -40,18 +36,11 @@ public class UserUI extends CustomActionView {
     }
 
     private class UserRootMenu extends CustomMenuView {
-        public UserRootMenu(String user, ViewConfig viewConfig, Scanner keyboard) {
-            this(user, viewConfig);
-            this.keyboard = keyboard;
-        }
 
         public UserRootMenu(AbstractView parentView, String user, ViewConfig viewConfig, Scanner keyboard) {
-            this(user, viewConfig, keyboard);
-            this.parentView = parentView;
-        }
+            super("Welcome, " + user, "", viewConfig, keyboard);
 
-        public UserRootMenu(String user, ViewConfig viewConfig) {
-            super("Welcome, " + user, "", viewConfig);
+            this.parentView = parentView;
 
             CustomActionView createWalletAction = new CustomActionView("Create a Wallet", "create wallet") {
                 @Override
