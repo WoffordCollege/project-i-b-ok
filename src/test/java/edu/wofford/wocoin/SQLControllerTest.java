@@ -8,45 +8,46 @@ import java.sql.*;
 
 public class SQLControllerTest {
 
+    private SQLController foo;
+
+    @Before
+    public void setup(){
+        foo = new SQLController();
+    }
+
     @Test
     public final void testConstructor(){
-        SQLController foo = new SQLController("testDB.sqlite3");
-        assertEquals("jdbc:sqlite:testDB.sqlite3", foo.getPath());
+        SQLController bar = new SQLController("testDB.sqlite3");
+        assertEquals("jdbc:sqlite:testDB.sqlite3", bar.getPath());
 
-        foo = new SQLController();
         assertEquals("jdbc:sqlite:wocoinDatabase.sqlite3", foo.getPath());
     }
 
 
     @Test
     public final void walletExists(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
         assertTrue(foo.findWallet("srogers"));
     }
 
     @Test
     public final void walletNotExists(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
         assertTrue(!foo.findWallet("tstark"));
     }
 
     @Test
     public final void addWallet(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
         foo.removeWallet("test");
         assertEquals(SQLController.AddWalletResult.ADDED, foo.addWallet("test","8675309"));
     }
 
     @Test
     public final void addWalletDuplicate(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
         foo.addWallet("test","8675309");
         assertEquals(SQLController.AddWalletResult.ALREADYEXISTS, foo.addWallet("test","8675309"));
     }
 
     @Test
     public final void replaceWallet(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
         foo.addWallet("test","8675309");
         assertEquals(SQLController.ReplaceWalletResult.REPLACED, foo.replaceWallet("test","867530"));
         assertEquals("867530",foo.RetrievePublicKey("test"));
@@ -54,27 +55,23 @@ public class SQLControllerTest {
 
     @Test
     public final void replaceNonExistentWallet(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
         assertEquals(SQLController.ReplaceWalletResult.NOSUCHWALLET, foo.replaceWallet("tstark","86753099"));
     }
 
     @Test
     public final void removeWallet(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
         foo.addWallet("bbanner","q8675309");
         assertEquals(SQLController.RemoveWalletResult.REMOVED,foo.removeWallet("bbanner"));
     }
 
     @Test
     public final void removeNonExistentWallet(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
         foo.removeWallet("bbanner");
         assertEquals(SQLController.RemoveWalletResult.NOSUCHWALLET,foo.removeWallet("bbanner"));
     }
 
     @Test
     public final void getPublicKeyTest(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
         foo.removeWallet("nfury");
         foo.addWallet("nfury","nf675309");
         assertEquals("nf675309",foo.RetrievePublicKey("nfury"));
@@ -82,7 +79,6 @@ public class SQLControllerTest {
 
     @Test
     public final void publicKeyDoesNotExist(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
         foo.removeWallet("nfury");
         assertEquals("",foo.RetrievePublicKey("nfury"));
     }
@@ -100,10 +96,10 @@ public class SQLControllerTest {
     @Ignore
     @Test
     public final void successfulProductAdd(){
-        SQLController foo = new SQLController("wocoinDatabase.sqlite3");
         foo.insertUser("john","Wofford1854");
         foo.addWallet("john","j12345");
         assertEquals(SQLController.AddProductResult.ADDED,foo.addProduct("john","x","This is the description.", 20));
+        //assertEquals("j12345",);
     }
 
     @Ignore

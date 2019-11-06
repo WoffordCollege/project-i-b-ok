@@ -18,15 +18,52 @@ public class SQLUsersTest {
     @Before
     public void setUp(){
         if(!setupIsDone) {
-            Utilities.createTestDatabase("TestData.sqlite3");
+            createUserTestDatabase("TestData.sqlite3");
             setupIsDone = true;
         }
         foo = new SQLController("TestData.sqlite3");
     }
 
+    public static void createUserTestDatabase(String filename) {
+        String url = "jdbc:sqlite:" + filename;
+        String users = "CREATE TABLE IF NOT EXISTS users (" +
+                "id text PRIMARY KEY, " +
+                "salt integer NOT NULL, " +
+                "hash text NOT NULL)";
+
+        try (Connection conn = DriverManager.getConnection(url);
+             Statement stmt = conn.createStatement()) {
+            stmt.execute(users);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String[] sqls = { "INSERT INTO users (id, salt, hash) VALUES (\"jdoe\", 13587, \"ebd3528832b124bb7886cd8e8d42871c99e06d5f3ad0c6ee883f6219b2b6a955\")",
+                "INSERT INTO users (id, salt, hash) VALUES (\"jsmith\", 52196, \"9d3194cf601e62d35f144abebcea7704ad005402e102d134bd8f82ac469c2ec9\")",
+                "INSERT INTO users (id, salt, hash) VALUES (\"hjones\", 47440, \"5d94ecaff496ac900a1f68ec950153aa1f500d06227b65167f460e5dd20a959b\")",
+                "INSERT INTO users (id, salt, hash) VALUES (\"srogers\", 54419, \"26f2573d733da38fb3cd09eb79f884bbe63010570d394de7d8809b65823da85a\")",
+        };
+
+        try (Connection conn = DriverManager.getConnection(url)) {
+            for (String sql : sqls) {
+                Statement stmt = conn.createStatement();
+                stmt.executeUpdate(sql);
+                stmt.close();
+                // Wait for one second so that timestamps are different.
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     @AfterClass
     public static void destroy(){
-        System.out.println("SelfDestruct");
         new File("TestData.sqlite3").delete();
         new File("notadb.sqlite3").delete();
         new File("testDB.sqlite3").delete();
