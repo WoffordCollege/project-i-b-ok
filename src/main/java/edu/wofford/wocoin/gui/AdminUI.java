@@ -1,11 +1,13 @@
 package edu.wofford.wocoin.gui;
 
 import edu.wofford.wocoin.ConsoleController;
-import io.bretty.console.view.ActionView;
+import io.bretty.console.view.AbstractView;
 import io.bretty.console.view.Validator;
 import io.bretty.console.view.ViewConfig;
 
-public class AdminUI extends ActionView {
+import java.util.Scanner;
+
+public class AdminUI extends CustomActionView {
     private ConsoleController cc;
 
     public AdminUI(ConsoleController cc) {
@@ -13,10 +15,10 @@ public class AdminUI extends ActionView {
         this.cc = cc;
     }
 
-    public AdminUI(ConsoleController cc, ViewConfig viewConfig) {
+    public AdminUI(ConsoleController cc, ViewConfig viewConfig, Scanner keyboard) {
         super("Enter the administrator password: ", "administrator", viewConfig);
         this.cc = cc;
-        this.keyboard = MainMenu.keyboard;
+        this.keyboard = keyboard;
     }
 
 
@@ -25,7 +27,7 @@ public class AdminUI extends ActionView {
         String password = this.prompt("", String.class);
 
         if (cc.adminLogin(password)) {
-            new AdminRootMenu(cc, this.viewConfig).display();
+            new AdminRootMenu(this.parentView, cc, this.viewConfig, this.keyboard).display();
         }
         else {
             this.println("Incorrect administrator password.");
@@ -37,11 +39,13 @@ public class AdminUI extends ActionView {
     private class AdminRootMenu extends CustomMenuView {
         private ConsoleController cc;
 
-        public AdminRootMenu(ConsoleController cc, ViewConfig viewConfig) {
+        public AdminRootMenu(AbstractView parentView, ConsoleController cc, ViewConfig viewConfig, Scanner keyboard) {
             super("Welcome, Administrator", "", viewConfig);
-            this.keyboard = MainMenu.keyboard;
 
-            ActionView addUserAction = new ActionView("Add User", "add user", viewConfig) {
+            this.parentView = parentView;
+            this.keyboard = keyboard;
+
+            CustomActionView addUserAction = new CustomActionView("Add User", "add user", viewConfig) {
                 @Override
                 public void executeCustomAction() {
                     Validator<String> customValidator = s -> s.split(" ").length == 2;
@@ -52,35 +56,18 @@ public class AdminUI extends ActionView {
                     this.println(cc.addUser(username, password));
                     this.println("Invalid input");
                 }
-
-                @Override
-                public void display() {
-                    this.println();
-                    this.println(this.runningTitle);
-                    this.executeCustomAction();
-                    this.goBack();
-                }
             };
 
-            ActionView removeUserAction = new ActionView("Remove User", "remove user", viewConfig) {
+            CustomActionView removeUserAction = new CustomActionView("Remove User", "remove user", viewConfig) {
                 @Override
                 public void executeCustomAction() {
                     String username = this.prompt("Please enter the username of the account to be removed: ", String.class);
                     this.println(cc.removeUser(username));
                 }
-
-                @Override
-                public void display() {
-                    this.println();
-                    this.println(this.runningTitle);
-                    this.executeCustomAction();
-                    this.goBack();
-                }
             };
 
             this.addMenuItem(addUserAction);
             this.addMenuItem(removeUserAction);
-            this.setParentView(new MainMenu(cc));
         }
 
     }

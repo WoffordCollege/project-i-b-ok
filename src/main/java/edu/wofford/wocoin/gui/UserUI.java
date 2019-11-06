@@ -2,19 +2,24 @@ package edu.wofford.wocoin.gui;
 
 import edu.wofford.wocoin.ConsoleController;
 import edu.wofford.wocoin.WalletUtilities;
-import io.bretty.console.view.ActionView;
+import io.bretty.console.view.AbstractView;
 import io.bretty.console.view.Validator;
 import io.bretty.console.view.ViewConfig;
 
 import java.util.Scanner;
 
-public class UserUI extends ActionView {
+public class UserUI extends CustomActionView {
     private ConsoleController cc;
 
     public UserUI(ConsoleController cc, ViewConfig viewConfig) {
         super("Please enter your username and password separated by a space.", "user", viewConfig);
         this.cc = cc;
-        this.keyboard = MainMenu.keyboard;
+    }
+
+    public UserUI(ConsoleController cc, ViewConfig viewConfig, Scanner keyboard) {
+        super("Please enter your username and password separated by a space.", "user", viewConfig);
+        this.cc = cc;
+        this.keyboard = keyboard;
     }
 
     @Override
@@ -30,20 +35,25 @@ public class UserUI extends ActionView {
             this.goBack();
         }
         else {
-            new UserRootMenu(username, viewConfig, this.keyboard).display();
+            new UserRootMenu(this.parentView, username, viewConfig, this.keyboard).display();
         }
     }
 
     private class UserRootMenu extends CustomMenuView {
         public UserRootMenu(String user, ViewConfig viewConfig, Scanner keyboard) {
             this(user, viewConfig);
-            this.keyboard = MainMenu.keyboard;
+            this.keyboard = keyboard;
+        }
+
+        public UserRootMenu(AbstractView parentView, String user, ViewConfig viewConfig, Scanner keyboard) {
+            this(user, viewConfig, keyboard);
+            this.parentView = parentView;
         }
 
         public UserRootMenu(String user, ViewConfig viewConfig) {
             super("Welcome, " + user, "", viewConfig);
 
-            ActionView createWalletAction = new ActionView("Create a Wallet", "create wallet") {
+            CustomActionView createWalletAction = new CustomActionView("Create a Wallet", "create wallet") {
                 @Override
                 public void executeCustomAction() {
                     boolean userStillCreatingWallet = true;
@@ -66,22 +76,11 @@ public class UserUI extends ActionView {
 
                     }
                 }
-
-                @Override
-                public void display() {
-                    this.println();
-                    this.println(this.runningTitle);
-                    this.executeCustomAction();
-                    this.goBack();
-                }
             };
 
-
-
             this.addMenuItem(createWalletAction);
-            this.setParentView(new MainMenu(cc));
+            this.setParentView(new MainMenu(cc, this.keyboard));
         }
-
 
 
         @Override

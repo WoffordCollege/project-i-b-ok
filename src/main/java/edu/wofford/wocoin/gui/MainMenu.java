@@ -6,39 +6,39 @@ import io.bretty.console.view.ViewConfig;
 
 import java.util.Scanner;
 
-public class MainMenu extends CustomMenuView{
+public class MainMenu extends CustomMenuView {
     private ConsoleController cc;
-    public static Scanner keyboard;
 
-    public MainMenu(ConsoleController consoleController) {
+    public MainMenu(ConsoleController consoleController, Scanner keyboard) {
         super("Welcome to Wocoin!", "");
         this.cc = consoleController;
 
         this.viewConfig = new ViewConfig.Builder()
                 .setIndexNumberFormatter(index -> (index + 1) + ": ")
                 .setBackMenuName("back")
-                .setQuitMenuName("quit")
+                .setQuitMenuName("exit")
                 .build();
 
-        keyboard = new Scanner(System.in);
+        this.keyboard = keyboard;
 
-        AdminUI adminUI = new AdminUI(cc, this.viewConfig);
-        UserUI userUI = new UserUI(cc, this.viewConfig);
-
-        adminUI.setParentView(this);
-        userUI.setParentView(this);
+        AdminUI adminUI = new AdminUI(cc, this.viewConfig, keyboard);
+        UserUI userUI = new UserUI(cc, this.viewConfig, keyboard);
 
         this.addMenuItem(adminUI);
         this.addMenuItem(userUI);
     }
 
+    @Override
+    protected void onQuit() {
+    }
+
     public static void main(String[] args) {
         MainMenu cc = null;
         if (args.length == 1) {
-            cc = new MainMenu(new ConsoleController(new SQLController(args[0])));
+            cc = new MainMenu(new ConsoleController(new SQLController(args[0])), new Scanner(System.in));
         }
         else {
-            cc = new MainMenu(new ConsoleController(new SQLController()));
+            cc = new MainMenu(new ConsoleController(new SQLController()), new Scanner(System.in));
         }
 
         cc.display();
