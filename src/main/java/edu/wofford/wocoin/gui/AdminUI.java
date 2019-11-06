@@ -69,7 +69,6 @@ public class AdminUI extends CustomActionView {
             this.addMenuItem(addUserAction);
             this.addMenuItem(removeUserAction);
         }
-
     }
 
     @Override

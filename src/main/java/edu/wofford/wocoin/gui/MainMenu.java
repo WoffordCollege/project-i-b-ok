@@ -14,15 +14,15 @@ public class MainMenu extends CustomMenuView {
         this.cc = consoleController;
 
         this.viewConfig = new ViewConfig.Builder()
-                .setIndexNumberFormatter(index -> (index + 1) + ": ")
-                .setBackMenuName("back")
-                .setQuitMenuName("exit")
-                .build();
+                                        .setIndexNumberFormatter(index -> (index + 1) + ": ")
+                                        .setBackMenuName("back")
+                                        .setQuitMenuName("exit")
+                                        .build();
 
         this.keyboard = keyboard;
 
-        AdminUI adminUI = new AdminUI(cc, this.viewConfig, keyboard);
-        UserUI userUI = new UserUI(cc, this.viewConfig, keyboard);
+        AdminUI adminUI = new AdminUI(cc, this.viewConfig, this.keyboard);
+        UserUI userUI = new UserUI(cc, this.viewConfig, this.keyboard);
 
         this.addMenuItem(adminUI);
         this.addMenuItem(userUI);
