@@ -15,6 +15,17 @@ public class SQLControllerTest {
         foo = new SQLController();
     }
 
+    @BeforeClass
+    public static void setupDB(){
+        new File("wocoinDatabase.sqlite3").delete();
+        Utilities.createTestDatabase("wocoinDatabase.sqlite3");
+    }
+
+    /*@AfterClass
+    public static void destroyDB(){
+        new File("wocoinDatabase.sqlite3").delete();
+    }*/
+
     @Test
     public final void testConstructor(){
         SQLController bar = new SQLController("testDB.sqlite3");
@@ -93,48 +104,51 @@ public class SQLControllerTest {
         assertEquals("", foo.getName("test"));
     }
 
-    @Ignore
     @Test
     public final void successfulProductAdd(){
         foo.insertUser("john","Wofford1854");
         foo.addWallet("john","j12345");
         assertEquals(SQLController.AddProductResult.ADDED,foo.addProduct("john","x","This is the description.", 20));
-        //assertEquals("j12345",);
+        try (Connection dataConn = DriverManager.getConnection(foo.getPath())) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT * FROM products order by id desc limit 1");
+            ResultSet dtr = stSelect.executeQuery();
+            assertEquals("j12345", dtr.getString(2));
+            assertEquals(20, dtr.getInt(3));
+            assertEquals("x", dtr.getString(4));
+            assertEquals("This is the description.", dtr.getString(5));
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
     }
 
-    @Ignore
     @Test
     public final void ProductAddWithoutWallet(){
-
+        foo.insertUser("newUser","password");
+        assertEquals(SQLController.AddProductResult.NOWALLET,foo.addProduct("newUser","x","This is the description.", 20));
     }
 
-    @Ignore
-    @Test
-    public final void ProductAddNoName(){
-
-    }
-
-    @Ignore
-    @Test
-    public final void ProductAddNoDescription(){
-
-    }
-
-    @Ignore
-    @Test
-    public final void ProductAddNegativePrice(){
-
-    }
-
-    @Ignore
-    @Test
-    public final void ProductAddZeroPrice(){
-
-    }
-
-    @Ignore
     @Test
     public final void ProductAddNoUser(){
+        assertEquals(SQLController.AddProductResult.NOWALLET,foo.addProduct("noName","x","This is the description.", 20));
+    }
 
+    @Test
+    public final void ProductAddNoDescription(){
+        assertEquals(SQLController.AddProductResult.EMPTYDESCRIPTION,foo.addProduct("jsmith","x","", 20));
+    }
+
+    @Test
+    public final void ProductAddNegativePrice(){
+        assertEquals(SQLController.AddProductResult.NONPOSITIVEPRICE,foo.addProduct("jsmith","x","This is the description.", -2));
+    }
+
+    @Test
+    public final void ProductAddZeroPrice(){
+        assertEquals(SQLController.AddProductResult.NONPOSITIVEPRICE,foo.addProduct("jsmith","x","This is the description.", 0));
+    }
+
+    @Test
+    public final void ProductAddNoName(){
+        assertEquals(SQLController.AddProductResult.EMPTYNAME,foo.addProduct("jsmith","","This is the description.", 20));
     }
 }
