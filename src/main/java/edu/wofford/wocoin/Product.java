@@ -8,7 +8,7 @@ public class Product implements Comparable<Product>{
     private int price;
     private String name;
     private String description;
-    private String currentUserWallet;
+    private String currentUser;
     private boolean ownedByUser;
     private CompareType compareType;
     private DisplayType displayType;
@@ -31,8 +31,8 @@ public class Product implements Comparable<Product>{
     /**
      * Works with the main constructor to set the default values of the comparison type and display type
      */
-    public Product(String seller, int price, String name, String description, String currentUserWallet) {
-        this(seller, price, name, description, currentUserWallet, CompareType.ALPHABETICALLY, DisplayType.HIDECURRENTUSER);
+    public Product(String seller, int price, String name, String description, String currentUser) {
+        this(seller, price, name, description, currentUser, CompareType.ALPHABETICALLY, DisplayType.HIDECURRENTUSER);
     }
 
     /**
@@ -41,19 +41,19 @@ public class Product implements Comparable<Product>{
      * @param price The price of the product
      * @param name The name of the product
      * @param description The description of the product
-     * @param currentUserWallet The wallet address of the user using this product
+     * @param currentUser The wallet address of the user using this product
      * @param compareType Chooses what the {@link Product#compareTo(Product)} function uses to determine which object comes first
      * @param displayType Chooses the method {@link Product#toString()} uses to show on display
      */
-    public Product(String seller, int price, String name, String description, String currentUserWallet, CompareType compareType, DisplayType displayType) {
+    public Product(String seller, int price, String name, String description, String currentUser, CompareType compareType, DisplayType displayType) {
         this.seller = seller;
         this.price = price;
         this.name = name;
         this.description = description;
-        this.currentUserWallet = currentUserWallet;
+        this.currentUser = currentUser;
 
-        if (this.currentUserWallet != null) {
-            this.ownedByUser = this.seller.equals(currentUserWallet);
+        if (this.currentUser != null) {
+            this.ownedByUser = this.seller.equals(currentUser);
         }
 
         this.compareType = compareType;
@@ -92,8 +92,8 @@ public class Product implements Comparable<Product>{
         this.description = description;
     }
 
-    public String getCurrentUserWallet() {
-        return currentUserWallet;
+    public String getCurrentUser() {
+        return currentUser;
     }
 
     /**
@@ -101,13 +101,13 @@ public class Product implements Comparable<Product>{
      * It is used in the toString method to determine if the right angle brackets should be visible.
      * If this remains unset, the toString method returns the standard description.
      * This also sets the ownedByUser flag to true if the currentUser equals the seller of the item.
-     * @param currentUserWallet The user currently logged into the UI.
+     * @param currentUser The user currently logged into the UI.
      */
-    public void setCurrentUserWallet(String currentUserWallet) {
-        this.currentUserWallet = currentUserWallet;
+    public void setCurrentUser(String currentUser) {
+        this.currentUser = currentUser;
 
-        if (currentUserWallet != null){
-            this.ownedByUser = this.currentUserWallet.equals(this.seller);
+        if (currentUser != null){
+            this.ownedByUser = this.currentUser.equals(this.seller);
         }
     }
 

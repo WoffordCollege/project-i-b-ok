@@ -46,9 +46,6 @@ public class CustomMenuView extends MenuView {
         }
 
 
-        // 4) Back/quit; always the last index
-
-
         // get a valid index number
         Validator<Integer> indexNumberValidator = new Validator<Integer>() {
             @Override

@@ -246,7 +246,7 @@ public class SQLController {
      * @param user The name of the user
      * @return The public key or an empty string if the user is not in the database
      */
-    public String RetrievePublicKey(String user){
+    public String retrievePublicKey(String user){
         String retVal = "";
         try (Connection dataConn = DriverManager.getConnection(url)) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT publickey FROM wallets WHERE id = ?");
@@ -279,36 +279,34 @@ public class SQLController {
 
     /**
      * Adds a product to the database.
-     * @param user the name of the user
-     * @param item the name of the product
-     * @param desc the description of the product
-     * @param price the price of the product
+     * @param product the product to be added to the database.
      * @return Added if successful, else why the product was not added.
      */
-    public AddProductResult addProduct(String user, String item, String desc, int price){
+    public AddProductResult addProduct(Product product){
         AddProductResult retVal = AddProductResult.NOTADDED;
 
-        if(!findWallet(user)){
+        if(!findWallet(product.getSeller())){
             retVal = AddProductResult.NOWALLET;
-        } else if(price<=0){
+        } else if(product.getPrice() <= 0){
             retVal = AddProductResult.NONPOSITIVEPRICE;
-        } else if(item.trim().isEmpty()){
+        } else if(product.getName().trim().isEmpty()){
             retVal = AddProductResult.EMPTYNAME;
-        } else if(desc.trim().isEmpty()){
+        } else if(product.getDescription().trim().isEmpty()){
             retVal = AddProductResult.EMPTYDESCRIPTION;
         } else {
             try (Connection dataConn = DriverManager.getConnection(url)) {
                 PreparedStatement stInsert = dataConn.prepareStatement("Insert into products (seller, price, name, description) values (?,?,?,?)");
-                stInsert.setString(1, this.RetrievePublicKey(user));
-                stInsert.setInt(2,price);
-                stInsert.setString(3, item);
-                stInsert.setString(4, desc);
+                stInsert.setString(1, this.retrievePublicKey(product.getSeller()));
+                stInsert.setInt(2, product.getPrice());
+                stInsert.setString(3, product.getName());
+                stInsert.setString(4, product.getDescription());
                 stInsert.execute();
                 retVal = AddProductResult.ADDED;
             } catch (Exception e) {
                 System.out.println(e.toString());
             }
         }
+
         return retVal;
     }
 }

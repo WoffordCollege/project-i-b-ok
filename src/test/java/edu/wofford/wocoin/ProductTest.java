@@ -68,12 +68,12 @@ public class ProductTest {
           6: >>>  Risk: board game  [4 WoCoins]
           7: trip to Charlotte: no questions asked  [4 WoCoins]
          */
-        skittles1.setCurrentUserWallet("testuser");
+        skittles1.setCurrentUser("testuser");
         skittles1.setDisplayType(Product.DisplayType.SHOWCURRENTUSER);
-        chalk2.setCurrentUserWallet("testuser");
-        zombieland3.setCurrentUserWallet("testuser");
-        apple4.setCurrentUserWallet("testuser");
-        risk6.setCurrentUserWallet("testuser");
+        chalk2.setCurrentUser("testuser");
+        zombieland3.setCurrentUser("testuser");
+        apple4.setCurrentUser("testuser");
+        risk6.setCurrentUser("testuser");
 
         assertEquals(">>>  skittles: a half-eaten bag  [1 WoCoin]", skittles1.toString());
         assertEquals("chalk: taken from a classroom  [2 WoCoins]", chalk2.toString());
@@ -122,7 +122,7 @@ public class ProductTest {
         for(Product product : products) {
             product.setDisplayType(Product.DisplayType.SHOWCURRENTUSER);
             product.setCompareType(Product.CompareType.PRICE);
-            product.setCurrentUserWallet("testuser");
+            product.setCurrentUser("testuser");
         }
 
         products.sort(Product::compareTo);
