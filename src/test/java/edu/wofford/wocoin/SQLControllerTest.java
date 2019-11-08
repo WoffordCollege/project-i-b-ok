@@ -246,4 +246,33 @@ public class SQLControllerTest {
         assertEquals(new ArrayList<Product>(), foo.getUserProductsList("notauser"));
 
     }
+
+    @Test
+    public void getAllProductsFromDB() {
+        setupDB();
+        Product skittles1 = new Product("jsmith", 1, "skittles", "a half-eaten bag");
+        Product chalk2 = new Product("jdoe", 2, "chalk", "taken from a classroom");
+        Product zombieland3 = new Product("jsmith", 2, "Zombieland", "DVD");
+        Product apple4 = new Product("jdoe", 3, "apple", "small");
+        Product paper5 = new Product("jdoe", 4, "paper", "a ream for a printer");
+        Product risk6 = new Product("jsmith", 4, "Risk", "board game");
+        Product tripToCharlotte7 = new Product("jdoe", 4, "trip to Charlotte", "no questions asked");
+
+        ArrayList<Product> expectedProducts = new ArrayList<>();
+
+        expectedProducts.add(skittles1);
+        expectedProducts.add(chalk2);
+        expectedProducts.add(zombieland3);
+        expectedProducts.add(apple4);
+        expectedProducts.add(paper5);
+        expectedProducts.add(risk6);
+        expectedProducts.add(tripToCharlotte7);
+
+        ArrayList<Product> actualProducts = foo.getAllProductsList();
+
+        expectedProducts.sort(Product::compareToWithPrice);
+        actualProducts.sort(Product::compareToWithPrice);
+
+        assertEquals(expectedProducts, actualProducts);
+    }
 }

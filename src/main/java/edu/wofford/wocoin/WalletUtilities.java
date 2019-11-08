@@ -1,19 +1,11 @@
 package edu.wofford.wocoin;
 
 import java.io.File;
-import java.io.IOException;
 
-import java.io.FileWriter;
-import java.io.FileReader;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.web3j.crypto.*;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 
 public class WalletUtilities {
     public enum CreateWalletResult{SUCCESS, FILEALREADYEXISTS, FAILED}
@@ -42,8 +34,8 @@ public class WalletUtilities {
 
         String wPath = directoryPath.toString();
 
-        String walletName = null;
-        Credentials credentials = null;
+        String walletName;
+        Credentials credentials;
 
         try {
             walletName = WalletUtils.generateNewWalletFile(password, directoryPath.toFile());

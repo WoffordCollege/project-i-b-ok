@@ -1,7 +1,5 @@
 package edu.wofford.wocoin;
 
-import java.util.Objects;
-
 /**
  * This class models the form of a product in the Wocoin database.
  */
@@ -38,7 +36,6 @@ public class Product implements Comparable<Product>{
      * @param name The name of the product
      * @param description The description of the product
      * @param currentUser The wallet address of the user using this product
-     * @param compareType Chooses what the {@link Product#compareTo(Product)} function uses to determine which object comes first
      * @param displayType Chooses the method {@link Product#toString()} uses to show on display
      */
     public Product(String seller, int price, String name, String description, String currentUser, DisplayType displayType) {
@@ -59,36 +56,16 @@ public class Product implements Comparable<Product>{
         return seller;
     }
 
-    public void setSeller(String seller) {
-        this.seller = seller;
-    }
-
     public int getPrice() {
         return price;
-    }
-
-    public void setPrice(int price) {
-        this.price = price;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getDescription() {
         return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getCurrentUser() {
-        return currentUser;
     }
 
     /**
@@ -104,10 +81,6 @@ public class Product implements Comparable<Product>{
         if (currentUser != null){
             this.ownedByUser = this.currentUser.equals(this.seller);
         }
-    }
-
-    public DisplayType getDisplayType() {
-        return displayType;
     }
 
     public void setDisplayType(DisplayType displayType) {
@@ -127,8 +100,6 @@ public class Product implements Comparable<Product>{
         String wocoinOrWocoins = this.price == 1 ? "WoCoin" : "WoCoins";
         return String.format("%s%s: %s  [%d %s]", angleBracketsForCurrentUser, this.name, this.description, this.price, wocoinOrWocoins);
     }
-
-
 
     /**
      * Compares two products based on their price, then their name.
@@ -157,6 +128,12 @@ public class Product implements Comparable<Product>{
         return this.name.compareToIgnoreCase(otherProduct.getName());
     }
 
+    /**
+     * Returns true if this and the Product have the same price, seller, name, and description
+     * Returns false otherwise
+     * @param o the object to be compared
+     * @return true if the Products are equal, false otherwise
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -168,8 +145,4 @@ public class Product implements Comparable<Product>{
                 getDescription().equals(product.getDescription());
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(getSeller(), getPrice(), getName(), getDescription());
-    }
 }

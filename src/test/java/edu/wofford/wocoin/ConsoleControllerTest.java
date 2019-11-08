@@ -1,18 +1,15 @@
 package edu.wofford.wocoin;
 
-import edu.wofford.wocoin.gui.MainMenu;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.*;
+import java.util.ArrayList;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 public class ConsoleControllerTest {
 
@@ -35,7 +32,7 @@ public class ConsoleControllerTest {
             boolean delete = file.delete();
         }
 
-        Utilities.createNewDatabase("test.db");
+        Utilities.createTestDatabase("test.db");
     }
 
     @Test
@@ -44,7 +41,6 @@ public class ConsoleControllerTest {
         cm.adminLogin("adminpwd");
         assertEquals(cm.addUser("testadduser", "test"), "testadduser was added.");
         assertEquals(cm.addUser("testadduser", "test"), "testadduser already exists.");
-        rebuildTestDB();
     }
 
     @Test
@@ -54,7 +50,6 @@ public class ConsoleControllerTest {
         cm.addUser("testadduser", "test");
         assertEquals(cm.removeUser("testadduser"), "testadduser was removed.");
         assertEquals(cm.removeUser("testadduser"), "testadduser does not exist.");
-        rebuildTestDB();
     }
 
     @Test
@@ -65,7 +60,6 @@ public class ConsoleControllerTest {
         assertFalse(cm.userLogin("baduser", "badpass"));
         assertTrue(cm.userLogin("testlogin", "testpass"));
         cm.doLogout();
-        rebuildTestDB();
     }
 
     @Test
@@ -75,7 +69,6 @@ public class ConsoleControllerTest {
         ConsoleController cm = new ConsoleController(sqlController);
         cm.userLogin("testwallet", "testpass");
         assertEquals(cm.getCurrentUser(), "testwallet");
-        rebuildTestDB();
     }
 
     @Test
@@ -111,7 +104,6 @@ public class ConsoleControllerTest {
             e.printStackTrace();
         }
 
-        rebuildTestDB();
     }
 
     @Test
@@ -127,12 +119,108 @@ public class ConsoleControllerTest {
 
         cm.userLogin("john", "Wofford1854");
 
+        Product newProduct = new Product("john", 20, "testitem", "testdescription");
         assertEquals(cm.addNewProduct("testitem", "testdescription", 20), "Product added.");
-        // TODO Check that the item is in the database, use sqlController
+        assertTrue(sqlController.productExistsInDatabase(newProduct));
 
         assertEquals(cm.addNewProduct("", "testdescription", 20), "Invalid value.\nExpected a string with at least 1 character.");
         assertEquals(cm.addNewProduct("testitem", "", 20), "Invalid value.\nExpected a string with at least 1 character.");
         assertEquals(cm.addNewProduct("testitem", "testdescription", 0), "Invalid value.\nExpected an integer value greater than or equal to 1.");
         assertEquals(cm.addNewProduct("testitem", "testdescription", -1), "Invalid value.\nExpected an integer value greater than or equal to 1.");
+    }
+
+    @Test
+    public void testRemoveProduct() {
+        SQLController sqlController = new SQLController("test.db");
+        sqlController.insertUser("paul","Wofford1854");
+        sqlController.insertUser("john","Wofford1854");
+        sqlController.addWallet("john","j12345");
+        ConsoleController cm = new ConsoleController(sqlController);
+
+
+        Product newProduct = new Product("john", 20, "testitem", "testdescription");
+        cm.userLogin("paul", "Wofford1854");
+        assertEquals(cm.removeProduct(new Product("paul", 20, "testitem", "testdescription")), "User has no wallet.");
+
+        cm.userLogin("john", "Wofford1854");
+        cm.addNewProduct(newProduct.getName(), newProduct.getDescription(), newProduct.getPrice());
+
+        assertEquals(cm.removeProduct(newProduct), "Product removed.");
+    }
+
+    @Test
+    public void testGetUserProducts() {
+        SQLController sqlController = new SQLController("test.db");
+        ConsoleController cc = new ConsoleController(sqlController);
+
+        Product skittles1 = new Product("jsmith", 1, "skittles", "a half-eaten bag");
+        Product chalk2 = new Product("jdoe", 2, "chalk", "taken from a classroom");
+        Product zombieland3 = new Product("jsmith", 2, "Zombieland", "DVD");
+        Product apple4 = new Product("jdoe", 3, "apple", "small");
+        Product paper5 = new Product("jdoe", 4, "paper", "a ream for a printer");
+        Product risk6 = new Product("jsmith", 4, "Risk", "board game");
+        Product tripToCharlotte7 = new Product("jdoe", 4, "trip to Charlotte", "no questions asked");
+
+        ArrayList<Product> expectedJsmithProducts = new ArrayList<>();
+        ArrayList<Product> expectedJdoeProducts = new ArrayList<>();
+
+        expectedJdoeProducts.add(chalk2);
+        expectedJdoeProducts.add(apple4);
+        expectedJdoeProducts.add(paper5);
+        expectedJdoeProducts.add(tripToCharlotte7);
+
+        expectedJsmithProducts.add(skittles1);
+        expectedJsmithProducts.add(zombieland3);
+        expectedJsmithProducts.add(risk6);
+
+        expectedJsmithProducts.sort(Product::compareTo);
+        expectedJdoeProducts.sort(Product::compareTo);
+
+        assertTrue(cc.userLogin("jdoe", "jdoe"));
+        ArrayList<Product> actualJdoeProducts = cc.getUserProducts();
+
+        cc.userLogin("jsmith", "jsmith");
+        ArrayList<Product> actualJsmithProducts = cc.getUserProducts();
+
+        actualJdoeProducts.sort(Product::compareTo);
+        actualJsmithProducts.sort(Product::compareTo);
+
+        assertEquals(expectedJsmithProducts, actualJsmithProducts);
+
+        assertEquals(expectedJdoeProducts, actualJdoeProducts);
+
+    }
+
+    @Test
+    public void testGetAllProducts() {
+
+        SQLController sqlController = new SQLController("test.db");
+        ConsoleController cc = new ConsoleController(sqlController);
+
+        Product skittles1 = new Product("jsmith", 1, "skittles", "a half-eaten bag");
+        Product chalk2 = new Product("jdoe", 2, "chalk", "taken from a classroom");
+        Product zombieland3 = new Product("jsmith", 2, "Zombieland", "DVD");
+        Product apple4 = new Product("jdoe", 3, "apple", "small");
+        Product paper5 = new Product("jdoe", 4, "paper", "a ream for a printer");
+        Product risk6 = new Product("jsmith", 4, "Risk", "board game");
+        Product tripToCharlotte7 = new Product("jdoe", 4, "trip to Charlotte", "no questions asked");
+
+        ArrayList<Product> expectedProducts = new ArrayList<>();
+
+        expectedProducts.add(skittles1);
+        expectedProducts.add(chalk2);
+        expectedProducts.add(zombieland3);
+        expectedProducts.add(apple4);
+        expectedProducts.add(paper5);
+        expectedProducts.add(risk6);
+        expectedProducts.add(tripToCharlotte7);
+
+        ArrayList<Product> actualProducts = cc.getAllProducts();
+
+        expectedProducts.sort(Product::compareToWithPrice);
+        actualProducts.sort(Product::compareToWithPrice);
+
+        assertEquals(expectedProducts, actualProducts);
+
     }
 }

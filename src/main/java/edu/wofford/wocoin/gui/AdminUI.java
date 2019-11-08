@@ -2,7 +2,6 @@ package edu.wofford.wocoin.gui;
 
 import edu.wofford.wocoin.ConsoleController;
 import io.bretty.console.view.AbstractView;
-import io.bretty.console.view.Validator;
 import io.bretty.console.view.ViewConfig;
 
 import java.util.Scanner;

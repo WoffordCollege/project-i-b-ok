@@ -33,7 +33,7 @@ public class MainMenu extends CustomMenuView {
     }
 
     public static void main(String[] args) {
-        MainMenu cc = null;
+        MainMenu cc;
         if (args.length == 1) {
             cc = new MainMenu(new ConsoleController(new SQLController(args[0])), new Scanner(System.in));
         }
