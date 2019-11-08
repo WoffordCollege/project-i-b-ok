@@ -8,6 +8,7 @@ import java.sql.*;
 
 public class SQLControllerTest {
 
+    // TODO change this variable name, smh
     private SQLController foo;
 
     @Before
@@ -42,7 +43,7 @@ public class SQLControllerTest {
 
     @Test
     public final void walletNotExists(){
-        assertTrue(!foo.findWallet("tstark"));
+        assertFalse(foo.findWallet("tstark"));
     }
 
     @Test
@@ -61,7 +62,7 @@ public class SQLControllerTest {
     public final void replaceWallet(){
         foo.addWallet("test","8675309");
         assertEquals(SQLController.ReplaceWalletResult.REPLACED, foo.replaceWallet("test","867530"));
-        assertEquals("867530",foo.retrievePublicKey("test"));
+        assertEquals("867530", foo.retrievePublicKey("test"));
     }
 
     @Test
@@ -72,26 +73,26 @@ public class SQLControllerTest {
     @Test
     public final void removeWallet(){
         foo.addWallet("bbanner","q8675309");
-        assertEquals(SQLController.RemoveWalletResult.REMOVED,foo.removeWallet("bbanner"));
+        assertEquals(SQLController.RemoveWalletResult.REMOVED, foo.removeWallet("bbanner"));
     }
 
     @Test
     public final void removeNonExistentWallet(){
         foo.removeWallet("bbanner");
-        assertEquals(SQLController.RemoveWalletResult.NOSUCHWALLET,foo.removeWallet("bbanner"));
+        assertEquals(SQLController.RemoveWalletResult.NOSUCHWALLET, foo.removeWallet("bbanner"));
     }
 
     @Test
     public final void getPublicKeyTest(){
         foo.removeWallet("nfury");
         foo.addWallet("nfury","nf675309");
-        assertEquals("nf675309",foo.retrievePublicKey("nfury"));
+        assertEquals("nf675309", foo.retrievePublicKey("nfury"));
     }
 
     @Test
     public final void publicKeyDoesNotExist(){
         foo.removeWallet("nfury");
-        assertEquals("",foo.retrievePublicKey("nfury"));
+        assertEquals("", foo.retrievePublicKey("nfury"));
     }
 
     @Test
@@ -110,7 +111,7 @@ public class SQLControllerTest {
         foo.addWallet("john","j12345");
 
         Product newProduct = new Product("john", 20, "x", "This is the description.");
-        assertEquals(SQLController.AddProductResult.ADDED,foo.addProduct(newProduct));
+        assertEquals(SQLController.AddProductResult.ADDED, foo.addProduct(newProduct));
         try (Connection dataConn = DriverManager.getConnection(foo.getPath())) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT * FROM products order by id desc limit 1");
             ResultSet dtr = stSelect.executeQuery();
@@ -127,36 +128,36 @@ public class SQLControllerTest {
     public final void ProductAddWithoutWallet(){
         foo.insertUser("newUser","password");
         Product noWalletProduct = new Product("newUser", 20, "x", "This is the description");
-        assertEquals(SQLController.AddProductResult.NOWALLET,foo.addProduct(noWalletProduct));
+        assertEquals(SQLController.AddProductResult.NOWALLET, foo.addProduct(noWalletProduct));
     }
 
     @Test
     public final void ProductAddNoUser(){
         Product noUserProduct = new Product("noName", 20, "x", "This is the description");
-        assertEquals(SQLController.AddProductResult.NOWALLET,foo.addProduct(noUserProduct));
+        assertEquals(SQLController.AddProductResult.NOWALLET, foo.addProduct(noUserProduct));
     }
 
     @Test
     public final void ProductAddNoDescription(){
         Product noDescriptionProduct = new Product("jsmith", 20, "x", "");
-        assertEquals(SQLController.AddProductResult.EMPTYDESCRIPTION,foo.addProduct(noDescriptionProduct));
+        assertEquals(SQLController.AddProductResult.EMPTYDESCRIPTION, foo.addProduct(noDescriptionProduct));
     }
 
     @Test
     public final void ProductAddNegativePrice(){
         Product negativePriceProduct = new Product("jsmith", -2, "x", "This is the description");
-        assertEquals(SQLController.AddProductResult.NONPOSITIVEPRICE,foo.addProduct(negativePriceProduct));
+        assertEquals(SQLController.AddProductResult.NONPOSITIVEPRICE, foo.addProduct(negativePriceProduct));
     }
 
     @Test
     public final void ProductAddZeroPrice(){
         Product zeroPriceProduct = new Product("jsmith", 0, "x", "This is the description");
-        assertEquals(SQLController.AddProductResult.NONPOSITIVEPRICE,foo.addProduct(zeroPriceProduct));
+        assertEquals(SQLController.AddProductResult.NONPOSITIVEPRICE, foo.addProduct(zeroPriceProduct));
     }
 
     @Test
     public final void ProductAddNoName(){
         Product noNameProduct = new Product("jsmith", 20, "", "This is the description");
-        assertEquals(SQLController.AddProductResult.EMPTYNAME,foo.addProduct(noNameProduct));
+        assertEquals(SQLController.AddProductResult.EMPTYNAME, foo.addProduct(noNameProduct));
     }
 }

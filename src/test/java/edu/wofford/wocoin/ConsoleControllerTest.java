@@ -15,16 +15,10 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
 public class ConsoleControllerTest {
-    public final String loginScreenString = "Please select from the following options:\n1: exit\n2: administrator\n3: user";
 
     @Before
     public void setUp(){
-        File file = new File("test.db");
-        if (file.exists()) {
-            boolean delete = file.delete();
-        }
-
-        Utilities.createNewDatabase("test.db");
+        rebuildTestDB();
     }
 
     @After
@@ -35,74 +29,32 @@ public class ConsoleControllerTest {
         }
     }
 
-    private String sendProgramInput(String input) {
-        String actualOutput = null;
-        InputStream originalIn = System.in;
-        PrintStream originalOut = System.out;
-
-        try {
-            System.setIn(new ByteArrayInputStream(input.getBytes()));
-            ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-            System.setOut(new PrintStream(outContent));
-            MainMenu.main(new String[]{"test.db"});
-            actualOutput = outContent.toString();
-        } finally {
-            System.setIn(originalIn);
-            System.setOut(originalOut);
+    public void rebuildTestDB() {
+        File file = new File("test.db");
+        if (file.exists()) {
+            boolean delete = file.delete();
         }
 
-        return actualOutput;
+        Utilities.createNewDatabase("test.db");
     }
-
-    @Test
-    public void testLoginScreenConsole() {
-        String output = sendProgramInput("1");
-        assertThat(output, containsString("1: exit\n2: administrator\n3: user\n"));
-    }
-
-
-    @Test
-    public void testAdministratorScreenConsole() {
-        String output = sendProgramInput("2\nadminpwd\n1\n1");
-        String expectedOutput = "1: back\n2: add user\n3: remove user";
-        assertThat(output, containsString(expectedOutput));
-    }
-
-    @Test
-    public void testAddUserConsole() {
-        String output = sendProgramInput("2\nadminpwd\n2\nmarshall marshall\n1\n1");
-        String expectedOutput = "marshall was added.";
-        assertThat(output, containsString(expectedOutput));
-        output = sendProgramInput("2\nadminpwd\n2\nmarshall marshall\n2\nmarshall marshall\n1\n1");
-        expectedOutput = "marshall already exists.";
-        assertThat(output, containsString(expectedOutput));
-    }
-
-    @Test
-    public void testRemoveUserConsole() {
-        String output = sendProgramInput("2\nadminpwd\n2\nmarshall marshall\n3\nmarshall\n1\n1");
-        String expectedOutput = "marshall was removed.";
-        assertThat(output, containsString(expectedOutput));
-    }
-
 
     @Test
     public void testAddUser() {
         ConsoleController cm = new ConsoleController(new SQLController("test.db"));
-        assertNull(cm.addUser("testadduser", "test"));
         cm.adminLogin("adminpwd");
         assertEquals(cm.addUser("testadduser", "test"), "testadduser was added.");
         assertEquals(cm.addUser("testadduser", "test"), "testadduser already exists.");
+        rebuildTestDB();
     }
 
     @Test
     public void testRemoveUser() {
         ConsoleController cm = new ConsoleController(new SQLController("test.db"));
-        assertNull(cm.removeUser("testadduser"));
         cm.adminLogin("adminpwd");
         cm.addUser("testadduser", "test");
         assertEquals(cm.removeUser("testadduser"), "testadduser was removed.");
         assertEquals(cm.removeUser("testadduser"), "testadduser does not exist.");
+        rebuildTestDB();
     }
 
     @Test
@@ -113,6 +65,7 @@ public class ConsoleControllerTest {
         assertFalse(cm.userLogin("baduser", "badpass"));
         assertTrue(cm.userLogin("testlogin", "testpass"));
         cm.doLogout();
+        rebuildTestDB();
     }
 
     @Test
@@ -122,6 +75,7 @@ public class ConsoleControllerTest {
         ConsoleController cm = new ConsoleController(sqlController);
         cm.userLogin("testwallet", "testpass");
         assertEquals(cm.getCurrentUser(), "testwallet");
+        rebuildTestDB();
     }
 
     @Test
@@ -156,5 +110,29 @@ public class ConsoleControllerTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        rebuildTestDB();
+    }
+
+    @Test
+    public void testAddNewProduct() {
+        SQLController sqlController = new SQLController("test.db");
+        sqlController.insertUser("paul","Wofford1854");
+        sqlController.insertUser("john","Wofford1854");
+        sqlController.addWallet("john","j12345");
+        ConsoleController cm = new ConsoleController(sqlController);
+
+        cm.userLogin("paul", "Wofford1854");
+        assertEquals(cm.addNewProduct("testitem","This is the description.", 20), "User has no wallet.");
+
+        cm.userLogin("john", "Wofford1854");
+
+        assertEquals(cm.addNewProduct("testitem", "testdescription", 20), "Product added.");
+        // TODO Check that the item is in the database, use sqlController
+
+        assertEquals(cm.addNewProduct("", "testdescription", 20), "Invalid value.\nExpected a string with at least 1 character.");
+        assertEquals(cm.addNewProduct("testitem", "", 20), "Invalid value.\nExpected a string with at least 1 character.");
+        assertEquals(cm.addNewProduct("testitem", "testdescription", 0), "Invalid value.\nExpected an integer value greater than or equal to 1.");
+        assertEquals(cm.addNewProduct("testitem", "testdescription", -1), "Invalid value.\nExpected an integer value greater than or equal to 1.");
     }
 }
