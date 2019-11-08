@@ -87,19 +87,10 @@ public class ProductTest {
     @Test
     public void compareTo() {
 
-        // Test that the order of the items when comparing by price first is correct
-        products.get(0).setCompareType(Product.CompareType.PRICE);
-
         for (int i = 0; i < products.size() - 1; i++) {
-            products.get(i + 1).setCompareType(Product.CompareType.PRICE);
-            assertTrue(products.get(i).compareTo(products.get(i + 1)) < 0);
-            assertEquals(0, products.get(i).compareTo(products.get(i)));
-            assertTrue(products.get(i + 1).compareTo(products.get(i)) > 0);
-        }
-
-        for (Product product : products) {
-            product.setCompareType(Product.CompareType.ALPHABETICALLY);
-            assertEquals(0, product.compareTo(product));
+            assertTrue(products.get(i).compareToWithPrice(products.get(i + 1)) < 0);
+            assertEquals(0, products.get(i).compareToWithPrice(products.get(i)));
+            assertTrue(products.get(i + 1).compareToWithPrice(products.get(i)) > 0);
         }
 
         assertTrue(apple4.compareTo(chalk2) < 0);
@@ -121,11 +112,10 @@ public class ProductTest {
     public void testSortingListWorksCorrectly() {
         for(Product product : products) {
             product.setDisplayType(Product.DisplayType.SHOWCURRENTUSER);
-            product.setCompareType(Product.CompareType.PRICE);
             product.setCurrentUser("testuser");
         }
 
-        products.sort(Product::compareTo);
+        products.sort(Product::compareToWithPrice);
 
         StringBuilder sb = new StringBuilder();
 

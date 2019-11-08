@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.sql.*;
+import java.util.ArrayList;
 
 public class SQLControllerTest {
 
@@ -120,8 +121,18 @@ public class SQLControllerTest {
             assertEquals("x", dtr.getString(4));
             assertEquals("This is the description.", dtr.getString(5));
         } catch (Exception e) {
-            System.out.println(e.toString());
+            System.out.println("HERE" + e.toString());
         }
+    }
+
+    @Test
+    public final void findAddedProduct() {
+        Product validProduct = new Product("jsmith", 1, "skittles", "a half-eaten bag");
+        Product nonExistentProduct = new Product("nottestuser", 2, "chalk", "taken from a classroom");
+
+        assertTrue(foo.productExistsInDatabase(validProduct));
+        assertFalse(foo.productExistsInDatabase(nonExistentProduct));
+
     }
 
     @Test
@@ -159,5 +170,80 @@ public class SQLControllerTest {
     public final void ProductAddNoName(){
         Product noNameProduct = new Product("jsmith", 20, "", "This is the description");
         assertEquals(SQLController.AddProductResult.EMPTYNAME, foo.addProduct(noNameProduct));
+    }
+
+    @Test
+    public final void removeProductInDB() {
+        foo.insertUser("john","Wofford1854");
+        foo.addWallet("john","j12345");
+
+        Product newProduct = new Product("john", 20, "x", "This is the description.");
+        assertEquals(SQLController.AddProductResult.ADDED, foo.addProduct(newProduct));
+
+        assertEquals(SQLController.RemoveProductResult.REMOVED, foo.removeProduct(newProduct));
+
+        try (Connection dataConn = DriverManager.getConnection(foo.getPath())) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT COUNT(*) FROM products WHERE seller = ? AND price = ? AND name = ? AND description = ?");
+            stSelect.setString(1, foo.retrievePublicKey(newProduct.getSeller()));
+            stSelect.setInt(2, newProduct.getPrice());
+            stSelect.setString(3, newProduct.getName());
+            stSelect.setString(4, newProduct.getDescription());
+            ResultSet dtr = stSelect.executeQuery();
+            assertEquals(0, dtr.getInt(1));
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    @Test
+    public final void removeProductNoWallet() {
+        Product newProduct = new Product("nowallet", 20, "x", "This is the description.");
+        assertEquals(SQLController.RemoveProductResult.NOWALLET, foo.removeProduct(newProduct));
+    }
+
+    @Test
+    public final void removeProductNoExists() {
+        Product newProduct = new Product("jsmith", 20, "x", "This is the description.");
+        assertEquals(SQLController.RemoveProductResult.DOESNOTEXIST, foo.removeProduct(newProduct));
+    }
+
+    @Test
+    public final void getUserProductsFromDB() {
+        setupDB();
+        Product skittles1 = new Product("jsmith", 1, "skittles", "a half-eaten bag");
+        Product chalk2 = new Product("jdoe", 2, "chalk", "taken from a classroom");
+        Product zombieland3 = new Product("jsmith", 2, "Zombieland", "DVD");
+        Product apple4 = new Product("jdoe", 3, "apple", "small");
+        Product paper5 = new Product("jdoe", 4, "paper", "a ream for a printer");
+        Product risk6 = new Product("jsmith", 4, "Risk", "board game");
+        Product tripToCharlotte7 = new Product("jdoe", 4, "trip to Charlotte", "no questions asked");
+
+        ArrayList<Product> expectedJdoeProducts = new ArrayList<>();
+        ArrayList<Product> expectedJsmithProducts = new ArrayList<>();
+
+        expectedJdoeProducts.add(chalk2);
+        expectedJdoeProducts.add(apple4);
+        expectedJdoeProducts.add(paper5);
+        expectedJdoeProducts.add(tripToCharlotte7);
+
+        expectedJsmithProducts.add(skittles1);
+        expectedJsmithProducts.add(zombieland3);
+        expectedJsmithProducts.add(risk6);
+
+        expectedJdoeProducts.sort(Product::compareTo);
+        expectedJsmithProducts.sort(Product::compareTo);
+
+        ArrayList<Product> actualJdoeProducts = foo.getUserProductsList("jdoe");
+        ArrayList<Product> actualJsmithProducts = foo.getUserProductsList("jsmith");
+
+        actualJdoeProducts.sort(Product::compareTo);
+        actualJsmithProducts.sort(Product::compareTo);
+
+        assertEquals(expectedJdoeProducts, actualJdoeProducts);
+
+        assertEquals(expectedJsmithProducts, actualJsmithProducts);
+
+        assertEquals(new ArrayList<Product>(), foo.getUserProductsList("notauser"));
+
     }
 }

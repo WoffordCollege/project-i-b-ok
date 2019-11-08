@@ -69,10 +69,10 @@ public class CustomMenuView extends MenuView {
         if (this.parentView != null) {
             this.onBack();
 
-            // if the parent view is a menu, display that menu
-            if(this.parentView instanceof MenuView){
-                this.parentView.display();
-            }
+//            // if the parent view is a menu, display that menu
+//            if(this.parentView instanceof MenuView){
+//                this.parentView.display();
+//            }
         }
         else {
             this.onQuit();

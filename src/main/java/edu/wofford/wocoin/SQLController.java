@@ -1,6 +1,7 @@
 package edu.wofford.wocoin;
 import java.io.File;
 import java.sql.*;
+import java.util.ArrayList;
 
 public class SQLController {
 
@@ -13,6 +14,7 @@ public class SQLController {
     public enum ReplaceWalletResult {REPLACED, NOTREPLACED, NOSUCHWALLET}
     public enum RemoveWalletResult {REMOVED, NOSUCHWALLET, NOTREMOVED}
     public enum AddProductResult {ADDED, NOTADDED, NOWALLET, EMPTYDESCRIPTION, EMPTYNAME, NONPOSITIVEPRICE}
+    public enum RemoveProductResult {REMOVED, NOTREMOVED, NOWALLET, DOESNOTEXIST}
 
     /**
      * Constructor that takes the name of the file
@@ -278,6 +280,26 @@ public class SQLController {
     }
 
     /**
+     * Checks to see if the product exists in the database.
+     * @param product The product to check for.
+     * @return True if the product is in the database
+     */
+    public boolean productExistsInDatabase(Product product) {
+        try (Connection dataConn = DriverManager.getConnection(url)) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT COUNT(*) FROM products WHERE seller = ? AND price = ? AND name = ? AND description = ?");
+            stSelect.setString(1, this.retrievePublicKey(product.getSeller()));
+            stSelect.setInt(2, product.getPrice());
+            stSelect.setString(3, product.getName());
+            stSelect.setString(4, product.getDescription());
+            ResultSet dtr = stSelect.executeQuery();
+            return dtr.getInt(1) != 0;
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
+        return false;
+    }
+
+    /**
      * Adds a product to the database.
      * @param product the product to be added to the database.
      * @return Added if successful, else why the product was not added.
@@ -308,5 +330,57 @@ public class SQLController {
         }
 
         return retVal;
+    }
+
+    /**
+     * Removes a product from the database
+     * @param productToRemove the product to be removed from the database.
+     * @return Removed if successful, otherwise a {@link RemoveProductResult} describing the failure
+     */
+    public RemoveProductResult removeProduct(Product productToRemove) {
+        RemoveProductResult retval = RemoveProductResult.NOTREMOVED;
+
+        if (!findWallet(productToRemove.getSeller())){
+            retval = RemoveProductResult.NOWALLET;
+        }
+        else if (!this.productExistsInDatabase(productToRemove)) {
+            retval = RemoveProductResult.DOESNOTEXIST;
+        }
+        else {
+            try (Connection dataConn = DriverManager.getConnection(url)) {
+                PreparedStatement stSelect = dataConn.prepareStatement("DELETE FROM products WHERE (SELECT max(id) FROM products b WHERE seller = ? AND price = ? AND name = ? AND description = ?) = products.id");
+                stSelect.setString(1, this.retrievePublicKey(productToRemove.getSeller()));
+                stSelect.setInt(2, productToRemove.getPrice());
+                stSelect.setString(3, productToRemove.getName());
+                stSelect.setString(4, productToRemove.getDescription());
+                stSelect.execute();
+                retval = RemoveProductResult.REMOVED;
+            } catch (Exception e) {
+                System.out.println(e.toString());
+            }
+        }
+        return retval;
+    }
+
+    /**
+     * Gets a list of the products in the database added by the username below
+     * @param username The username of the user whose products are being retrieved
+     * @return An ArrayList of the {@link Product} added by the user
+     */
+    public ArrayList<Product> getUserProductsList (String username) {
+        ArrayList<Product> products = new ArrayList<>();
+        try (Connection dataConn = DriverManager.getConnection(url)) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE user = ?");
+            stSelect.setString(1, username);
+            ResultSet dtr = stSelect.executeQuery();
+            while (dtr.next()) {
+                Product newProduct = new Product(dtr.getString("user"), dtr.getInt("price"), dtr.getString("name"), dtr.getString("description"));
+                newProduct.setDisplayType(Product.DisplayType.HIDECURRENTUSER);
+                products.add(newProduct);
+            }
+        } catch (Exception e) {
+            System.out.println("NOT_HERE" + e.toString());
+        }
+        return products;
     }
 }

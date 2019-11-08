@@ -1,5 +1,7 @@
 package edu.wofford.wocoin;
 
+import java.util.Objects;
+
 /**
  * This class models the form of a product in the Wocoin database.
  */
@@ -10,13 +12,7 @@ public class Product implements Comparable<Product>{
     private String description;
     private String currentUser;
     private boolean ownedByUser;
-    private CompareType compareType;
     private DisplayType displayType;
-
-    /**
-     * This allows the user to choose the compare type for the products in {@link Product#compareTo(Product)}.
-     */
-    public enum CompareType {ALPHABETICALLY, PRICE}
 
     /**
      * This allows the user to choose a display type for the products using {@link Product#toString()}
@@ -32,7 +28,7 @@ public class Product implements Comparable<Product>{
      * Works with the main constructor to set the default values of the comparison type and display type
      */
     public Product(String seller, int price, String name, String description, String currentUser) {
-        this(seller, price, name, description, currentUser, CompareType.ALPHABETICALLY, DisplayType.HIDECURRENTUSER);
+        this(seller, price, name, description, currentUser, DisplayType.HIDECURRENTUSER);
     }
 
     /**
@@ -45,7 +41,7 @@ public class Product implements Comparable<Product>{
      * @param compareType Chooses what the {@link Product#compareTo(Product)} function uses to determine which object comes first
      * @param displayType Chooses the method {@link Product#toString()} uses to show on display
      */
-    public Product(String seller, int price, String name, String description, String currentUser, CompareType compareType, DisplayType displayType) {
+    public Product(String seller, int price, String name, String description, String currentUser, DisplayType displayType) {
         this.seller = seller;
         this.price = price;
         this.name = name;
@@ -56,7 +52,6 @@ public class Product implements Comparable<Product>{
             this.ownedByUser = this.seller.equals(currentUser);
         }
 
-        this.compareType = compareType;
         this.displayType = displayType;
     }
 
@@ -111,14 +106,6 @@ public class Product implements Comparable<Product>{
         }
     }
 
-    public CompareType getCompareType() {
-        return compareType;
-    }
-
-    public void setCompareType(CompareType compareType) {
-        this.compareType = compareType;
-    }
-
     public DisplayType getDisplayType() {
         return displayType;
     }
@@ -144,20 +131,45 @@ public class Product implements Comparable<Product>{
 
 
     /**
-     * Compares two products based on their price, then their description.
+     * Compares two products based on their price, then their name.
      * If the price of the two objects are different, and the CompareType is price,
      * returns a number &lt; 0 if this product has a lower price and a a number &gt; 0 if this product has a higher price.
      * Otherwise it compares the two product names lexicographically using the {@link String#compareTo(String)}.
      * @param otherProduct the Product to be compared to
      * @return a negative integer, zero, or a positive integer as this product is less than, equal to, or greater than the specified product.
      */
-    @Override
-    public int compareTo(Product otherProduct) {
-        if (this.compareType == CompareType.PRICE && this.price != otherProduct.getPrice()) {
+    public int compareToWithPrice(Product otherProduct) {
+        if (this.price != otherProduct.getPrice()) {
             return this.price - otherProduct.getPrice();
         }
         else {
             return this.name.compareToIgnoreCase(otherProduct.getName());
         }
+    }
+
+    /**
+     * Compares two products based on their name
+     * @param otherProduct the Product to be compared to
+     * @return a negative integer, zero, or a positive integer as this product is less than, equal to, or greater than the specified product.
+     */
+    @Override
+    public int compareTo(Product otherProduct) {
+        return this.name.compareToIgnoreCase(otherProduct.getName());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Product product = (Product) o;
+        return getPrice() == product.getPrice() &&
+                getSeller().equals(product.getSeller()) &&
+                getName().equals(product.getName()) &&
+                getDescription().equals(product.getDescription());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getSeller(), getPrice(), getName(), getDescription());
     }
 }

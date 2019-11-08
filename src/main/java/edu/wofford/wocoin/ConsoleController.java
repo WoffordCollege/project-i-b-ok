@@ -1,5 +1,7 @@
 package edu.wofford.wocoin;
 
+import java.util.ArrayList;
+
 /**
  * This class stores the helper methods that can be used to create a Console style GUI
  * It stores a SQLController which is used to perform the necessary operations on the database
@@ -155,6 +157,17 @@ public class ConsoleController {
         return currentUser;
     }
 
+    /**
+     * This function creates a new {@link Product} and adds it to the SQL database.
+     * If the Product was successfully added, returns "Product added."
+     * If the User has no wallet, returns "User has no wallet."
+     * If the price is invalid, returns "Invalid value.\nExpected an integer value greater than or equal to 1."
+     * If the description or name is not specified, returns "Invalid value.\nExpected a string with at least 1 character."
+     * @param name The name of the new Product
+     * @param description The description of the new Product
+     * @param price The price of the new Product
+     * @return A String representing the result of adding the Product to the DB
+     */
     public String addNewProduct(String name, String description, int price) {
         Product newProduct = new Product(this.currentUser, price, name, description);
         SQLController.AddProductResult result = sqlController.addProduct(newProduct);
@@ -167,6 +180,32 @@ public class ConsoleController {
                 return "Invalid value.\nExpected an integer value greater than or equal to 1.";
             default:
                 return "Invalid value.\nExpected a string with at least 1 character.";
+        }
+    }
+
+    /**
+     * This function returns an ArrayList of the current user's products
+     * @return An arraylist of the current user's products
+     * @see SQLController#getUserProductsList(String)
+     */
+    public ArrayList<Product> getUserProducts() {
+        return sqlController.getUserProductsList(this.currentUser);
+    }
+
+    /**
+     * Removes the specified product from the database and returns a string representing what occurred.
+     * @param product The product to remove
+     * @return A string representing the action that occurred.
+     */
+    public String removeProduct(Product product) {
+        SQLController.RemoveProductResult removeProductResult = sqlController.removeProduct(product);
+        switch (removeProductResult){
+            case REMOVED:
+                return "Product removed.";
+            case NOWALLET:
+                return "User has no wallet.";
+            default:
+                return "Action canceled.";
         }
     }
 }
