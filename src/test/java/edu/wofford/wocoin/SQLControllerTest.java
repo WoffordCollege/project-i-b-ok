@@ -10,11 +10,11 @@ import java.util.ArrayList;
 public class SQLControllerTest {
 
     // TODO change this variable name, smh
-    private SQLController foo;
+    private SQLController foobar;
 
     @Before
     public void setup(){
-        foo = new SQLController();
+        foobar = new SQLController();
     }
 
     @BeforeClass
@@ -33,87 +33,87 @@ public class SQLControllerTest {
         SQLController bar = new SQLController("testDB.sqlite3");
         assertEquals("jdbc:sqlite:testDB.sqlite3", bar.getPath());
 
-        assertEquals("jdbc:sqlite:wocoinDatabase.sqlite3", foo.getPath());
+        assertEquals("jdbc:sqlite:wocoinDatabase.sqlite3", foobar.getPath());
     }
 
 
     @Test
     public final void walletExists(){
-        assertTrue(foo.findWallet("srogers"));
+        assertTrue(foobar.findWallet("srogers"));
     }
 
     @Test
     public final void walletNotExists(){
-        assertFalse(foo.findWallet("tstark"));
+        assertFalse(foobar.findWallet("tstark"));
     }
 
     @Test
     public final void addWallet(){
-        foo.removeWallet("test");
-        assertEquals(SQLController.AddWalletResult.ADDED, foo.addWallet("test","8675309"));
+        foobar.removeWallet("test");
+        assertEquals(SQLController.AddWalletResult.ADDED, foobar.addWallet("test","8675309"));
     }
 
     @Test
     public final void addWalletDuplicate(){
-        foo.addWallet("test","8675309");
-        assertEquals(SQLController.AddWalletResult.ALREADYEXISTS, foo.addWallet("test","8675309"));
+        foobar.addWallet("test","8675309");
+        assertEquals(SQLController.AddWalletResult.ALREADYEXISTS, foobar.addWallet("test","8675309"));
     }
 
     @Test
     public final void replaceWallet(){
-        foo.addWallet("test","8675309");
-        assertEquals(SQLController.ReplaceWalletResult.REPLACED, foo.replaceWallet("test","867530"));
-        assertEquals("867530", foo.retrievePublicKey("test"));
+        foobar.addWallet("test","8675309");
+        assertEquals(SQLController.ReplaceWalletResult.REPLACED, foobar.replaceWallet("test","867530"));
+        assertEquals("867530", foobar.retrievePublicKey("test"));
     }
 
     @Test
     public final void replaceNonExistentWallet(){
-        assertEquals(SQLController.ReplaceWalletResult.NOSUCHWALLET, foo.replaceWallet("tstark","86753099"));
+        assertEquals(SQLController.ReplaceWalletResult.NOSUCHWALLET, foobar.replaceWallet("tstark","86753099"));
     }
 
     @Test
     public final void removeWallet(){
-        foo.addWallet("bbanner","q8675309");
-        assertEquals(SQLController.RemoveWalletResult.REMOVED, foo.removeWallet("bbanner"));
+        foobar.addWallet("bbanner","q8675309");
+        assertEquals(SQLController.RemoveWalletResult.REMOVED, foobar.removeWallet("bbanner"));
     }
 
     @Test
     public final void removeNonExistentWallet(){
-        foo.removeWallet("bbanner");
-        assertEquals(SQLController.RemoveWalletResult.NOSUCHWALLET, foo.removeWallet("bbanner"));
+        foobar.removeWallet("bbanner");
+        assertEquals(SQLController.RemoveWalletResult.NOSUCHWALLET, foobar.removeWallet("bbanner"));
     }
 
     @Test
     public final void getPublicKeyTest(){
-        foo.removeWallet("nfury");
-        foo.addWallet("nfury","nf675309");
-        assertEquals("nf675309", foo.retrievePublicKey("nfury"));
+        foobar.removeWallet("nfury");
+        foobar.addWallet("nfury","nf675309");
+        assertEquals("nf675309", foobar.retrievePublicKey("nfury"));
     }
 
     @Test
     public final void publicKeyDoesNotExist(){
-        foo.removeWallet("nfury");
-        assertEquals("", foo.retrievePublicKey("nfury"));
+        foobar.removeWallet("nfury");
+        assertEquals("", foobar.retrievePublicKey("nfury"));
     }
 
     @Test
     public final void getName(){
-        assertEquals("jdoe", foo.getName("587888ea2b080656816aad7e0bc8f1cf3cf0bced"));
+        assertEquals("jdoe", foobar.getName("587888ea2b080656816aad7e0bc8f1cf3cf0bced"));
     }
 
     @Test
     public final void getNameInvalidPublicKey(){
-        assertEquals("", foo.getName("test"));
+        assertEquals("", foobar.getName("test"));
     }
 
     @Test
     public final void successfulProductAdd(){
-        foo.insertUser("john","Wofford1854");
-        foo.addWallet("john","j12345");
+        foobar.insertUser("john","Wofford1854");
+        foobar.addWallet("john","j12345");
 
         Product newProduct = new Product("john", 20, "x", "This is the description.");
-        assertEquals(SQLController.AddProductResult.ADDED, foo.addProduct(newProduct));
-        try (Connection dataConn = DriverManager.getConnection(foo.getPath())) {
+        assertEquals(SQLController.AddProductResult.ADDED, foobar.addProduct(newProduct));
+        try (Connection dataConn = DriverManager.getConnection(foobar.getPath())) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT * FROM products order by id desc limit 1");
             ResultSet dtr = stSelect.executeQuery();
             assertEquals("j12345", dtr.getString(2));
@@ -130,61 +130,61 @@ public class SQLControllerTest {
         Product validProduct = new Product("jsmith", 1, "skittles", "a half-eaten bag");
         Product nonExistentProduct = new Product("nottestuser", 2, "chalk", "taken from a classroom");
 
-        assertTrue(foo.productExistsInDatabase(validProduct));
-        assertFalse(foo.productExistsInDatabase(nonExistentProduct));
+        assertTrue(foobar.productExistsInDatabase(validProduct));
+        assertFalse(foobar.productExistsInDatabase(nonExistentProduct));
 
     }
 
     @Test
     public final void ProductAddWithoutWallet(){
-        foo.insertUser("newUser","password");
+        foobar.insertUser("newUser","password");
         Product noWalletProduct = new Product("newUser", 20, "x", "This is the description");
-        assertEquals(SQLController.AddProductResult.NOWALLET, foo.addProduct(noWalletProduct));
+        assertEquals(SQLController.AddProductResult.NOWALLET, foobar.addProduct(noWalletProduct));
     }
 
     @Test
     public final void ProductAddNoUser(){
         Product noUserProduct = new Product("noName", 20, "x", "This is the description");
-        assertEquals(SQLController.AddProductResult.NOWALLET, foo.addProduct(noUserProduct));
+        assertEquals(SQLController.AddProductResult.NOWALLET, foobar.addProduct(noUserProduct));
     }
 
     @Test
     public final void ProductAddNoDescription(){
         Product noDescriptionProduct = new Product("jsmith", 20, "x", "");
-        assertEquals(SQLController.AddProductResult.EMPTYDESCRIPTION, foo.addProduct(noDescriptionProduct));
+        assertEquals(SQLController.AddProductResult.EMPTYDESCRIPTION, foobar.addProduct(noDescriptionProduct));
     }
 
     @Test
     public final void ProductAddNegativePrice(){
         Product negativePriceProduct = new Product("jsmith", -2, "x", "This is the description");
-        assertEquals(SQLController.AddProductResult.NONPOSITIVEPRICE, foo.addProduct(negativePriceProduct));
+        assertEquals(SQLController.AddProductResult.NONPOSITIVEPRICE, foobar.addProduct(negativePriceProduct));
     }
 
     @Test
     public final void ProductAddZeroPrice(){
         Product zeroPriceProduct = new Product("jsmith", 0, "x", "This is the description");
-        assertEquals(SQLController.AddProductResult.NONPOSITIVEPRICE, foo.addProduct(zeroPriceProduct));
+        assertEquals(SQLController.AddProductResult.NONPOSITIVEPRICE, foobar.addProduct(zeroPriceProduct));
     }
 
     @Test
     public final void ProductAddNoName(){
         Product noNameProduct = new Product("jsmith", 20, "", "This is the description");
-        assertEquals(SQLController.AddProductResult.EMPTYNAME, foo.addProduct(noNameProduct));
+        assertEquals(SQLController.AddProductResult.EMPTYNAME, foobar.addProduct(noNameProduct));
     }
 
     @Test
     public final void removeProductInDB() {
-        foo.insertUser("john","Wofford1854");
-        foo.addWallet("john","j12345");
+        foobar.insertUser("john","Wofford1854");
+        foobar.addWallet("john","j12345");
 
         Product newProduct = new Product("john", 20, "x", "This is the description.");
-        assertEquals(SQLController.AddProductResult.ADDED, foo.addProduct(newProduct));
+        assertEquals(SQLController.AddProductResult.ADDED, foobar.addProduct(newProduct));
 
-        assertEquals(SQLController.RemoveProductResult.REMOVED, foo.removeProduct(newProduct));
+        assertEquals(SQLController.RemoveProductResult.REMOVED, foobar.removeProduct(newProduct));
 
-        try (Connection dataConn = DriverManager.getConnection(foo.getPath())) {
+        try (Connection dataConn = DriverManager.getConnection(foobar.getPath())) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT COUNT(*) FROM products WHERE seller = ? AND price = ? AND name = ? AND description = ?");
-            stSelect.setString(1, foo.retrievePublicKey(newProduct.getSeller()));
+            stSelect.setString(1, foobar.retrievePublicKey(newProduct.getSeller()));
             stSelect.setInt(2, newProduct.getPrice());
             stSelect.setString(3, newProduct.getName());
             stSelect.setString(4, newProduct.getDescription());
@@ -198,13 +198,13 @@ public class SQLControllerTest {
     @Test
     public final void removeProductNoWallet() {
         Product newProduct = new Product("nowallet", 20, "x", "This is the description.");
-        assertEquals(SQLController.RemoveProductResult.NOWALLET, foo.removeProduct(newProduct));
+        assertEquals(SQLController.RemoveProductResult.NOWALLET, foobar.removeProduct(newProduct));
     }
 
     @Test
     public final void removeProductNoExists() {
         Product newProduct = new Product("jsmith", 20, "x", "This is the description.");
-        assertEquals(SQLController.RemoveProductResult.DOESNOTEXIST, foo.removeProduct(newProduct));
+        assertEquals(SQLController.RemoveProductResult.DOESNOTEXIST, foobar.removeProduct(newProduct));
     }
 
     @Test
@@ -233,8 +233,8 @@ public class SQLControllerTest {
         expectedJdoeProducts.sort(Product::compareTo);
         expectedJsmithProducts.sort(Product::compareTo);
 
-        ArrayList<Product> actualJdoeProducts = foo.getUserProductsList("jdoe");
-        ArrayList<Product> actualJsmithProducts = foo.getUserProductsList("jsmith");
+        ArrayList<Product> actualJdoeProducts = foobar.getUserProductsList("jdoe");
+        ArrayList<Product> actualJsmithProducts = foobar.getUserProductsList("jsmith");
 
         actualJdoeProducts.sort(Product::compareTo);
         actualJsmithProducts.sort(Product::compareTo);
@@ -243,7 +243,7 @@ public class SQLControllerTest {
 
         assertEquals(expectedJsmithProducts, actualJsmithProducts);
 
-        assertEquals(new ArrayList<Product>(), foo.getUserProductsList("notauser"));
+        assertEquals(new ArrayList<Product>(), foobar.getUserProductsList("notauser"));
 
     }
 
@@ -268,7 +268,7 @@ public class SQLControllerTest {
         expectedProducts.add(risk6);
         expectedProducts.add(tripToCharlotte7);
 
-        ArrayList<Product> actualProducts = foo.getAllProductsList();
+        ArrayList<Product> actualProducts = foobar.getAllProductsList();
 
         expectedProducts.sort(Product::compareToWithPrice);
         actualProducts.sort(Product::compareToWithPrice);
