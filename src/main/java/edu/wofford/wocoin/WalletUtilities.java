@@ -24,6 +24,7 @@ public class WalletUtilities {
      * and FAILED if a file cannot be created
      * @param path the path of the user directory where the JSON file will go
      * @param username the username for which the wallet will be created for
+     * @param password the password of the user owning the wallet
      * @return SUCCESS if the wallet was created, ALREADYEXSITS if the file is already exists, and FAILED if a file cannot be created
      */
     public static Pair<String, CreateWalletResult> createWallet (String path, String username, String password) {

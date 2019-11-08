@@ -107,7 +107,8 @@ public class ConsoleController {
      * at the given filepath combined with the username. (if filepath=tmp, then generated directory is tmp/currentuser)
      * If no user is logged in, returns failed, otherwise returns the result from {@link WalletUtilities}
      * @param filepath the main directory in which a subdirectory with the current user can be placed
-     * @return a {@link WalletUtilities.CreateWalletResult} relating to the result of the executed operation (see {@link WalletUtilities}).
+     * @return a {@link WalletUtilities.CreateWalletResult} relating to the result of the executed operation.
+     * @see WalletUtilities
      */
     public WalletUtilities.CreateWalletResult addWalletToUser(String filepath) {
         if (currentUser == null || currentUser.length() == 0) {
