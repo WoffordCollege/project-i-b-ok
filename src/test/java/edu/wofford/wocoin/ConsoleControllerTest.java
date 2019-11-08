@@ -1,9 +1,7 @@
 package edu.wofford.wocoin;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -13,20 +11,10 @@ import static org.testng.Assert.assertEquals;
 
 public class ConsoleControllerTest {
 
-    @Before
-    public void setUp(){
-        rebuildTestDB();
-    }
+    private SQLController sqlController;
 
-    @After
-    public void tearDown() {
-        File file = new File("test.db");
-        if (file.exists()) {
-            boolean delete = file.delete();
-        }
-    }
-
-    public void rebuildTestDB() {
+    @BeforeClass
+    public static void rebuildTestDB() {
         File file = new File("test.db");
         if (file.exists()) {
             boolean delete = file.delete();
@@ -35,9 +23,22 @@ public class ConsoleControllerTest {
         Utilities.createTestDatabase("test.db");
     }
 
+    @Before
+    public void setUp(){
+        sqlController = new SQLController("test.db");
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        File file = new File("test.db");
+        if (file.exists()) {
+            boolean delete = file.delete();
+        }
+    }
+
     @Test
     public void testAddUser() {
-        ConsoleController cm = new ConsoleController(new SQLController("test.db"));
+        ConsoleController cm = new ConsoleController(sqlController);
         cm.adminLogin("adminpwd");
         assertEquals(cm.addUser("testadduser", "test"), "testadduser was added.");
         assertEquals(cm.addUser("testadduser", "test"), "testadduser already exists.");
@@ -45,7 +46,7 @@ public class ConsoleControllerTest {
 
     @Test
     public void testRemoveUser() {
-        ConsoleController cm = new ConsoleController(new SQLController("test.db"));
+        ConsoleController cm = new ConsoleController(sqlController);
         cm.adminLogin("adminpwd");
         cm.addUser("testadduser", "test");
         assertEquals(cm.removeUser("testadduser"), "testadduser was removed.");
@@ -54,7 +55,6 @@ public class ConsoleControllerTest {
 
     @Test
     public void testUserLogin() {
-        SQLController sqlController = new SQLController("test.db");
         sqlController.insertUser("testlogin", "testpass");
         ConsoleController cm = new ConsoleController(sqlController);
         assertFalse(cm.userLogin("baduser", "badpass"));
@@ -64,7 +64,6 @@ public class ConsoleControllerTest {
 
     @Test
     public void testAddWallet() {
-        SQLController sqlController = new SQLController("test.db");
         sqlController.insertUser("testwallet", "testpass");
         ConsoleController cm = new ConsoleController(sqlController);
         cm.userLogin("testwallet", "testpass");
@@ -73,7 +72,6 @@ public class ConsoleControllerTest {
 
     @Test
     public void testUserWithWallet() {
-        SQLController sqlController = new SQLController("test.db");
         sqlController.insertUser("testuserwithwallet", "testpassword");
         ConsoleController cm = new ConsoleController(sqlController);
         assertFalse(cm.userHasWallet());
@@ -88,7 +86,6 @@ public class ConsoleControllerTest {
 
     @Test
     public void testWalletCreation() {
-        SQLController sqlController = new SQLController("test.db");
         sqlController.insertUser("testwalletcreate", "test");
         ConsoleController cm = new ConsoleController(sqlController);
         assertSame(WalletUtilities.CreateWalletResult.FAILED, cm.addWalletToUser("nouser"));
@@ -108,7 +105,6 @@ public class ConsoleControllerTest {
 
     @Test
     public void testAddNewProduct() {
-        SQLController sqlController = new SQLController("test.db");
         sqlController.insertUser("paul","Wofford1854");
         sqlController.insertUser("john","Wofford1854");
         sqlController.addWallet("john","j12345");
@@ -131,7 +127,6 @@ public class ConsoleControllerTest {
 
     @Test
     public void testRemoveProduct() {
-        SQLController sqlController = new SQLController("test.db");
         sqlController.insertUser("paul","Wofford1854");
         sqlController.insertUser("john","Wofford1854");
         sqlController.addWallet("john","j12345");
@@ -150,7 +145,6 @@ public class ConsoleControllerTest {
 
     @Test
     public void testGetUserProducts() {
-        SQLController sqlController = new SQLController("test.db");
         ConsoleController cc = new ConsoleController(sqlController);
 
         Product skittles1 = new Product("jsmith", 1, "skittles", "a half-eaten bag");
@@ -193,8 +187,7 @@ public class ConsoleControllerTest {
 
     @Test
     public void testGetAllProducts() {
-
-        SQLController sqlController = new SQLController("test.db");
+        rebuildTestDB();
         ConsoleController cc = new ConsoleController(sqlController);
 
         Product skittles1 = new Product("jsmith", 1, "skittles", "a half-eaten bag");
