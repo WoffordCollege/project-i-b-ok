@@ -1,6 +1,6 @@
 package edu.wofford.wocoin;
 
-import edu.wofford.wocoin.main.ConsoleMain;
+import edu.wofford.wocoin.gui.MainMenu;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -44,7 +44,7 @@ public class ConsoleControllerTest {
             System.setIn(new ByteArrayInputStream(input.getBytes()));
             ByteArrayOutputStream outContent = new ByteArrayOutputStream();
             System.setOut(new PrintStream(outContent));
-            ConsoleMain.main(new String[]{"test.db"});
+            MainMenu.main(new String[]{"test.db"});
             actualOutput = outContent.toString();
         } finally {
             System.setIn(originalIn);
@@ -85,42 +85,6 @@ public class ConsoleControllerTest {
         assertThat(output, containsString(expectedOutput));
     }
 
-    @Test
-    public void testUIStateString() {
-        SQLController sqlController = new SQLController("test.db");
-        sqlController.insertUser("testuser", "testpass");
-        ConsoleController cm = new ConsoleController(sqlController);
-        assertEquals(cm.getCurrentUIString(), loginScreenString);
-        cm.adminLogin("badpass");
-        assertEquals(cm.getCurrentUIString(), loginScreenString);
-        cm.adminLogin("adminpwd");
-        assertThat(cm.getCurrentUIString(), containsString("1: back\n2: add user\n3: remove user"));
-        cm.doLogout();
-        assertEquals(cm.getCurrentUIString(), loginScreenString);
-        cm.userLogin("testuser", "testpass");
-        assertThat(cm.getCurrentUIString(), containsString("1: back\n2: create wallet"));
-        cm.doLogout();
-        assertEquals(cm.getCurrentUIString(), loginScreenString);
-        cm.exit();
-        assertEquals(cm.getCurrentUIString(), "");
-    }
-
-    @Test
-    public void testAdminLogin() {
-        ConsoleController cm = new ConsoleController(new SQLController("test.db"));
-        assertEquals(cm.getCurrentState(), ConsoleController.UIState.LOGIN);
-        assertFalse(cm.adminLogin("badpass"));
-        assertEquals(cm.getCurrentState(), ConsoleController.UIState.LOGIN);
-        assertTrue(cm.adminLogin("adminpwd"));
-        assertEquals(cm.getCurrentState(), ConsoleController.UIState.ADMINISTRATOR);
-
-        assertTrue(cm.adminLogin("adminpwd"));
-        assertEquals(cm.getCurrentState(), ConsoleController.UIState.ADMINISTRATOR);
-        cm.doLogout();
-        assertEquals(cm.getCurrentState(), ConsoleController.UIState.LOGIN);
-        cm.exit();
-        assertEquals(cm.getCurrentState(), ConsoleController.UIState.EXIT);
-    }
 
     @Test
     public void testAddUser() {
@@ -147,13 +111,8 @@ public class ConsoleControllerTest {
         sqlController.insertUser("testlogin", "testpass");
         ConsoleController cm = new ConsoleController(sqlController);
         assertFalse(cm.userLogin("baduser", "badpass"));
-        assertEquals(cm.getCurrentState(), ConsoleController.UIState.LOGIN);
         assertTrue(cm.userLogin("testlogin", "testpass"));
-        assertEquals(cm.getCurrentState(), ConsoleController.UIState.USER);
-        assertTrue(cm.userLogin("testlogin", "testpass"));
-        assertEquals(cm.getCurrentState(), ConsoleController.UIState.USER);
         cm.doLogout();
-        assertEquals(cm.getCurrentState(), ConsoleController.UIState.LOGIN);
     }
 
     @Test
@@ -162,7 +121,6 @@ public class ConsoleControllerTest {
         sqlController.insertUser("testwallet", "testpass");
         ConsoleController cm = new ConsoleController(sqlController);
         cm.userLogin("testwallet", "testpass");
-        assertEquals(cm.getCurrentState(), ConsoleController.UIState.USER);
         assertEquals(cm.getCurrentUser(), "testwallet");
     }
 

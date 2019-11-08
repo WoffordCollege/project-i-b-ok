@@ -67,7 +67,18 @@ public class UserUI extends CustomActionView {
                 }
             };
 
+            CustomActionView createProductAction = new CustomActionView("Add a Product", "add product", viewConfig, keyboard) {
+                @Override
+                public void executeCustomAction() {
+                    String name = this.prompt("Enter the product name: ", String.class);
+                    String description = this.prompt("Enter the product description: ", String.class);
+                    int price = this.prompt("Enter the product price: ", Integer.class);
+                    this.println(cc.addNewProduct(name, description, price));
+                }
+            };
+
             this.addMenuItem(createWalletAction);
+            this.addMenuItem(createProductAction);
         }
 
 

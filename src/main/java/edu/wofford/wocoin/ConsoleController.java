@@ -8,10 +8,6 @@ public class ConsoleController {
 
     private SQLController sqlController;
 
-    public enum UIState {EXIT, LOGIN, USER, ADMINISTRATOR}
-
-    private UIState currentState;
-
     private String currentUser;
     private String currentPassword;
 
@@ -20,27 +16,8 @@ public class ConsoleController {
      * @param sqlController The {@link SQLController} with a given WocoinDatabase that is modified with the Controller
      */
     public ConsoleController(SQLController sqlController) {
-        this.currentState = UIState.LOGIN;
         this.sqlController = sqlController;
         this.currentUser = null;
-    }
-
-
-    /**
-     * @return returns the String representation of the current screen.
-     */
-    public String getCurrentUIString() {
-        switch (currentState) {
-            case EXIT:
-                return "";
-            case LOGIN:
-                return "Please select from the following options:\n1: exit\n2: administrator\n3: user";
-            case USER:
-                return "Please select from the following options:\n1: back\n2: create wallet";
-            case ADMINISTRATOR:
-                return "Please select from the following options:\n1: back\n2: add user\n3: remove user";
-        }
-        return null;
     }
 
     /**
@@ -50,36 +27,23 @@ public class ConsoleController {
      * @return true if the UIState is already administrator or if the password is correct, and returns false otherwise
      */
     public boolean adminLogin(String password) {
-        if (currentState == UIState.ADMINISTRATOR) {
-            return true;
-        }
-        else if (password.equals("adminpwd")) {
-            currentState = UIState.ADMINISTRATOR;
-            return true;
-        }
-        else {
-            return false;
-        }
+        return password.equals("adminpwd");
     }
 
     /**
      * This function updates the state of the display to User if the username and password combination is correct.
      * If the login is successful, we store the username of the current user for wallet interaction
-     * returns true if the {@link UIState} is already User, or if the username and password combination is correct.
+     * returns true if the username and password combination is correct.
      * returns false otherwise
      * @param username the username of the user logging in
      * @param password the password of the user logging in
-     * @return true if the {@link UIState} is already User, or if the username and password combination is correct and false otherwise.
+     * @return true if the username and password combination is correct and false otherwise.
      */
     public boolean userLogin(String username, String password) {
-        if (currentState == UIState.USER) {
+        if (sqlController.userLogin(username, password) == SQLController.LoginResult.SUCCESS) {
+            this.currentUser = username;
+            this.currentPassword = password;
             return true;
-        }
-        else if (sqlController.userLogin(username, password) == SQLController.LoginResult.SUCCESS) {
-                currentState = UIState.USER;
-                this.currentUser = username;
-                this.currentPassword = password;
-                return true;
         }
         else{
             return false;
@@ -132,14 +96,6 @@ public class ConsoleController {
     public void doLogout() {
         this.currentUser = null;
         this.currentPassword = null;
-        currentState = UIState.LOGIN;
-    }
-
-    /**
-     * Sets the current state of the UI to exit
-     */
-    public void exit() {
-        currentState = UIState.EXIT;
     }
 
 
@@ -155,20 +111,16 @@ public class ConsoleController {
      * @return A string representing the action that occurred when the user was added.
      */
     public String addUser(String username, String password) {
-        if (currentState == UIState.ADMINISTRATOR) {
-            SQLController.AddUserResult result = sqlController.insertUser(username, password);
+        SQLController.AddUserResult result = sqlController.insertUser(username, password);
 
-            switch (result) {
-                case ADDED:
-                    return username + " was added.";
-                case DUPLICATE:
-                    return username + " already exists.";
-                case NOTADDED:
-                    return username + " was not added.";
-            }
+        switch (result) {
+            case ADDED:
+                return username + " was added.";
+            case DUPLICATE:
+                return username + " already exists.";
+            default:
+                return username + " was not added.";
         }
-
-        return null;
     }
 
 
@@ -183,28 +135,16 @@ public class ConsoleController {
      * @return A string representing the action that occurred when the user was added.
      */
     public String removeUser(String username) {
-        if (currentState == UIState.ADMINISTRATOR) {
-            SQLController.RemoveUserResult result = sqlController.removeUser(username);
+        SQLController.RemoveUserResult result = sqlController.removeUser(username);
 
-            switch (result) {
-                case REMOVED:
-                    return username + " was removed.";
-                case NORECORD:
-                    return username + " does not exist.";
-                case NOTREMOVED:
-                    return username + " was not removed.";
-            }
+        switch (result) {
+            case REMOVED:
+                return username + " was removed.";
+            case NORECORD:
+                return username + " does not exist.";
+            default:
+                return username + " was not removed.";
         }
-
-        return null;
-    }
-
-    /**
-     * This function can be used to determine what display type is currently
-     * @return returns a {@link UIState} reflecting the state of the UI
-     */
-    public UIState getCurrentState() {
-        return currentState;
     }
 
     /**
@@ -213,5 +153,20 @@ public class ConsoleController {
      */
     public String getCurrentUser() {
         return currentUser;
+    }
+
+    public String addNewProduct(String name, String description, int price) {
+        Product newProduct = new Product(this.currentUser, price, name, description);
+        SQLController.AddProductResult result = sqlController.addProduct(newProduct);
+        switch (result) {
+            case ADDED:
+                return "Product added.";
+            case NOWALLET:
+                return "User has no wallet.";
+            case NONPOSITIVEPRICE:
+                return "Invalid value.\nExpected an integer value greater than or equal to 1.";
+            default:
+                return "Invalid value.\nExpected a string with at least 1 character.";
+        }
     }
 }

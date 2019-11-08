@@ -16,7 +16,7 @@ public class Main {
             if (args[0].equals("0")) {
                 Feature00Main.main(realArgs);
             }
-            else if (args[0].equals("1") || args[0].equals("2") || args[0].equals("3")) {
+            else if (args[0].equals("1") || args[0].equals("2") || args[0].equals("3") || args[0].equals("4")) {
                 MainMenu.main(new String[] {args[1]});
             }
             else {
