@@ -192,6 +192,16 @@ public class ConsoleController {
         return sqlController.getUserProductsList(this.currentUser);
     }
 
+
+    /**
+     * This function returns an ArrayList of all of the products in the database
+     * @return An arraylist of all of the products
+     * @see SQLController#getAllProductsList()
+     */
+    public ArrayList<Product> getAllProducts() {
+        return sqlController.getAllProductsList();
+    }
+
     /**
      * Removes the specified product from the database and returns a string representing what occurred.
      * @param product The product to remove
@@ -208,4 +218,6 @@ public class ConsoleController {
                 return "Action canceled.";
         }
     }
+
+
 }

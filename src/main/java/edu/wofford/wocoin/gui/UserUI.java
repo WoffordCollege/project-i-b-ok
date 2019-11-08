@@ -48,6 +48,7 @@ public class UserUI extends CustomActionView {
             views.add(new CreateWalletAction(viewConfig, keyboard));
             views.add(new CreateProductAction(viewConfig, keyboard));
             views.add(new RemoveProductAction(viewConfig, keyboard));
+            views.add(new DisplayProductsAction(viewConfig, keyboard));
 
             views.forEach(this::addMenuItem);
         }
@@ -142,5 +143,25 @@ public class UserUI extends CustomActionView {
             }
         }
 
+        private class DisplayProductsAction extends CustomActionView {
+
+            public DisplayProductsAction(ViewConfig viewConfig, Scanner keyboard) {
+                super("Products for Sale", "display products", viewConfig, keyboard);
+            }
+
+            @Override
+            public void executeCustomAction() {
+                ArrayList<Product> products = cc.getAllProducts();
+                products.sort(Product::compareToWithPrice);
+
+                for (int i = 0; i < products.size(); i++) {
+                    Product product = products.get(i);
+                    product.setCurrentUser(cc.getCurrentUser());
+                    product.setDisplayType(Product.DisplayType.SHOWCURRENTUSER);
+                    this.println(String.format("%d: %s", i + 1, product.toString()));
+                }
+                this.goBack();
+            }
+        }
     }
 }

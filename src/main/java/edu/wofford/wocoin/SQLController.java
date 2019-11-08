@@ -383,4 +383,26 @@ public class SQLController {
         }
         return products;
     }
+
+    /**
+     * Gets a list of all of the products in the database
+     * @return An ArrayList of the {@link Product} in the database
+     */
+    public ArrayList<Product> getAllProductsList () {
+        ArrayList<Product> products = new ArrayList<>();
+        try (Connection dataConn = DriverManager.getConnection(url)) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products");
+            ResultSet dtr = stSelect.executeQuery();
+            while (dtr.next()) {
+                Product newProduct = new Product(dtr.getString("user"), dtr.getInt("price"), dtr.getString("name"), dtr.getString("description"));
+                newProduct.setDisplayType(Product.DisplayType.SHOWCURRENTUSER);
+                products.add(newProduct);
+            }
+        } catch (Exception e) {
+            System.out.println("NOT_HERE" + e.toString());
+        }
+        return products;
+    }
+
+
 }
