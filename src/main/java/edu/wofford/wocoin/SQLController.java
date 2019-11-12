@@ -15,6 +15,8 @@ public class SQLController {
     public enum RemoveWalletResult {REMOVED, NOSUCHWALLET, NOTREMOVED}
     public enum AddProductResult {ADDED, NOTADDED, NOWALLET, EMPTYDESCRIPTION, EMPTYNAME, NONPOSITIVEPRICE}
     public enum RemoveProductResult {REMOVED, NOTREMOVED, NOWALLET, DOESNOTEXIST}
+    public enum TransferWocoinResult {SUCCESS, NOUSER, NOWALLET, NEGATIVEINPUT}
+
 
     /**
      * Constructor that takes the name of the file
@@ -402,6 +404,19 @@ public class SQLController {
             System.out.println("NOT_HERE" + e.toString());
         }
         return products;
+    }
+    public TransferWocoinResult transferWocoin(String username, int amt) {
+        if(!lookupUser(username)){
+            return TransferWocoinResult.NOUSER;
+        } else if (!findWallet(username)){
+            return TransferWocoinResult.NOWALLET;
+        } else if (amt <= 0){
+            return TransferWocoinResult.NEGATIVEINPUT;
+        } else {
+            //do blockchain stuff
+            return TransferWocoinResult.SUCCESS;
+        }
+
     }
 
 

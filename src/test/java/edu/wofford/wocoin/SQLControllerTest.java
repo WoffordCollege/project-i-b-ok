@@ -275,4 +275,30 @@ public class SQLControllerTest {
 
         assertEquals(expectedProducts, actualProducts);
     }
+    @Test
+    public void transferSuccess(){
+        foobar.insertUser("test", "1234");
+        foobar.removeWallet("test");
+        foobar.addWallet("test","8675309");
+        assertEquals(SQLController.TransferWocoinResult.SUCCESS, foobar.transferWocoin("test", 5));
+    }
+    @Test
+    public void transferNoUser(){
+        assertEquals(SQLController.TransferWocoinResult.NOUSER, foobar.transferWocoin("jonDoe", 5));
+    }
+
+    @Test
+    public void transferNoWallet(){
+        foobar.insertUser("test","1234");
+        foobar.removeWallet("test");
+        assertEquals(SQLController.TransferWocoinResult.NOWALLET, foobar.transferWocoin("test", 5 ));
+    }
+
+    @Test
+    public void transferNegValue(){
+        foobar.insertUser("test", "1234");
+        foobar.removeWallet("test");
+        foobar.addWallet("test","8675309");
+        assertEquals(SQLController.TransferWocoinResult.NEGATIVEINPUT, foobar.transferWocoin("test", -5));
+    }
 }
