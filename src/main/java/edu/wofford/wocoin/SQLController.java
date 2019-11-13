@@ -3,6 +3,10 @@ import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 
+/**
+ * This class is an API used to connect to a Wocoin database.
+ * It provides the functions necessary to populate and erase information from the database.
+ */
 public class SQLController {
 
     private String url;

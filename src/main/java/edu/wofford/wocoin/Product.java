@@ -24,6 +24,12 @@ public class Product implements Comparable<Product>{
 
     /**
      * Works with the main constructor to set the default values of the comparison type and display type
+     * Constructs a new product with all fields initialized.
+     * @param seller The seller of the product
+     * @param price The price of the product
+     * @param name The name of the product
+     * @param description The description of the product
+     * @param currentUser The wallet address of the user using this product
      */
     public Product(String seller, int price, String name, String description, String currentUser) {
         this(seller, price, name, description, currentUser, DisplayType.HIDECURRENTUSER);
@@ -90,7 +96,7 @@ public class Product implements Comparable<Product>{
     /**
      * Takes the information from the class to determine the string representation of the object.
      * If currentUser is set, and the seller of the item is the same as the currentUser, and the displayType is SHOWCURRENTUSER,
-     * returns a string in the form <code>>>>  name: description  [n WoCoin(s)]</code>
+     * returns a string in the form <code>&gt;&gt;&gt;  name: description  [n WoCoin(s)]</code>
      * Otherwise returns a string in the form <code>name: description  [n WoCoin(s)]</code>
      * @return a string representing the Product object.
      */
@@ -144,5 +150,4 @@ public class Product implements Comparable<Product>{
                 getName().equals(product.getName()) &&
                 getDescription().equals(product.getDescription());
     }
-
 }
