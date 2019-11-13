@@ -1,10 +1,9 @@
 package edu.wofford.wocoin;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 import java.security.*;
-import java.security.spec.*;
-import java.util.Base64;
 import java.sql.*;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
@@ -99,7 +98,7 @@ public class Utilities {
 	public static String applySha256(String input) {		
 		try {
 			MessageDigest digest = MessageDigest.getInstance("SHA-256");
-			byte[] hash = digest.digest(input.getBytes("UTF-8"));
+			byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
 			StringBuffer hexString = new StringBuffer();
 			for (int i = 0; i < hash.length; i++) {
 				String hex = Integer.toHexString(0xff & hash[i]);

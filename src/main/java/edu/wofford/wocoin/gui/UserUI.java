@@ -1,0 +1,167 @@
+package edu.wofford.wocoin.gui;
+
+import edu.wofford.wocoin.ConsoleController;
+import edu.wofford.wocoin.Product;
+import edu.wofford.wocoin.WalletUtilities;
+import io.bretty.console.view.AbstractView;
+import io.bretty.console.view.ViewConfig;
+
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class UserUI extends CustomActionView {
+    private ConsoleController cc;
+
+    public UserUI(ConsoleController cc, ViewConfig viewConfig) {
+        super("Please enter your username and password separated by a space.", "user", viewConfig);
+        this.cc = cc;
+    }
+
+    public UserUI(ConsoleController cc, ViewConfig viewConfig, Scanner keyboard) {
+        super("Please enter your username and password separated by a space.", "user", viewConfig, keyboard);
+        this.cc = cc;
+    }
+
+    @Override
+    public void executeCustomAction() {
+        String username = this.prompt("Enter your username: ", String.class);
+        String password = this.prompt("Enter your password: ", String.class);
+
+        if (!cc.userLogin(username, password)){
+            this.println("No such user.");
+            this.goBack();
+        }
+        else {
+            new UserRootMenu(this.parentView, username, viewConfig, this.keyboard).display();
+        }
+    }
+
+    private class UserRootMenu extends CustomMenuView {
+
+        public UserRootMenu(AbstractView parentView, String user, ViewConfig viewConfig, Scanner keyboard) {
+            super("Welcome, " + user, "", viewConfig, keyboard);
+
+            this.parentView = parentView;
+
+            ArrayList<AbstractView> views = new ArrayList<>();
+
+            views.add(new CreateWalletAction(viewConfig, keyboard));
+            views.add(new CreateProductAction(viewConfig, keyboard));
+            views.add(new RemoveProductAction(viewConfig, keyboard));
+            views.add(new DisplayProductsAction(viewConfig, keyboard));
+
+            views.forEach(this::addMenuItem);
+        }
+
+
+        @Override
+        protected void onBack() {
+            cc.doLogout();
+            super.onBack();
+        }
+
+        private class CreateWalletAction extends CustomActionView {
+
+            public CreateWalletAction(ViewConfig viewConfig, Scanner keyboard) {
+                super("Create a Wallet", "create wallet", viewConfig, keyboard);
+            }
+
+            @Override
+            public void executeCustomAction() {
+                boolean userStillCreatingWallet = true;
+
+                if (cc.userHasWallet()) {
+                    this.println("Your account has an associated wallet.");
+                    userStillCreatingWallet = this.confirmDialog("Would you like to delete this wallet and create a new wallet?");
+
+                    if (userStillCreatingWallet) {
+                        this.println("Wallet deleted.");
+                    }
+                }
+
+                if (userStillCreatingWallet) {
+                    String path = this.prompt("Enter the file path for the wallet: ", String.class);
+
+                    WalletUtilities.CreateWalletResult result = cc.addWalletToUser(path);
+
+                    this.println(result == WalletUtilities.CreateWalletResult.SUCCESS ? "Wallet added." : "Action Canceled");
+
+                }
+            }
+        }
+
+        private class CreateProductAction extends CustomActionView {
+
+            public CreateProductAction(ViewConfig viewConfig, Scanner keyboard) {
+                super("Add a Product", "add product", viewConfig, keyboard);
+            }
+
+            @Override
+            public void executeCustomAction() {
+                String name = this.prompt("Enter the product name: ", String.class);
+                String description = this.prompt("Enter the product description: ", String.class);
+                int price = this.prompt("Enter the product price: ", Integer.class);
+                this.println(cc.addNewProduct(name, description, price));
+            }
+        }
+
+        private class RemoveProductAction extends CustomActionView {
+
+            public RemoveProductAction(ViewConfig viewConfig, Scanner keyboard) {
+                super("Select a Product to Remove", "remove product", viewConfig, keyboard);
+
+                this.viewConfig = new ViewConfig.Builder()
+                                                .setBackMenuName("cancel")
+                                                .setIndexNumberFormatter(index -> (index + 1) + ": ")
+                                                .build();
+            }
+
+            @Override
+            public void executeCustomAction() {
+                ArrayList<Product> products = cc.getUserProducts();
+                products.sort(Product::compareTo);
+
+                this.println("1: cancel");
+                for (int i = 0; i < products.size(); i++) {
+                    this.println(String.format("%d: %s", i + 2, products.get(i).toString()));
+                }
+                int selected = this.prompt("Please select item to remove: ", Integer.class);
+
+                if (selected == 1) {
+                    this.println("Action canceled.");
+                }
+                else if (!cc.userHasWallet()) {
+                    this.println("User has no wallet.");
+                }
+                else if (selected < 1 || selected - 1 > products.size()) {
+                    this.println(String.format("Invalid value. Enter a value between 1 and %d.", products.size() + 1));
+                }
+                else {
+                    this.println(cc.removeProduct(products.get(selected - 2)));
+                }
+                this.goBack();
+            }
+        }
+
+        private class DisplayProductsAction extends CustomActionView {
+
+            public DisplayProductsAction(ViewConfig viewConfig, Scanner keyboard) {
+                super("Products for Sale", "display products", viewConfig, keyboard);
+            }
+
+            @Override
+            public void executeCustomAction() {
+                ArrayList<Product> products = cc.getAllProducts();
+                products.sort(Product::compareToWithPrice);
+
+                for (int i = 0; i < products.size(); i++) {
+                    Product product = products.get(i);
+                    product.setCurrentUser(cc.getCurrentUser());
+                    product.setDisplayType(Product.DisplayType.SHOWCURRENTUSER);
+                    this.println(String.format("%d: %s", i + 1, product.toString()));
+                }
+                this.goBack();
+            }
+        }
+    }
+}

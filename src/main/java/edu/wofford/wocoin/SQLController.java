@@ -1,6 +1,7 @@
 package edu.wofford.wocoin;
 import java.io.File;
 import java.sql.*;
+import java.util.ArrayList;
 
 public class SQLController {
 
@@ -12,6 +13,10 @@ public class SQLController {
     public enum AddWalletResult {ADDED, ALREADYEXISTS, NOTADDED}
     public enum ReplaceWalletResult {REPLACED, NOTREPLACED, NOSUCHWALLET}
     public enum RemoveWalletResult {REMOVED, NOSUCHWALLET, NOTREMOVED}
+    public enum AddProductResult {ADDED, NOTADDED, NOWALLET, EMPTYDESCRIPTION, EMPTYNAME, NONPOSITIVEPRICE}
+    public enum RemoveProductResult {REMOVED, NOTREMOVED, NOWALLET, DOESNOTEXIST}
+    public enum TransferWocoinResult {SUCCESS, NOUSER, NOWALLET, NEGATIVEINPUT}
+
 
     /**
      * Constructor that takes the name of the file
@@ -96,9 +101,7 @@ public class SQLController {
     /**
      * Removes the specified user from the database
      * @param name: the user to be removed
-     * @return
-     * if successful returns REMOVED
-     * if unsuccessful, returns why
+     * @return if successful returns REMOVED and if unsuccessful, returns why
      */
     public RemoveUserResult removeUser(String name){
         if(!lookupUser(name)){
@@ -124,7 +127,7 @@ public class SQLController {
      * Verifies that the password is associated with that user.
      * @param user The user name
      * @param password The password
-     * @return 
+     * @return whether the user was successfully removed or that the user did not exist
      */
     public LoginResult userLogin(String user, String password){
         LoginResult retVal = LoginResult.UNSET;
@@ -176,7 +179,7 @@ public class SQLController {
      * @return whether the wallet was successfully added or that the wallet already exists
      */
     public AddWalletResult addWallet(String user, String pubKey){
-        AddWalletResult retVal;
+        AddWalletResult retVal = AddWalletResult.NOTADDED;
         if(findWallet(user)){
             retVal = AddWalletResult.ALREADYEXISTS;
         } else {
@@ -188,7 +191,6 @@ public class SQLController {
                 retVal = AddWalletResult.ADDED;
             } catch (Exception e) {
                 System.out.println(e.toString());
-                retVal = AddWalletResult.NOTADDED;
             }
         }
         return retVal;
@@ -205,13 +207,12 @@ public class SQLController {
         if(findWallet(user)){
             try (Connection dataConn = DriverManager.getConnection(url)) {
                 PreparedStatement stUpdate = dataConn.prepareStatement("Update wallets set publickey = ? WHERE id = ?");
-                stUpdate.setString(1, user);
-                stUpdate.setString(2, pubKey);
+                stUpdate.setString(1, pubKey);
+                stUpdate.setString(2, user);
                 stUpdate.execute();
                 retVal = ReplaceWalletResult.REPLACED;
             } catch (Exception e) {
                 System.out.println(e.toString());
-                retVal = ReplaceWalletResult.NOTREPLACED;
             }
         } else{
             retVal = ReplaceWalletResult.NOSUCHWALLET;
@@ -237,11 +238,186 @@ public class SQLController {
             stDelete.setString(1, name);
             stDelete.execute();
             result = RemoveWalletResult.REMOVED;
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             System.out.println(e.toString());
         }
 
         return result;
     }
+
+    /**
+     * Retrieves the public key from the database for the provided user name
+     * @param user The name of the user
+     * @return The public key or an empty string if the user is not in the database
+     */
+    public String retrievePublicKey(String user){
+        String retVal = "";
+        try (Connection dataConn = DriverManager.getConnection(url)) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT publickey FROM wallets WHERE id = ?");
+            stSelect.setString(1, user);
+            ResultSet dtr = stSelect.executeQuery();
+            retVal = dtr.getString(1);
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
+        return retVal;
+    }
+
+    /**
+     * Retrieves the user name from the database for the provided public key
+     * @param publicKey The public key for the user
+     * @return The user name or an empty string if the user is not in the database
+     */
+    public String getName(String publicKey){
+        String retVal = "";
+        try (Connection dataConn = DriverManager.getConnection(url)) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT id FROM wallets WHERE publickey = ?");
+            stSelect.setString(1, publicKey);
+            ResultSet dtr = stSelect.executeQuery();
+            retVal = dtr.getString(1);
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
+        return retVal;
+    }
+
+    /**
+     * Checks to see if the product exists in the database.
+     * @param product The product to check for.
+     * @return True if the product is in the database
+     */
+    public boolean productExistsInDatabase(Product product) {
+        try (Connection dataConn = DriverManager.getConnection(url)) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT COUNT(*) FROM products WHERE seller = ? AND price = ? AND name = ? AND description = ?");
+            stSelect.setString(1, this.retrievePublicKey(product.getSeller()));
+            stSelect.setInt(2, product.getPrice());
+            stSelect.setString(3, product.getName());
+            stSelect.setString(4, product.getDescription());
+            ResultSet dtr = stSelect.executeQuery();
+            return dtr.getInt(1) != 0;
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
+        return false;
+    }
+
+    /**
+     * Adds a product to the database.
+     * @param product the product to be added to the database.
+     * @return Added if successful, else why the product was not added.
+     */
+    public AddProductResult addProduct(Product product){
+        AddProductResult retVal = AddProductResult.NOTADDED;
+
+        if(!findWallet(product.getSeller())){
+            retVal = AddProductResult.NOWALLET;
+        } else if(product.getPrice() <= 0){
+            retVal = AddProductResult.NONPOSITIVEPRICE;
+        } else if(product.getName().trim().isEmpty()){
+            retVal = AddProductResult.EMPTYNAME;
+        } else if(product.getDescription().trim().isEmpty()){
+            retVal = AddProductResult.EMPTYDESCRIPTION;
+        } else {
+            try (Connection dataConn = DriverManager.getConnection(url)) {
+                PreparedStatement stInsert = dataConn.prepareStatement("Insert into products (seller, price, name, description) values (?,?,?,?)");
+                stInsert.setString(1, this.retrievePublicKey(product.getSeller()));
+                stInsert.setInt(2, product.getPrice());
+                stInsert.setString(3, product.getName());
+                stInsert.setString(4, product.getDescription());
+                stInsert.execute();
+                retVal = AddProductResult.ADDED;
+            } catch (Exception e) {
+                System.out.println(e.toString());
+            }
+        }
+
+        return retVal;
+    }
+
+    /**
+     * Removes a product from the database
+     * @param productToRemove the product to be removed from the database.
+     * @return Removed if successful, otherwise a {@link RemoveProductResult} describing the failure
+     */
+    public RemoveProductResult removeProduct(Product productToRemove) {
+        RemoveProductResult retval = RemoveProductResult.NOTREMOVED;
+
+        if (!findWallet(productToRemove.getSeller())){
+            retval = RemoveProductResult.NOWALLET;
+        }
+        else if (!this.productExistsInDatabase(productToRemove)) {
+            retval = RemoveProductResult.DOESNOTEXIST;
+        }
+        else {
+            try (Connection dataConn = DriverManager.getConnection(url)) {
+                PreparedStatement stSelect = dataConn.prepareStatement("DELETE FROM products WHERE (SELECT max(id) FROM products b WHERE seller = ? AND price = ? AND name = ? AND description = ?) = products.id");
+                stSelect.setString(1, this.retrievePublicKey(productToRemove.getSeller()));
+                stSelect.setInt(2, productToRemove.getPrice());
+                stSelect.setString(3, productToRemove.getName());
+                stSelect.setString(4, productToRemove.getDescription());
+                stSelect.execute();
+                retval = RemoveProductResult.REMOVED;
+            } catch (Exception e) {
+                System.out.println(e.toString());
+            }
+        }
+        return retval;
+    }
+
+    /**
+     * Gets a list of the products in the database added by the username below
+     * @param username The username of the user whose products are being retrieved
+     * @return An ArrayList of the {@link Product} added by the user
+     */
+    public ArrayList<Product> getUserProductsList (String username) {
+        ArrayList<Product> products = new ArrayList<>();
+        try (Connection dataConn = DriverManager.getConnection(url)) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE user = ?");
+            stSelect.setString(1, username);
+            ResultSet dtr = stSelect.executeQuery();
+            while (dtr.next()) {
+                Product newProduct = new Product(dtr.getString("user"), dtr.getInt("price"), dtr.getString("name"), dtr.getString("description"));
+                newProduct.setDisplayType(Product.DisplayType.HIDECURRENTUSER);
+                products.add(newProduct);
+            }
+        } catch (Exception e) {
+            System.out.println("NOT_HERE" + e.toString());
+        }
+        return products;
+    }
+
+    /**
+     * Gets a list of all of the products in the database
+     * @return An ArrayList of the {@link Product} in the database
+     */
+    public ArrayList<Product> getAllProductsList () {
+        ArrayList<Product> products = new ArrayList<>();
+        try (Connection dataConn = DriverManager.getConnection(url)) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products");
+            ResultSet dtr = stSelect.executeQuery();
+            while (dtr.next()) {
+                Product newProduct = new Product(dtr.getString("user"), dtr.getInt("price"), dtr.getString("name"), dtr.getString("description"));
+                newProduct.setDisplayType(Product.DisplayType.SHOWCURRENTUSER);
+                products.add(newProduct);
+            }
+        } catch (Exception e) {
+            System.out.println("NOT_HERE" + e.toString());
+        }
+        return products;
+    }
+    public TransferWocoinResult transferWocoin(String username, int amt) {
+        if(!lookupUser(username)){
+            return TransferWocoinResult.NOUSER;
+        } else if (!findWallet(username)){
+            return TransferWocoinResult.NOWALLET;
+        } else if (amt <= 0){
+            return TransferWocoinResult.NEGATIVEINPUT;
+        } else {
+            //do blockchain stuff
+            return TransferWocoinResult.SUCCESS;
+        }
+
+    }
+
+
 }
