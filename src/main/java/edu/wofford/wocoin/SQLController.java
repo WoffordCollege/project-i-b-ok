@@ -436,7 +436,14 @@ public class SQLController {
         }
         return products;
     }
-    public TransferWocoinResult transferWocoin(String username, int amt) {
+
+    /**
+     * Add Wocoins to a specific user's wallet.
+     * @param username the name of the user
+     * @param amt the amount to be transferred
+     * @return a TransferWocoinResult
+     */
+    TransferWocoinResult transferWocoin(String username, int amt) {
         if(!lookupUser(username)){
             return TransferWocoinResult.NOUSER;
         } else if (!findWallet(username)){
