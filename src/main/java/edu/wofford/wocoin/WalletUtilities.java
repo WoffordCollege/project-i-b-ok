@@ -7,6 +7,9 @@ import org.web3j.crypto.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * This class contains static functions for creating and interfacing with Wallet files.
+ */
 public class WalletUtilities {
     public enum CreateWalletResult{SUCCESS, FILEALREADYEXISTS, FAILED}
 
