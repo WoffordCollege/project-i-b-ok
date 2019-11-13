@@ -11,14 +11,41 @@ public class SQLController {
 
     private String url;
 
+    /**
+     * An enumeration of the possible results of attempting to add a user
+     */
     public enum AddUserResult {ADDED, DUPLICATE, NOTADDED}
+    /**
+     * An enumeration of the possible results of attempting to remove a user
+     */
     public enum RemoveUserResult {REMOVED, NORECORD, NOTREMOVED}
+    /**
+     * An enumeration of the possible results of attempting to login as a user
+     */
     public enum LoginResult{SUCCESS, NOSUCHUSER, WRONGPASSWORD, UNSET}
+    /**
+     * An enumeration of the possible results of attempting to add a wallet to a user
+     */
     public enum AddWalletResult {ADDED, ALREADYEXISTS, NOTADDED}
+    /**
+     * An enumeration of the possible results of attempting to replace a user's wallet
+     */
     public enum ReplaceWalletResult {REPLACED, NOTREPLACED, NOSUCHWALLET}
+    /**
+     * An enumeration of the possible results of attempting to remove a wallet from a user
+     */
     public enum RemoveWalletResult {REMOVED, NOSUCHWALLET, NOTREMOVED}
+    /**
+     * An enumeration of the possible results of attempting to add a product to the DB
+     */
     public enum AddProductResult {ADDED, NOTADDED, NOWALLET, EMPTYDESCRIPTION, EMPTYNAME, NONPOSITIVEPRICE}
+    /**
+     * An enumeration of the possible results of attempting to remove a product from the DB
+     */
     public enum RemoveProductResult {REMOVED, NOTREMOVED, NOWALLET, DOESNOTEXIST}
+    /**
+     * An enumeration of the possible results of attempting to transfer Wocoins to a user
+     */
     public enum TransferWocoinResult {SUCCESS, NOUSER, NOWALLET, NEGATIVEINPUT}
 
 

@@ -41,7 +41,8 @@ jacocoTestReport {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: ['edu/wofford/wocoin/Utilities**',
-                                        'edu/wofford/wocoin/main/**'])
+                                        'edu/wofford/wocoin/main/**',
+                                        'edu/wofford/wocoin/gui/**'])
         }))
     }
 }

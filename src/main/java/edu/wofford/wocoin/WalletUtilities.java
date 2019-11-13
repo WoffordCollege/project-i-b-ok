@@ -11,6 +11,9 @@ import java.nio.file.Paths;
  * This class contains static functions for creating and interfacing with Wallet files.
  */
 public class WalletUtilities {
+    /**
+     * An enumeration of the possible results of attempting to create a wallet file.
+     */
     public enum CreateWalletResult{SUCCESS, FILEALREADYEXISTS, FAILED}
 
     /**
