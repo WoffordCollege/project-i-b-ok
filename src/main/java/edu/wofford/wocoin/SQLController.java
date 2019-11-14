@@ -3,18 +3,49 @@ import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 
+/**
+ * This class is an API used to connect to a Wocoin database.
+ * It provides the functions necessary to populate and erase information from the database.
+ */
 public class SQLController {
 
     private String url;
 
+    /**
+     * An enumeration of the possible results of attempting to add a user
+     */
     public enum AddUserResult {ADDED, DUPLICATE, NOTADDED}
+    /**
+     * An enumeration of the possible results of attempting to remove a user
+     */
     public enum RemoveUserResult {REMOVED, NORECORD, NOTREMOVED}
+    /**
+     * An enumeration of the possible results of attempting to login as a user
+     */
     public enum LoginResult{SUCCESS, NOSUCHUSER, WRONGPASSWORD, UNSET}
+    /**
+     * An enumeration of the possible results of attempting to add a wallet to a user
+     */
     public enum AddWalletResult {ADDED, ALREADYEXISTS, NOTADDED}
+    /**
+     * An enumeration of the possible results of attempting to replace a user's wallet
+     */
     public enum ReplaceWalletResult {REPLACED, NOTREPLACED, NOSUCHWALLET}
+    /**
+     * An enumeration of the possible results of attempting to remove a wallet from a user
+     */
     public enum RemoveWalletResult {REMOVED, NOSUCHWALLET, NOTREMOVED}
+    /**
+     * An enumeration of the possible results of attempting to add a product to the DB
+     */
     public enum AddProductResult {ADDED, NOTADDED, NOWALLET, EMPTYDESCRIPTION, EMPTYNAME, NONPOSITIVEPRICE}
+    /**
+     * An enumeration of the possible results of attempting to remove a product from the DB
+     */
     public enum RemoveProductResult {REMOVED, NOTREMOVED, NOWALLET, DOESNOTEXIST}
+    /**
+     * An enumeration of the possible results of attempting to transfer Wocoins to a user
+     */
     public enum TransferWocoinResult {SUCCESS, NOUSER, NOWALLET, NEGATIVEINPUT}
 
 
@@ -42,7 +73,7 @@ public class SQLController {
      *Get the path to the database.
      * @return the path to the database
      */
-    public String getPath(){
+    String getPath(){
         return url;
     }
 
@@ -51,7 +82,7 @@ public class SQLController {
      * @param name: the name of the user
      * @return true if the user has a record in the table
      */
-    public boolean lookupUser(String name){
+    boolean lookupUser(String name){
         boolean returnVal = false;
         try (Connection dataConn = DriverManager.getConnection(url)) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT count(*) FROM users WHERE id = ?");
@@ -73,7 +104,7 @@ public class SQLController {
      * if duplicate username, returns DUPLICATE
      * if unsuccessful, returns NOTADDED
      */
-    public AddUserResult insertUser(String name, String password){
+    AddUserResult insertUser(String name, String password){
         if(lookupUser(name)){
             return AddUserResult.DUPLICATE;
         }
@@ -104,7 +135,7 @@ public class SQLController {
      * @param name: the user to be removed
      * @return if successful returns REMOVED and if unsuccessful, returns why
      */
-    public RemoveUserResult removeUser(String name){
+    RemoveUserResult removeUser(String name){
         if(!lookupUser(name)){
             return RemoveUserResult.NORECORD;
         }
@@ -130,7 +161,7 @@ public class SQLController {
      * @param password The password
      * @return whether the user was successfully removed or that the user did not exist
      */
-    public LoginResult userLogin(String user, String password){
+    LoginResult userLogin(String user, String password){
         LoginResult retVal = LoginResult.UNSET;
         if(this.lookupUser(user)){
             try (Connection dataConn = DriverManager.getConnection(url)) {
@@ -159,7 +190,7 @@ public class SQLController {
      * @param user The user name to check for.
      * @return True if the user has a wallet
      */
-    public boolean findWallet(String user){
+    boolean findWallet(String user){
         boolean retVal = false;
         try (Connection dataConn = DriverManager.getConnection(url)) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT count(*) FROM wallets WHERE id = ?");
@@ -179,7 +210,7 @@ public class SQLController {
      * @param pubKey the public key of the wallet
      * @return whether the wallet was successfully added or that the wallet already exists
      */
-    public AddWalletResult addWallet(String user, String pubKey){
+    AddWalletResult addWallet(String user, String pubKey){
         AddWalletResult retVal = AddWalletResult.NOTADDED;
         if(findWallet(user)){
             retVal = AddWalletResult.ALREADYEXISTS;
@@ -203,7 +234,7 @@ public class SQLController {
      * @param pubKey the public key of the wallet
      * @return whether the wallet was successfully replaced or that the wallet did not exist
      */
-    public ReplaceWalletResult replaceWallet(String user, String pubKey){
+    ReplaceWalletResult replaceWallet(String user, String pubKey){
         ReplaceWalletResult retVal = ReplaceWalletResult.NOTREPLACED;
         if(findWallet(user)){
             try (Connection dataConn = DriverManager.getConnection(url)) {
@@ -227,7 +258,7 @@ public class SQLController {
      * @param name the user name
      * @return whether the wallet was successfully removed or that the wallet did not exist
      */
-    public RemoveWalletResult removeWallet(String name){
+    RemoveWalletResult removeWallet(String name){
         if(!findWallet(name)){
             return RemoveWalletResult.NOSUCHWALLET;
         }
@@ -251,7 +282,7 @@ public class SQLController {
      * @param user The name of the user
      * @return The public key or an empty string if the user is not in the database
      */
-    public String retrievePublicKey(String user){
+    String retrievePublicKey(String user){
         String retVal = "";
         try (Connection dataConn = DriverManager.getConnection(url)) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT publickey FROM wallets WHERE id = ?");
@@ -269,7 +300,7 @@ public class SQLController {
      * @param publicKey The public key for the user
      * @return The user name or an empty string if the user is not in the database
      */
-    public String getName(String publicKey){
+    String getName(String publicKey){
         String retVal = "";
         try (Connection dataConn = DriverManager.getConnection(url)) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT id FROM wallets WHERE publickey = ?");
@@ -287,7 +318,7 @@ public class SQLController {
      * @param product The product to check for.
      * @return True if the product is in the database
      */
-    public boolean productExistsInDatabase(Product product) {
+    boolean productExistsInDatabase(Product product) {
         try (Connection dataConn = DriverManager.getConnection(url)) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT COUNT(*) FROM products WHERE seller = ? AND price = ? AND name = ? AND description = ?");
             stSelect.setString(1, this.retrievePublicKey(product.getSeller()));
@@ -307,7 +338,7 @@ public class SQLController {
      * @param product the product to be added to the database.
      * @return Added if successful, else why the product was not added.
      */
-    public AddProductResult addProduct(Product product){
+    AddProductResult addProduct(Product product){
         AddProductResult retVal = AddProductResult.NOTADDED;
 
         if(!findWallet(product.getSeller())){
@@ -340,7 +371,7 @@ public class SQLController {
      * @param productToRemove the product to be removed from the database.
      * @return Removed if successful, otherwise a {@link RemoveProductResult} describing the failure
      */
-    public RemoveProductResult removeProduct(Product productToRemove) {
+    RemoveProductResult removeProduct(Product productToRemove) {
         RemoveProductResult retval = RemoveProductResult.NOTREMOVED;
 
         if (!findWallet(productToRemove.getSeller())){
@@ -370,7 +401,7 @@ public class SQLController {
      * @param username The username of the user whose products are being retrieved
      * @return An ArrayList of the {@link Product} added by the user
      */
-    public ArrayList<Product> getUserProductsList (String username) {
+    ArrayList<Product> getUserProductsList (String username) {
         ArrayList<Product> products = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE user = ?");
@@ -391,7 +422,7 @@ public class SQLController {
      * Gets a list of all of the products in the database
      * @return An ArrayList of the {@link Product} in the database
      */
-    public ArrayList<Product> getAllProductsList () {
+    ArrayList<Product> getAllProductsList () {
         ArrayList<Product> products = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products");
@@ -406,7 +437,14 @@ public class SQLController {
         }
         return products;
     }
-    public TransferWocoinResult transferWocoin(String username, int amt) {
+
+    /**
+     * Add Wocoins to a specific user's wallet.
+     * @param username the name of the user
+     * @param amt the amount to be transferred
+     * @return a TransferWocoinResult
+     */
+    TransferWocoinResult transferWocoin(String username, int amt) {
         if(!lookupUser(username)){
             return TransferWocoinResult.NOUSER;
         } else if (!findWallet(username)){
