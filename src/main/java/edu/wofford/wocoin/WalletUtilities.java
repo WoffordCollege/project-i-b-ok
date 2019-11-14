@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 public class WalletUtilities {
     public enum CreateWalletResult{SUCCESS, FILEALREADYEXISTS, FAILED}
 
+
     /**
      * This function creates a public and private key for a user's wallet which will be stored in a JSON File. The function
      * returns a pair which is the public key and SUCCESS if the wallet was created, ALREADYEXSITS if the file is already exists,
@@ -57,4 +58,6 @@ public class WalletUtilities {
 
 
     }
+
+
 }
