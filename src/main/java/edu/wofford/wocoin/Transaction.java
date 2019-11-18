@@ -35,3 +35,12 @@ public class Transaction {
                 + transferReceipt.getTransactionHash());
     }
 }
+
+/*      geth --datadir ./node0 init ./genesis.json
+        geth --rpc --rpcaddr
+        miner.start()
+
+        eth.accounts
+        web3.fromWei(eth.getBalance(<address_of_account>), "ether")
+        eth.sendTransaction({from:”address”, to:”address”, value: web3.toWei(amount, "ether")})
+        personal.unlockAccount(eth.accounts[0], "<password>")*/
