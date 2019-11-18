@@ -163,5 +163,16 @@ public class UserUI extends CustomActionView {
                 this.goBack();
             }
         }
+
+        private class TransferWocoinsAction extends CustomActionView {
+            public TransferWocoinsAction(ViewConfig viewConfig, Scanner keyboard) {
+                super("Choose a user to transfer Wocoins to", "transfer WoCoins", viewConfig, keyboard);
+            }
+
+            @Override
+            public void executeCustomAction() {
+
+            }
+        }
     }
 }

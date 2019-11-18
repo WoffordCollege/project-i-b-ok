@@ -49,6 +49,7 @@ public class SQLController {
     public enum TransferWocoinResult {SUCCESS, NOUSER, NOWALLET, NEGATIVEINPUT}
 
 
+
     /**
      * Constructor that takes the name of the file
      * @param filename The name of the file.
