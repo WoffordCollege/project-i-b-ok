@@ -6,6 +6,9 @@ import io.bretty.console.view.ViewConfig;
 
 import java.util.Scanner;
 
+/**
+ * This class represents
+ */
 public class AdminUI extends CustomActionView {
     private ConsoleController cc;
 

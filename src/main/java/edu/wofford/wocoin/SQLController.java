@@ -47,6 +47,14 @@ public class SQLController {
      * An enumeration of the possible results of attempting to transfer Wocoins to a user
      */
     public enum TransferWocoinResult {SUCCESS, NOUSER, NOWALLET, NEGATIVEINPUT}
+    /**
+     * An enumeration of the possible results of attempting to send a message to a user
+     */
+    public enum SendMessageResult {SENT, INVALIDSENDER, INVALIDRECIPIENT, NOWALLET, NOTSENT}
+    /**
+     * An enumeration of the possible results of attempting to delete a message from a user
+     */
+    public enum DeleteMessageResult {DELETED, DOESNOTEXIST, NOTDELETED}
 
 
 
@@ -382,6 +390,7 @@ public class SQLController {
         }
         else {
             try (Connection dataConn = DriverManager.getConnection(url)) {
+                // TODO use the ID from the product class as opposed to selecting the max product.
                 PreparedStatement stSelect = dataConn.prepareStatement("DELETE FROM products WHERE (SELECT max(id) FROM products b WHERE seller = ? AND price = ? AND name = ? AND description = ?) = products.id");
                 stSelect.setString(1, this.retrievePublicKey(productToRemove.getSeller()));
                 stSelect.setInt(2, productToRemove.getPrice());
@@ -404,6 +413,7 @@ public class SQLController {
     ArrayList<Product> getUserProductsList (String username) {
         ArrayList<Product> products = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
+            // TODO add the database ID to the product
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE user = ?");
             stSelect.setString(1, username);
             ResultSet dtr = stSelect.executeQuery();
@@ -425,6 +435,7 @@ public class SQLController {
     ArrayList<Product> getAllProductsList () {
         ArrayList<Product> products = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
+            // TODO Add the database ID to the Product
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products");
             ResultSet dtr = stSelect.executeQuery();
             while (dtr.next()) {
@@ -458,5 +469,39 @@ public class SQLController {
 
     }
 
+    /**
+     * This function takes a username and returns an {@link ArrayList} of the {@link Message}s sent to the user.
+     * The Messages returned are fully populated (id, recipient, sender, message, product)
+     * @param username the username of the user receiving messages
+     * @return an ArrayList of fully populated {@link Message}s
+     */
+    ArrayList<Message> getMessagesForUser(String username) {
+        ArrayList<Message> messages = new ArrayList<>();
+        // TODO Get messages from DB ordered by submitDateTime where newer messages are first
+        return messages;
+    }
 
+    /**
+     * This function takes in a {@link Message} object and adds it to the database. After adding it to the database,
+     * it returns a {@link SendMessageResult} with the action that occurred upon adding it.
+     * @param message the message to be sent
+     * @return a {@link SendMessageResult} with the result of attempting to send the message.
+     */
+    SendMessageResult sendMessage(Message message) {
+        // TODO Check to make sure sender and recipient have a wallet
+        // TODO Add the message to the database
+        return SendMessageResult.NOTSENT;
+    }
+
+    /**
+     * This function takes in a {@link Message} object and deletes it from the database.
+     * It returns a {@link DeleteMessageResult} with the result of attempting to delete it from the Database.
+     * @param message the message to be deleted from the database.
+     * @return a {@link DeleteMessageResult} with the result of deleting it from the database.
+     */
+    DeleteMessageResult deleteMessage(Message message) {
+        // STUB
+        // TODO check if the message exists, and, if so, delete it
+        return DeleteMessageResult.NOTDELETED;
+    }
 }

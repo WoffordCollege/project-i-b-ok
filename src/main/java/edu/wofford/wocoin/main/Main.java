@@ -1,6 +1,5 @@
 package edu.wofford.wocoin.main;
 
-import edu.wofford.wocoin.ConsoleController;
 import edu.wofford.wocoin.gui.MainMenu;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,8 @@ public class Main {
                 Feature00Main.main(realArgs);
             }
             else if (args[0].equals("1") || args[0].equals("2") || args[0].equals("3")
-                  || args[0].equals("4") || args[0].equals("5") || args[0].equals("6")) {
+                  || args[0].equals("4") || args[0].equals("5") || args[0].equals("6")
+                  || args[0].equals("8")) {
                 MainMenu.main(new String[] {args[1]});
             }
             else {
