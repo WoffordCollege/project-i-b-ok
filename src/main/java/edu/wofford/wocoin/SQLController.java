@@ -1,5 +1,6 @@
 package edu.wofford.wocoin;
 import java.io.File;
+import java.math.BigInteger;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -390,12 +391,8 @@ public class SQLController {
         }
         else {
             try (Connection dataConn = DriverManager.getConnection(url)) {
-                // TODO use the ID from the product class as opposed to selecting the max product.
-                PreparedStatement stSelect = dataConn.prepareStatement("DELETE FROM products WHERE (SELECT max(id) FROM products b WHERE seller = ? AND price = ? AND name = ? AND description = ?) = products.id");
-                stSelect.setString(1, this.retrievePublicKey(productToRemove.getSeller()));
-                stSelect.setInt(2, productToRemove.getPrice());
-                stSelect.setString(3, productToRemove.getName());
-                stSelect.setString(4, productToRemove.getDescription());
+                PreparedStatement stSelect = dataConn.prepareStatement("DELETE FROM products WHERE id = ?");
+                stSelect.setInt(1, productToRemove.getId());
                 stSelect.execute();
                 retval = RemoveProductResult.REMOVED;
             } catch (Exception e) {
@@ -413,15 +410,9 @@ public class SQLController {
     ArrayList<Product> getUserProductsList (String username) {
         ArrayList<Product> products = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
-            // TODO add the database ID to the product
-            PreparedStatement stSelect = dataConn.prepareStatement("SELECT price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE user = ?");
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE user = ?");
             stSelect.setString(1, username);
-            ResultSet dtr = stSelect.executeQuery();
-            while (dtr.next()) {
-                Product newProduct = new Product(dtr.getString("user"), dtr.getInt("price"), dtr.getString("name"), dtr.getString("description"));
-                newProduct.setDisplayType(Product.DisplayType.HIDECURRENTUSER);
-                products.add(newProduct);
-            }
+            createProductsListFromStatement(products, stSelect, Product.DisplayType.HIDECURRENTUSER);
         } catch (Exception e) {
             System.out.println("NOT_HERE" + e.toString());
         }
@@ -435,18 +426,45 @@ public class SQLController {
     ArrayList<Product> getAllProductsList () {
         ArrayList<Product> products = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
-            // TODO Add the database ID to the Product
-            PreparedStatement stSelect = dataConn.prepareStatement("SELECT price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products");
-            ResultSet dtr = stSelect.executeQuery();
-            while (dtr.next()) {
-                Product newProduct = new Product(dtr.getString("user"), dtr.getInt("price"), dtr.getString("name"), dtr.getString("description"));
-                newProduct.setDisplayType(Product.DisplayType.SHOWCURRENTUSER);
-                products.add(newProduct);
-            }
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products");
+            createProductsListFromStatement(products, stSelect, Product.DisplayType.SHOWCURRENTUSER);
         } catch (Exception e) {
             System.out.println("NOT_HERE" + e.toString());
         }
         return products;
+    }
+
+    /**
+     * Gets a list of a user's purchasable products in the database
+     * @return An ArrayList of the {@link Product} in the database
+     */
+    ArrayList<Product> getPurchasableProducts () {
+        ArrayList<Product> products = new ArrayList<>();
+        try (Connection dataConn = DriverManager.getConnection(url)) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE user <> ?");
+            createProductsListFromStatement(products, stSelect, Product.DisplayType.SHOWCURRENTUSER);
+        } catch (Exception e) {
+            System.out.println("NOT_HERE" + e.toString());
+        }
+        return products;
+    }
+
+    /**
+     * This function takes a prepared statement and creates a list of products from the database result
+     * @param products the {@link ArrayList} of products to be appended to
+     * @param stSelect the select statement to use to connect to the DB
+     * @param displayType the Display Type of the products to be added
+     * @throws SQLException if the statement is invalid
+     */
+    private void createProductsListFromStatement(ArrayList<Product> products, PreparedStatement stSelect, Product.DisplayType displayType) throws SQLException {
+        ResultSet dtr = stSelect.executeQuery();
+        while (dtr.next()) {
+            Product newProduct = new Product(dtr.getInt("id"), dtr.getString("user"),
+                    dtr.getInt("price"), dtr.getString("name"),
+                    dtr.getString("description"));
+            newProduct.setDisplayType(displayType);
+            products.add(newProduct);
+        }
     }
 
     /**
@@ -503,5 +521,16 @@ public class SQLController {
         // STUB
         // TODO check if the message exists, and, if so, delete it
         return DeleteMessageResult.NOTDELETED;
+    }
+
+    /**
+     * This function takes a username and returns the balance of their wallet.
+     * If no wallet exists, returns -1
+     * @param username the username of the wallet owner
+     * @return a {@link BigInteger} denoting the balance of the user's wallet
+     */
+    BigInteger getUserBalance(String username) {
+        String publicKey = this.retrievePublicKey(username);
+        return publicKey != null ? Utilities.getBalance(publicKey) : BigInteger.valueOf(-1);
     }
 }

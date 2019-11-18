@@ -4,6 +4,7 @@ package edu.wofford.wocoin;
  * This class models the form of a product in the Wocoin database.
  */
 public class Product implements Comparable<Product>{
+    private int id;
     private String seller;
     private int price;
     private String name;
@@ -19,7 +20,11 @@ public class Product implements Comparable<Product>{
 
 
     public Product(String seller, int price, String name, String description) {
-        this(seller, price, name, description, null);
+        this(-1, seller, price, name, description, null);
+    }
+
+    public Product(int id, String seller, int price, String name, String description) {
+        this(id, seller, price, name, description, null);
     }
 
     /**
@@ -31,8 +36,8 @@ public class Product implements Comparable<Product>{
      * @param description The description of the product
      * @param currentUser The wallet address of the user using this product
      */
-    public Product(String seller, int price, String name, String description, String currentUser) {
-        this(seller, price, name, description, currentUser, DisplayType.HIDECURRENTUSER);
+    public Product(int id, String seller, int price, String name, String description, String currentUser) {
+        this(-1, seller, price, name, description, currentUser, DisplayType.HIDECURRENTUSER);
     }
 
     /**
@@ -44,7 +49,8 @@ public class Product implements Comparable<Product>{
      * @param currentUser The wallet address of the user using this product
      * @param displayType Chooses the method {@link Product#toString()} uses to show on display
      */
-    public Product(String seller, int price, String name, String description, String currentUser, DisplayType displayType) {
+    public Product(int id, String seller, int price, String name, String description, String currentUser, DisplayType displayType) {
+        this.id = id;
         this.seller = seller;
         this.price = price;
         this.name = name;
@@ -56,6 +62,10 @@ public class Product implements Comparable<Product>{
         }
 
         this.displayType = displayType;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getSeller() {
