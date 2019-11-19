@@ -211,6 +211,14 @@ public class ConsoleController {
     }
 
     /**
+     * Gets the ArrayList of products that the current user can purchase
+     * @return an ArrayList with all products not owned by the user
+     */
+    public ArrayList<Product> getPurchasableProducts() {
+        return sqlController.getPurchasableProducts(this.currentUser);
+    }
+
+    /**
      * Removes the specified product from the database and returns a string representing what occurred.
      * @param product The product to remove
      * @return A string representing the action that occurred.
@@ -247,4 +255,71 @@ public class ConsoleController {
         return "";
     }
 
+    /**
+     * Sends a message from the current user to the seller of the given product.
+     * @param product the product the message is about
+     * @param message the message that should be sent
+     * @return a string describing the operation that occurred.
+     */
+    public String sendMessage(Product product, String message) {
+        Message newMessage = new Message(this.currentUser, message, product);
+        switch (sqlController.sendMessage(newMessage)){
+            case SENT:
+                return "Message sent.";
+            case INVALIDSENDER:
+            case INVALIDRECIPIENT:
+                return "No such user.";
+            case NOWALLET:
+                return "User has no wallet.";
+            default:
+                return "Action canceled.";
+        }
+    }
+
+    /**
+     * This function retrieves the messages for the currently logged in user
+     * @return an ArrayList of messages sent to the current user
+     */
+    public ArrayList<Message> getUserMessages() {
+        return sqlController.getMessagesForUser(this.currentUser);
+    }
+
+    /**
+     * This function deletes a given message. The message must be fully qualified.
+     * @param message the message to be deleted
+     * @return a String representing what happened to the message.
+     */
+    public String deleteMessage(Message message) {
+        switch (sqlController.deleteMessage(message)){
+            case DELETED:
+                return "Message deleted.";
+            case DOESNOTEXIST:
+                return "Message does not exist.";
+            default:
+                return "Message not deleted.";
+        }
+    }
+
+
+    /**
+     * Takes a message about a product and sends a reply to the initial
+     * @param originalMessage the message that was originally sent to the user
+     * @param messageReply the reply the user is sending
+     * @return a String representing what happened when sending the message.
+     */
+    public String replyToMessage(Message originalMessage, String messageReply) {
+        Message newMessage = new Message(this.currentUser, originalMessage.getSenderUsername(), originalMessage.getProduct());
+
+        switch (sqlController.sendMessage(newMessage)){
+            case SENT:
+                return "Message sent.";
+            case INVALIDSENDER:
+            case INVALIDRECIPIENT:
+                return "No such user.";
+            case NOWALLET:
+                return "User has no wallet.";
+            default:
+                return "Message reply not sent.";
+        }
+    }
 }
