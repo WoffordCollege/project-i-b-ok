@@ -327,7 +327,7 @@ public class SQLController {
      * @param product The product to check for.
      * @return True if the product is in the database
      */
-    boolean productExistsInDatabase(Product product) {
+    public boolean productExistsInDatabase(Product product) {
         try (Connection dataConn = DriverManager.getConnection(url)) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT COUNT(*) FROM products WHERE seller = ? AND price = ? AND name = ? AND description = ?");
             stSelect.setString(1, this.retrievePublicKey(product.getSeller()));
@@ -407,7 +407,7 @@ public class SQLController {
      * @param username The username of the user whose products are being retrieved
      * @return An ArrayList of the {@link Product} added by the user
      */
-    ArrayList<Product> getUserProductsList (String username) {
+    public ArrayList<Product> getUserProductsList (String username) {
         ArrayList<Product> products = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE user = ?");
@@ -423,7 +423,7 @@ public class SQLController {
      * Gets a list of all of the products in the database
      * @return An ArrayList of the {@link Product} in the database
      */
-    ArrayList<Product> getAllProductsList () {
+    public ArrayList<Product> getAllProductsList () {
         ArrayList<Product> products = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products");
@@ -438,10 +438,11 @@ public class SQLController {
      * Gets a list of a user's purchasable products in the database
      * @return An ArrayList of the {@link Product} in the database
      */
-    ArrayList<Product> getPurchasableProducts () {
+    ArrayList<Product> getPurchasableProducts (String username) {
         ArrayList<Product> products = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE user <> ?");
+            stSelect.setString(1, this.retrievePublicKey(username));
             createProductsListFromStatement(products, stSelect, Product.DisplayType.SHOWCURRENTUSER);
         } catch (Exception e) {
             System.out.println("NOT_HERE" + e.toString());

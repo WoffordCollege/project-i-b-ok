@@ -7,25 +7,21 @@ package edu.wofford.wocoin;
  */
 public class Message {
 	private int id;
-	private String recipientUsername;
+	private String message;
 	private String senderUsername;
 	private String submitDateTime;
 	private Product product;
 
-	public Message(int id, String recipientUsername, String senderUsername, String submitDateTime, Product product) {
+	public Message(int id, String senderUsername, String message, String submitDateTime, Product product) {
 		this.id = id;
-		this.recipientUsername = recipientUsername;
 		this.senderUsername = senderUsername;
 		this.submitDateTime = submitDateTime;
+		this.message = message;
 		this.product = product;
 	}
 
-	public Message(String recipientUsername, String senderUsername, String submitDateTime, Product product) {
-		this(-1, recipientUsername, senderUsername, submitDateTime, product);
-	}
-
-	public Message(String recipientUsername, String senderUsername, Product product) {
-		this(-1, recipientUsername, senderUsername, null, product);
+	public Message(String senderUsername, String message, Product product) {
+		this(-1, senderUsername, message, null, product);
 	}
 
 	public int getId() {
@@ -33,7 +29,7 @@ public class Message {
 	}
 
 	public String getRecipientUsername() {
-		return recipientUsername;
+		return product.getSeller();
 	}
 
 	public String getSenderUsername() {
@@ -48,11 +44,20 @@ public class Message {
 		return product;
 	}
 
+	public String getMessage() {
+		return message;
+	}
+
 	public void setId(int id) {
 		this.id = id;
 	}
 
 	public void setSubmitDateTime(String submitDateTime) {
 		this.submitDateTime = submitDateTime;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s [%s] %s", message, product.getName(), this.submitDateTime);
 	}
 }
