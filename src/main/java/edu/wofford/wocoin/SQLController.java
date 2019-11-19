@@ -91,7 +91,7 @@ public class SQLController {
      * @param name: the name of the user
      * @return true if the user has a record in the table
      */
-    boolean lookupUser(String name){
+    public boolean lookupUser(String name){
         boolean returnVal = false;
         try (Connection dataConn = DriverManager.getConnection(url)) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT count(*) FROM users WHERE id = ?");
@@ -199,7 +199,7 @@ public class SQLController {
      * @param user The user name to check for.
      * @return True if the user has a wallet
      */
-    boolean findWallet(String user){
+    public boolean findWallet(String user){
         boolean retVal = false;
         try (Connection dataConn = DriverManager.getConnection(url)) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT count(*) FROM wallets WHERE id = ?");
@@ -481,7 +481,7 @@ public class SQLController {
         } else if (amt <= 0){
             return TransferWocoinResult.NEGATIVEINPUT;
         } else {
-            //do blockchain stuff
+            // TODO do blockchain transaction stuff
             return TransferWocoinResult.SUCCESS;
         }
 

@@ -53,6 +53,14 @@ public class ConsoleController {
     }
 
     /**
+     * This function returns the current SQLController
+     * @return the current sqlController
+     */
+    public SQLController getSqlController() {
+        return sqlController;
+    }
+
+    /**
      * This is a helper method for use in checking if a user has a Wocoin wallet.
      * @return if there is a currentUser and they have a wallet, returns true, else false
      */
@@ -219,5 +227,24 @@ public class ConsoleController {
         }
     }
 
+    /**
+     * This function takes a username and amount and adds the WoCoins to the user's balance.
+     * @param username the username to transfer WoCoins to
+     * @param amount the amount of WoCoins to transfer
+     * @return a string representing the output
+     */
+    public String transferWocoinsToUser(String username, int amount) {
+        switch (sqlController.transferWocoin(username, amount)) {
+            case SUCCESS:
+                return "Transfer complete.";
+            case NOUSER:
+                return "No such user.";
+            case NOWALLET:
+                return "User has no wallet.";
+            case NEGATIVEINPUT:
+                return "Expected an integer value greater than or equal to 1.";
+        }
+        return "";
+    }
 
 }

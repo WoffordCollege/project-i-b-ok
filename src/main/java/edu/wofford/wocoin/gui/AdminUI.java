@@ -46,24 +46,9 @@ public class AdminUI extends CustomActionView {
             this.parentView = parentView;
             this.keyboard = keyboard;
 
-            CustomActionView addUserAction = new CustomActionView("Add User", "add user", viewConfig, keyboard) {
-                @Override
-                public void executeCustomAction() {
-                    String username = this.prompt("Enter your username: ", String.class);
-                    String password = this.prompt("Enter your password: ", String.class);
+            AddUserAction addUserAction = new AddUserAction(viewConfig, keyboard);
+            RemoveUserAction removeUserAction = new RemoveUserAction(viewConfig, keyboard);
 
-                    this.println(cc.addUser(username, password));
-                    this.println("Invalid input");
-                }
-            };
-
-            CustomActionView removeUserAction = new CustomActionView("Remove User", "remove user", viewConfig, keyboard) {
-                @Override
-                public void executeCustomAction() {
-                    String username = this.prompt("Please enter the username of the account to be removed: ", String.class);
-                    this.println(cc.removeUser(username));
-                }
-            };
 
             this.addMenuItem(addUserAction);
             this.addMenuItem(removeUserAction);
@@ -74,5 +59,57 @@ public class AdminUI extends CustomActionView {
     protected void onBack() {
         cc.doLogout();
         super.onBack();
+    }
+
+    private class AddUserAction extends CustomActionView {
+        public AddUserAction(ViewConfig viewConfig, Scanner keyboard) {
+            super("Add User", "add user", viewConfig, keyboard);
+        }
+
+        @Override
+        public void executeCustomAction() {
+            String username = this.prompt("Enter a username to add: ", String.class);
+            String password = this.prompt("Enter a password for the user: ", String.class);
+
+            this.println(cc.addUser(username, password));
+        }
+    }
+
+    private class RemoveUserAction extends CustomActionView {
+        public RemoveUserAction(ViewConfig viewConfig, Scanner keyboard) {
+            super("Remove User", "remove user", viewConfig, keyboard);
+        }
+
+        @Override
+        public void executeCustomAction() {
+            String username = this.prompt("Please enter the username of the account to be removed: ", String.class);
+            this.println(cc.removeUser(username));
+        }
+    }
+
+    private class TransferFundsAction extends CustomActionView {
+        public TransferFundsAction(ViewConfig viewConfig, Scanner keyboard) {
+            super("Transfer WoCoins to User", "transfer WoCoins", viewConfig, keyboard);
+        }
+
+        @Override
+        public void executeCustomAction() {
+            String username = this.prompt("Enter the username of the user to transfer WoCoins to: ", String.class);
+            if (!cc.getSqlController().lookupUser(username)) {
+                this.println("No such user.");
+            }
+            else if (!cc.getSqlController().findWallet(username)){
+                this.println("User has no wallet.");
+            }
+            else {
+                int coinsToTransfer = this.prompt("Enter the amount of WoCoins to transfer to the user: ", Integer.class);
+                if (coinsToTransfer > 0) {
+					this.println(cc.transferWocoinsToUser(username, coinsToTransfer));
+                }
+                else {
+                    this.println("Expected an integer value greater than or equal to 1.");
+                }
+            }
+        }
     }
 }
