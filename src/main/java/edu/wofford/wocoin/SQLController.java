@@ -420,6 +420,25 @@ public class SQLController {
     }
 
     /**
+     * Gets a list of the products in the database not added by the username below and whose price is less than or equal to the user's wocoin balance
+     * @param username The username of the user whose products are not being retrieved
+     * @param balance the user's wocoin balance
+     * @return An ArrayList of the {@link Product} that can be bought by the user
+     */
+    ArrayList<Product> getPurchasableProductsList (String username, int balance) {
+        ArrayList<Product> products = new ArrayList<>();
+        try (Connection dataConn = DriverManager.getConnection(url)) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE user <> ? and price <= ?");
+            stSelect.setString(1, username);
+            stSelect.setInt(2, balance);
+            createProductsListFromStatement(products, stSelect, Product.DisplayType.HIDECURRENTUSER);
+        } catch (Exception e) {
+            System.out.println("NOT_HERE" + e.toString());
+        }
+        return products;
+    }
+
+    /**
      * Gets a list of all of the products in the database
      * @return An ArrayList of the {@link Product} in the database
      */

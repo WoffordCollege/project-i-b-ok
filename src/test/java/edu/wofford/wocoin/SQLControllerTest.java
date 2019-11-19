@@ -248,6 +248,56 @@ public class SQLControllerTest {
     }
 
     @Test
+    public final void getPurchasableProducts(){
+        setupDB();
+        Product skittles1 = new Product("jsmith", 1, "skittles", "a half-eaten bag");
+        Product zombieland3 = new Product("jsmith", 2, "Zombieland", "DVD");
+        Product risk6 = new Product("jsmith", 4, "Risk", "board game");
+
+        ArrayList<Product> expectedJdoeProducts = new ArrayList<>();
+
+        expectedJdoeProducts.add(skittles1);
+        expectedJdoeProducts.add(zombieland3);
+        expectedJdoeProducts.add(risk6);
+
+        expectedJdoeProducts.sort(Product::compareTo);
+
+        ArrayList<Product> actualJdoeProducts = foobar.getPurchasableProductsList("jdoe",5);
+
+        actualJdoeProducts.sort(Product::compareTo);
+
+        assertEquals(expectedJdoeProducts, actualJdoeProducts);
+    }
+
+    @Test
+    public final void getPurchasableProductsOther(){
+        //setupDB();
+        Product skittles1 = new Product("jsmith", 1, "skittles", "a half-eaten bag");
+        Product zombieland3 = new Product("jsmith", 2, "Zombieland", "DVD");
+
+        ArrayList<Product> expectedJdoeProducts = new ArrayList<>();
+
+        expectedJdoeProducts.add(skittles1);
+        expectedJdoeProducts.add(zombieland3);
+
+        expectedJdoeProducts.sort(Product::compareTo);
+
+        ArrayList<Product> actualJdoeProducts = foobar.getPurchasableProductsList("jdoe",2);
+
+        actualJdoeProducts.sort(Product::compareTo);
+
+        assertEquals(expectedJdoeProducts, actualJdoeProducts);
+    }
+
+    @Test
+    public final void getPurchasableProductsOtherOther(){
+        //setupDB();
+        ArrayList<Product> expectedJdoeProducts = new ArrayList<>();
+        ArrayList<Product> actualJdoeProducts = foobar.getPurchasableProductsList("jdoe",0);
+        assertEquals(expectedJdoeProducts, actualJdoeProducts);
+    }
+
+    @Test
     public void getAllProductsFromDB() {
         setupDB();
         Product skittles1 = new Product("jsmith", 1, "skittles", "a half-eaten bag");
@@ -275,6 +325,7 @@ public class SQLControllerTest {
 
         assertEquals(expectedProducts, actualProducts);
     }
+
     @Test
     public void transferSuccess(){
         foobar.insertUser("test", "1234");
