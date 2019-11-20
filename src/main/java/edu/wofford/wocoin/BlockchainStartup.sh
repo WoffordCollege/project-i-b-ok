@@ -1,0 +1,2 @@
+geth --datadir ./node0 init ./genesis.json
+geth --rpc --rpcapi personal,eth,net,web3,miner --mine --miner.etherbase 0x0fce4741f3f54fbffb97837b4ddaa8f769ba0f91 --nodiscover --rpccorsdomain "*" --datadir ./node0 --miner.noverify --allow-insecure-unlock --unlock 0 --password C:\Users\cburd\project-i-b-ok\ethereum\node0\keystore\password.txt
