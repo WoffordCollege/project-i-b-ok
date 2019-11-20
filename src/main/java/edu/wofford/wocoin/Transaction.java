@@ -29,7 +29,7 @@ public class Transaction {
         TransactionReceipt transferReceipt = Transfer.sendFunds(
                 web3j, credentials,
                 "0xa615316333ba8622fd5bb60fe39758b3515f774d",
-                BigDecimal.valueOf(0.123), Convert.Unit.ETHER).sendAsync()
+                BigDecimal.valueOf(11), Convert.Unit.ETHER).sendAsync()
                 .get();
         log.info("Transaction complete : "
                 + transferReceipt.getTransactionHash());
