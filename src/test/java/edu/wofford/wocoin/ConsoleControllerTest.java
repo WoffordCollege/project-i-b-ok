@@ -216,4 +216,25 @@ public class ConsoleControllerTest {
         assertEquals(expectedProducts, actualProducts);
 
     }
+
+    @Test
+    public void testGetSQLController() {
+        ConsoleController cc = new ConsoleController(sqlController);
+        assertSame(cc.getSqlController(), sqlController);
+    }
+
+    @Test
+    public void testTransferWoCoins() {
+        ConsoleController cc = new ConsoleController(sqlController);
+        cc.addUser("testtransfer", "password");
+        cc.addUser("testtransfernowallet", "password");
+        cc.userLogin("testtransfer", "password");
+        cc.addWalletToUser("test");
+        assertEquals(cc.transferWocoinsToUser("testtransfer", 10), "Transfer complete.");
+        assertEquals(cc.transferWocoinsToUser("notauser", 10), "No such user.");
+        assertEquals(cc.transferWocoinsToUser("testtransfernowallet", 10), "User has no wallet.");
+        assertEquals(cc.transferWocoinsToUser("testtransfer", -10), "Expected an integer value greater than or equal to 1.");
+
+        // TODO When the transfer in SQLController is done, check to make sure the balance correctly reflects the transaction
+    }
 }

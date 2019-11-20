@@ -1,5 +1,6 @@
 package edu.wofford.wocoin;
 import java.io.File;
+import java.math.BigInteger;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -47,6 +48,14 @@ public class SQLController {
      * An enumeration of the possible results of attempting to transfer Wocoins to a user
      */
     public enum TransferWocoinResult {SUCCESS, NOUSER, NOWALLET, NEGATIVEINPUT}
+    /**
+     * An enumeration of the possible results of attempting to send a message to a user
+     */
+    public enum SendMessageResult {SENT, INVALIDSENDER, INVALIDRECIPIENT, NOWALLET, NOTSENT}
+    /**
+     * An enumeration of the possible results of attempting to delete a message from a user
+     */
+    public enum DeleteMessageResult {DELETED, DOESNOTEXIST, NOTDELETED}
 
 
 
@@ -82,7 +91,7 @@ public class SQLController {
      * @param name: the name of the user
      * @return true if the user has a record in the table
      */
-    boolean lookupUser(String name){
+    public boolean lookupUser(String name){
         boolean returnVal = false;
         try (Connection dataConn = DriverManager.getConnection(url)) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT count(*) FROM users WHERE id = ?");
@@ -190,7 +199,7 @@ public class SQLController {
      * @param user The user name to check for.
      * @return True if the user has a wallet
      */
-    boolean findWallet(String user){
+    public boolean findWallet(String user){
         boolean retVal = false;
         try (Connection dataConn = DriverManager.getConnection(url)) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT count(*) FROM wallets WHERE id = ?");
@@ -318,7 +327,7 @@ public class SQLController {
      * @param product The product to check for.
      * @return True if the product is in the database
      */
-    boolean productExistsInDatabase(Product product) {
+    public boolean productExistsInDatabase(Product product) {
         try (Connection dataConn = DriverManager.getConnection(url)) {
             PreparedStatement stSelect = dataConn.prepareStatement("SELECT COUNT(*) FROM products WHERE seller = ? AND price = ? AND name = ? AND description = ?");
             stSelect.setString(1, this.retrievePublicKey(product.getSeller()));
@@ -382,11 +391,8 @@ public class SQLController {
         }
         else {
             try (Connection dataConn = DriverManager.getConnection(url)) {
-                PreparedStatement stSelect = dataConn.prepareStatement("DELETE FROM products WHERE (SELECT max(id) FROM products b WHERE seller = ? AND price = ? AND name = ? AND description = ?) = products.id");
-                stSelect.setString(1, this.retrievePublicKey(productToRemove.getSeller()));
-                stSelect.setInt(2, productToRemove.getPrice());
-                stSelect.setString(3, productToRemove.getName());
-                stSelect.setString(4, productToRemove.getDescription());
+                PreparedStatement stSelect = dataConn.prepareStatement("DELETE FROM products WHERE id = ?");
+                stSelect.setInt(1, productToRemove.getId());
                 stSelect.execute();
                 retval = RemoveProductResult.REMOVED;
             } catch (Exception e) {
@@ -401,17 +407,31 @@ public class SQLController {
      * @param username The username of the user whose products are being retrieved
      * @return An ArrayList of the {@link Product} added by the user
      */
-    ArrayList<Product> getUserProductsList (String username) {
+    public ArrayList<Product> getUserProductsList (String username) {
         ArrayList<Product> products = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
-            PreparedStatement stSelect = dataConn.prepareStatement("SELECT price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE user = ?");
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE user = ?");
             stSelect.setString(1, username);
-            ResultSet dtr = stSelect.executeQuery();
-            while (dtr.next()) {
-                Product newProduct = new Product(dtr.getString("user"), dtr.getInt("price"), dtr.getString("name"), dtr.getString("description"));
-                newProduct.setDisplayType(Product.DisplayType.HIDECURRENTUSER);
-                products.add(newProduct);
-            }
+            createProductsListFromStatement(products, stSelect, Product.DisplayType.HIDECURRENTUSER);
+        } catch (Exception e) {
+            System.out.println("NOT_HERE" + e.toString());
+        }
+        return products;
+    }
+
+    /**
+     * Gets a list of the products in the database not added by the username below and whose price is less than or equal to the user's wocoin balance
+     * @param username The username of the user whose products are not being retrieved
+     * @param balance the user's wocoin balance
+     * @return An ArrayList of the {@link Product} that can be bought by the user
+     */
+    ArrayList<Product> getPurchasableProductsList (String username, int balance) {
+        ArrayList<Product> products = new ArrayList<>();
+        try (Connection dataConn = DriverManager.getConnection(url)) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE user <> ? and price <= ?");
+            stSelect.setString(1, username);
+            stSelect.setInt(2, balance);
+            createProductsListFromStatement(products, stSelect, Product.DisplayType.HIDECURRENTUSER);
         } catch (Exception e) {
             System.out.println("NOT_HERE" + e.toString());
         }
@@ -422,20 +442,49 @@ public class SQLController {
      * Gets a list of all of the products in the database
      * @return An ArrayList of the {@link Product} in the database
      */
-    ArrayList<Product> getAllProductsList () {
+    public ArrayList<Product> getAllProductsList () {
         ArrayList<Product> products = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
-            PreparedStatement stSelect = dataConn.prepareStatement("SELECT price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products");
-            ResultSet dtr = stSelect.executeQuery();
-            while (dtr.next()) {
-                Product newProduct = new Product(dtr.getString("user"), dtr.getInt("price"), dtr.getString("name"), dtr.getString("description"));
-                newProduct.setDisplayType(Product.DisplayType.SHOWCURRENTUSER);
-                products.add(newProduct);
-            }
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products");
+            createProductsListFromStatement(products, stSelect, Product.DisplayType.SHOWCURRENTUSER);
         } catch (Exception e) {
             System.out.println("NOT_HERE" + e.toString());
         }
         return products;
+    }
+
+    /**
+     * Gets a list of a user's purchasable products in the database
+     * @return An ArrayList of the {@link Product} in the database
+     */
+    ArrayList<Product> getPurchasableProducts (String username) {
+        ArrayList<Product> products = new ArrayList<>();
+        try (Connection dataConn = DriverManager.getConnection(url)) {
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE user <> ?");
+            stSelect.setString(1, this.retrievePublicKey(username));
+            createProductsListFromStatement(products, stSelect, Product.DisplayType.SHOWCURRENTUSER);
+        } catch (Exception e) {
+            System.out.println("NOT_HERE" + e.toString());
+        }
+        return products;
+    }
+
+    /**
+     * This function takes a prepared statement and creates a list of products from the database result
+     * @param products the {@link ArrayList} of products to be appended to
+     * @param stSelect the select statement to use to connect to the DB
+     * @param displayType the Display Type of the products to be added
+     * @throws SQLException if the statement is invalid
+     */
+    private void createProductsListFromStatement(ArrayList<Product> products, PreparedStatement stSelect, Product.DisplayType displayType) throws SQLException {
+        ResultSet dtr = stSelect.executeQuery();
+        while (dtr.next()) {
+            Product newProduct = new Product(dtr.getInt("id"), dtr.getString("user"),
+                    dtr.getInt("price"), dtr.getString("name"),
+                    dtr.getString("description"));
+            newProduct.setDisplayType(displayType);
+            products.add(newProduct);
+        }
     }
 
     /**
@@ -452,11 +501,56 @@ public class SQLController {
         } else if (amt <= 0){
             return TransferWocoinResult.NEGATIVEINPUT;
         } else {
-            //do blockchain stuff
+            // TODO do blockchain transaction stuff
             return TransferWocoinResult.SUCCESS;
         }
 
     }
 
+    /**
+     * This function takes a username and returns an {@link ArrayList} of the {@link Message}s sent to the user.
+     * The Messages returned are fully populated (id, recipient, sender, message, product)
+     * @param username the username of the user receiving messages
+     * @return an ArrayList of fully populated {@link Message}s
+     */
+    ArrayList<Message> getMessagesForUser(String username) {
+        ArrayList<Message> messages = new ArrayList<>();
+        // TODO Get messages from DB ordered by submitDateTime where newer messages are first
+        return messages;
+    }
 
+    /**
+     * This function takes in a {@link Message} object and adds it to the database. After adding it to the database,
+     * it returns a {@link SendMessageResult} with the action that occurred upon adding it.
+     * @param message the message to be sent
+     * @return a {@link SendMessageResult} with the result of attempting to send the message.
+     */
+    SendMessageResult sendMessage(Message message) {
+        // TODO Check to make sure sender and recipient have a wallet
+        // TODO Add the message to the database
+        return SendMessageResult.NOTSENT;
+    }
+
+    /**
+     * This function takes in a {@link Message} object and deletes it from the database.
+     * It returns a {@link DeleteMessageResult} with the result of attempting to delete it from the Database.
+     * @param message the message to be deleted from the database.
+     * @return a {@link DeleteMessageResult} with the result of deleting it from the database.
+     */
+    DeleteMessageResult deleteMessage(Message message) {
+        // STUB
+        // TODO check if the message exists, and, if so, delete it
+        return DeleteMessageResult.NOTDELETED;
+    }
+
+    /**
+     * This function takes a username and returns the balance of their wallet.
+     * If no wallet exists, returns -1
+     * @param username the username of the wallet owner
+     * @return a {@link BigInteger} denoting the balance of the user's wallet
+     */
+    BigInteger getUserBalance(String username) {
+        String publicKey = this.retrievePublicKey(username);
+        return publicKey != null ? Utilities.getBalance(publicKey) : BigInteger.valueOf(-1);
+    }
 }

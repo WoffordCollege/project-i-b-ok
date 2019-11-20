@@ -1,10 +1,12 @@
 package edu.wofford.wocoin.gui;
 
 import edu.wofford.wocoin.ConsoleController;
+import edu.wofford.wocoin.Message;
 import edu.wofford.wocoin.Product;
 import edu.wofford.wocoin.WalletUtilities;
 import io.bretty.console.view.AbstractView;
 import io.bretty.console.view.ViewConfig;
+import org.web3j.abi.datatypes.Int;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -18,14 +20,17 @@ public class UserUI extends CustomActionView {
     }
 
     public UserUI(ConsoleController cc, ViewConfig viewConfig, Scanner keyboard) {
-        super("Please enter your username and password separated by a space.", "user", viewConfig, keyboard);
+        super("", "user", viewConfig, keyboard);
         this.cc = cc;
     }
 
     @Override
     public void executeCustomAction() {
-        String username = this.prompt("Enter your username: ", String.class);
-        String password = this.prompt("Enter your password: ", String.class);
+        this.print("Enter your username: ");
+        String username = this.prompt("", String.class);
+
+        this.print("Enter your password: ");
+        String password = this.prompt("", String.class);
 
         if (!cc.userLogin(username, password)){
             this.println("No such user.");
@@ -49,6 +54,7 @@ public class UserUI extends CustomActionView {
             views.add(new CreateProductAction(viewConfig, keyboard));
             views.add(new RemoveProductAction(viewConfig, keyboard));
             views.add(new DisplayProductsAction(viewConfig, keyboard));
+            views.add(new SendMessageAction(viewConfig, keyboard));
 
             views.forEach(this::addMenuItem);
         }
@@ -151,7 +157,7 @@ public class UserUI extends CustomActionView {
 
             @Override
             public void executeCustomAction() {
-                ArrayList<Product> products = cc.getAllProducts();
+                ArrayList<Product> products = cc.getSqlController().getAllProductsList();
                 products.sort(Product::compareToWithPrice);
 
                 for (int i = 0; i < products.size(); i++) {
@@ -164,15 +170,86 @@ public class UserUI extends CustomActionView {
             }
         }
 
-        private class TransferWocoinsAction extends CustomActionView {
-            public TransferWocoinsAction(ViewConfig viewConfig, Scanner keyboard) {
-                super("Choose a user to transfer Wocoins to", "transfer WoCoins", viewConfig, keyboard);
+        private class SendMessageAction extends CustomActionView {
+            public SendMessageAction(ViewConfig viewConfig, Scanner keyboard) {
+                super("Pick a Product to send a message to its seller", "send message", viewConfig, keyboard);
+	            this.viewConfig = new ViewConfig.Builder()
+									            .setBackMenuName("cancel")
+									            .setIndexNumberFormatter(index -> (index + 1) + ": ")
+									            .build();
             }
 
             @Override
             public void executeCustomAction() {
+	            ArrayList<Product> products = cc.getPurchasableProducts();
+	            products.sort(Product::compareToWithPrice);
 
+	            this.println("1: cancel");
+	            for (int i = 0; i < products.size(); i++) {
+		            this.println(String.format("%d: %s", i + 2, products.get(i).toString()));
+	            }
+
+	            int selected = this.prompt("Which product number is the subject of the message? ", Integer.class);
+
+	            if (selected == 1) {
+		            this.println("Action canceled.");
+	            }
+	            else if (!cc.userHasWallet()) {
+		            this.println("User has no wallet.");
+	            }
+	            else if (selected < 1 || selected - 1 > products.size()) {
+		            this.println(String.format("Invalid value. Enter a value between 1 and %d.", products.size() + 1));
+		            this.println("Action canceled.");
+	            }
+	            else {
+	            	String userMessage = this.prompt("What is the message? ", String.class);
+		            this.println(cc.sendMessage(products.get(selected - 2), userMessage));
+	            }
             }
+        }
+
+        private class GetMessagesAction extends CustomActionView {
+	        public GetMessagesAction(ViewConfig viewConfig, Scanner keyboard) {
+	        	super("Pick a message to reply to or delete.", "get messages", viewConfig, keyboard);
+	        }
+
+	        @Override
+	        public void executeCustomAction() {
+				ArrayList<Message> messages = cc.getUserMessages();
+
+		        this.println("1: cancel");
+		        for (int i = 0; i < messages.size(); i++) {
+			        this.println(String.format("%d: %s", i + 2, messages.get(i).toString()));
+		        }
+		        int selected = this.prompt("Which message? ", Integer.class);
+
+		        if (selected == 1) {
+			        this.println("Action canceled.");
+		        }
+		        else if (!cc.userHasWallet()) {
+			        this.println("User has no wallet.");
+		        }
+		        else if (selected < 1 || selected - 1 > messages.size()) {
+			        this.println(String.format("Invalid value. Enter a value between 1 and %d.", messages.size() + 1));
+		        }
+		        else {
+			        this.println("1: cancel");
+			        this.println("2: reply");
+			        this.println("3: delete");
+			        int messageOption = this.prompt("What do you want to do? ", Integer.class);
+			        if (messageOption == 1) {
+			        	this.println("Action canceled.");
+			        }
+			        else if (messageOption == 2) {
+			        	String reply = this.prompt("What would you like to reply? ", String.class);
+						this.println(cc.replyToMessage(messages.get(selected - 2), reply));
+			        }
+			        else if (messageOption == 3) {
+						this.println(cc.deleteMessage(messages.get(selected - 2)));
+			        }
+		        }
+		        this.goBack();
+	        }
         }
     }
 }
