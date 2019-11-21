@@ -34,7 +34,6 @@ public class WalletUtilities {
     public static Pair<String, CreateWalletResult> createWallet(String path, String username, String password) {
         Path directoryPath = Paths.get(path, username);
         Path finalFilePath = Paths.get(path, username, "mykeyfile.json");
-
         File finalKeyFile = finalFilePath.toFile();
 
         if (finalKeyFile.exists()) {
