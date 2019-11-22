@@ -526,6 +526,18 @@ public class SQLController {
      */
     ArrayList<Message> getMessagesForUser(String username) {
         ArrayList<Message> messages = new ArrayList<>();
+        try (Connection dataConn = DriverManager.getConnection(url)) {
+            PreparedStatement stSelect = dataConn.prepareStatement("select a.id, (select id from wallets where publickey = a.sender) senderUserName, (select id from wallets where publickey = a.recipient) recieverUserName, message, b.id, b.price, b.name, b.description, a.dt from messages a join products b on a.productid = b.id;");
+            ResultSet dtr = stSelect.executeQuery();
+            while (dtr.next()) {
+                Product newProduct = new Product(dtr.getInt(5),dtr.getString("senderUserName"),dtr.getInt(6),dtr.getString(7),dtr.getString(8));
+                Message newMessage = new Message(dtr.getInt(1), dtr.getString("senderUserName"),dtr.getString("message"),dtr.getString(9),newProduct);
+                newMessage.setRecipient(dtr.getString("recieverUserName"));
+                messages.add(newMessage);
+            }
+        } catch (Exception e) {
+            System.out.println("NOT_HERE" + e.toString());
+        }
         // TODO Get messages from DB ordered by submitDateTime where newer messages are first
         return messages;
     }
