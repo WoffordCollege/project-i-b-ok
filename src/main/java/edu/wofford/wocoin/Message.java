@@ -9,6 +9,7 @@ public class Message {
 	private int id;
 	private String message;
 	private String senderUsername;
+	private String recipientUsername;
 	private String submitDateTime;
 	private Product product;
 
@@ -51,6 +52,8 @@ public class Message {
 	public void setId(int id) {
 		this.id = id;
 	}
+
+	public void setRecipient(String username){ this.recipientUsername = username;}
 
 	public void setSubmitDateTime(String submitDateTime) {
 		this.submitDateTime = submitDateTime;
