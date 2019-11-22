@@ -174,10 +174,10 @@ public class SQLControllerTest {
 
     @Test
     public final void removeProductInDB() {
-        foobar.insertUser("john","Wofford1854");
-        foobar.addWallet("john","j12345");
+        foobar.insertUser("testseller","Wofford1854");
+        foobar.addWallet("testseller","j12345");
 
-        Product newProduct = new Product("john", 20, "x", "This is the description.");
+        Product newProduct = new Product("testseller", 20, "x", "This is the description.");
         assertEquals(SQLController.AddProductResult.ADDED, foobar.addProduct(newProduct));
 
         assertEquals(SQLController.RemoveProductResult.REMOVED, foobar.removeProduct(newProduct));

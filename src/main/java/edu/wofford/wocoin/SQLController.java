@@ -55,7 +55,7 @@ public class SQLController {
     /**
      * An enumeration of the possible results of attempting to delete a message from a user
      */
-    public enum DeleteMessageResult {DELETED, DOESNOTEXIST, NOTDELETED}
+    public enum DeleteMessageResult {DELETED, NOTDELETED}
 
 
 
@@ -391,10 +391,21 @@ public class SQLController {
         }
         else {
             try (Connection dataConn = DriverManager.getConnection(url)) {
-                PreparedStatement stSelect = dataConn.prepareStatement("DELETE FROM products WHERE id = ?");
-                stSelect.setInt(1, productToRemove.getId());
-                stSelect.execute();
-                retval = RemoveProductResult.REMOVED;
+                if (productToRemove.getId() < 0) {
+                    PreparedStatement stSelect = dataConn.prepareStatement("DELETE FROM products WHERE (SELECT max(id) FROM products b WHERE seller = ? AND price = ? AND name = ? AND description = ?) = products.id");
+                    stSelect.setString(1, this.retrievePublicKey(productToRemove.getSeller()));
+                    stSelect.setInt(2, productToRemove.getPrice());
+                    stSelect.setString(3, productToRemove.getName());
+                    stSelect.setString(4, productToRemove.getDescription());
+                    stSelect.execute();
+                    retval = RemoveProductResult.REMOVED;
+                }
+                else {
+                    PreparedStatement stSelect = dataConn.prepareStatement("DELETE FROM products WHERE id = ?");
+                    stSelect.setInt(1, productToRemove.getId());
+                    stSelect.execute();
+                    retval = RemoveProductResult.REMOVED;
+                }
             } catch (Exception e) {
                 System.out.println(e.toString());
             }
@@ -516,7 +527,7 @@ public class SQLController {
     ArrayList<Message> getMessagesForUser(String username) {
         ArrayList<Message> messages = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
-            PreparedStatement stSelect = dataConn.prepareStatement("select a.id, (select id from wallets where publickey = a.sender) senderUserName, (select id from wallets where publickey = a.recipient) recieverUserName, message, b.id, b.price, b.name, b.description, a.dt from messages a join products b on a.productid = b.id;");
+            PreparedStatement stSelect = dataConn.prepareStatement("select a.id, (select id from wallets where publickey = a.sender) senderUserName, (select id from wallets where publickey = a.recipient) recieverUserName, message, b.id, b.price, b.name, b.description, a.dt from messages a join products b on a.productid = b.id Order By dt Asc;");
             ResultSet dtr = stSelect.executeQuery();
             while (dtr.next()) {
                 Product newProduct = new Product(dtr.getInt(5),dtr.getString("senderUserName"),dtr.getInt(6),dtr.getString(7),dtr.getString(8));
@@ -538,9 +549,25 @@ public class SQLController {
      * @return a {@link SendMessageResult} with the result of attempting to send the message.
      */
     SendMessageResult sendMessage(Message message) {
-        // TODO Check to make sure sender and recipient have a wallet
+        SendMessageResult retVal = SendMessageResult.NOTSENT;
+        if(!findWallet(message.getSenderUsername())){
+            retVal = SendMessageResult.INVALIDSENDER;
+        }else if(!findWallet(message.getSenderUsername())){
+            retVal = SendMessageResult.INVALIDRECIPIENT;
+        }else{
+            try(Connection dataConn = DriverManager.getConnection(url)){
+                PreparedStatement stInsert = dataConn.prepareStatement("Insert Into messages (sender, recipient, productid, message) Values (?,?,?,?)");
+                stInsert.setString(1,getName(message.getSenderUsername()));
+                stInsert.setString(2,getName(message.getRecipientUsername()));
+                stInsert.setInt(3,message.getProduct().getId());
+                stInsert.setString(4,message.getMessage());
+                retVal = SendMessageResult.SENT;
+            } catch (Exception e){
+                System.out.println(e.toString());
+            }
+        }
         // TODO Add the message to the database
-        return SendMessageResult.NOTSENT;
+        return retVal;
     }
 
     /**
@@ -550,9 +577,16 @@ public class SQLController {
      * @return a {@link DeleteMessageResult} with the result of deleting it from the database.
      */
     DeleteMessageResult deleteMessage(Message message) {
-        // STUB
+        DeleteMessageResult retVal = DeleteMessageResult.NOTDELETED;
+        try(Connection dataConn = DriverManager.getConnection(url)){
+            PreparedStatement stInsert = dataConn.prepareStatement("Delete From messages Where id = ?");
+            stInsert.setInt(1,message.getId());
+            retVal = DeleteMessageResult.DELETED;
+        } catch (Exception e){
+            System.out.println(e.toString());
+        }
         // TODO check if the message exists, and, if so, delete it
-        return DeleteMessageResult.NOTDELETED;
+        return retVal;
     }
 
     /**
