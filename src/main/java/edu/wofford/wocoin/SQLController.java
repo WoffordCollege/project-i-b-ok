@@ -55,7 +55,7 @@ public class SQLController {
     /**
      * An enumeration of the possible results of attempting to delete a message from a user
      */
-    public enum DeleteMessageResult {DELETED, DOESNOTEXIST, NOTDELETED}
+    public enum DeleteMessageResult {DELETED, NOTDELETED}
 
 
 
@@ -527,7 +527,7 @@ public class SQLController {
     ArrayList<Message> getMessagesForUser(String username) {
         ArrayList<Message> messages = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
-            PreparedStatement stSelect = dataConn.prepareStatement("select a.id, (select id from wallets where publickey = a.sender) senderUserName, (select id from wallets where publickey = a.recipient) recieverUserName, message, b.id, b.price, b.name, b.description, a.dt from messages a join products b on a.productid = b.id;");
+            PreparedStatement stSelect = dataConn.prepareStatement("select a.id, (select id from wallets where publickey = a.sender) senderUserName, (select id from wallets where publickey = a.recipient) recieverUserName, message, b.id, b.price, b.name, b.description, a.dt from messages a join products b on a.productid = b.id Order By dt Asc;");
             ResultSet dtr = stSelect.executeQuery();
             while (dtr.next()) {
                 Product newProduct = new Product(dtr.getInt(5),dtr.getString("senderUserName"),dtr.getInt(6),dtr.getString(7),dtr.getString(8));
@@ -566,7 +566,6 @@ public class SQLController {
                 System.out.println(e.toString());
             }
         }
-        // TODO Check to make sure sender and recipient have a wallet
         // TODO Add the message to the database
         return retVal;
     }
