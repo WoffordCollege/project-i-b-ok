@@ -48,15 +48,13 @@ public class UserUI extends CustomActionView {
 
             this.parentView = parentView;
 
-            ArrayList<AbstractView> views = new ArrayList<>();
-
-            views.add(new CreateWalletAction(viewConfig, keyboard));
-            views.add(new CreateProductAction(viewConfig, keyboard));
-            views.add(new RemoveProductAction(viewConfig, keyboard));
-            views.add(new DisplayProductsAction(viewConfig, keyboard));
-            views.add(new SendMessageAction(viewConfig, keyboard));
-
-            views.forEach(this::addMenuItem);
+            this.addMenuItem(new CreateWalletAction(viewConfig, keyboard));
+            this.addMenuItem(new CreateProductAction(viewConfig, keyboard));
+            this.addMenuItem(new RemoveProductAction(viewConfig, keyboard));
+            this.addMenuItem(new DisplayProductsAction(viewConfig, keyboard));
+            this.addMenuItem(new SendMessageAction(viewConfig, keyboard));
+            this.addMenuItem(new GetMessagesAction(viewConfig, keyboard));
+            this.addMenuItem(new GetBalanceAction(viewConfig, keyboard));
         }
 
 
@@ -249,6 +247,18 @@ public class UserUI extends CustomActionView {
 			        }
 		        }
 		        this.goBack();
+	        }
+        }
+
+        private class GetBalanceAction extends CustomActionView {
+
+	        public GetBalanceAction(ViewConfig viewConfig, Scanner keyboard) {
+		        super("Current WoCoin Balance", "check balance", viewConfig, keyboard);
+	        }
+
+	        @Override
+	        public void executeCustomAction() {
+				this.println(cc.getUserBalance());
 	        }
         }
     }
