@@ -392,8 +392,8 @@ public class SQLController {
         else {
             try (Connection dataConn = DriverManager.getConnection(url)) {
                 if (productToRemove.getId() < 0) {
-                    PreparedStatement stSelect = dataConn.prepareStatement("DELETE FROM products WHERE seller = ? AND price = ? AND name = ? AND description = ? AND id = (SELECT max(id) from main.products a WHERE seller = a.seller AND price = a.price AND name = a.name AND description = a.description)");
-                    stSelect.setString(1, productToRemove.getSeller());
+                    PreparedStatement stSelect = dataConn.prepareStatement("DELETE FROM products WHERE (SELECT max(id) FROM products b WHERE seller = ? AND price = ? AND name = ? AND description = ?) = products.id");
+                    stSelect.setString(1, this.retrievePublicKey(productToRemove.getSeller()));
                     stSelect.setInt(2, productToRemove.getPrice());
                     stSelect.setString(3, productToRemove.getName());
                     stSelect.setString(4, productToRemove.getDescription());
