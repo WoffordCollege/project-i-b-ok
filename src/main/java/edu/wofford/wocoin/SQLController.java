@@ -391,10 +391,21 @@ public class SQLController {
         }
         else {
             try (Connection dataConn = DriverManager.getConnection(url)) {
-                PreparedStatement stSelect = dataConn.prepareStatement("DELETE FROM products WHERE id = ?");
-                stSelect.setInt(1, productToRemove.getId());
-                stSelect.execute();
-                retval = RemoveProductResult.REMOVED;
+                if (productToRemove.getId() < 0) {
+                    PreparedStatement stSelect = dataConn.prepareStatement("DELETE FROM products WHERE seller = ? AND price = ? AND name = ? AND description = ? AND id = (SELECT max(id) from main.products a WHERE seller = a.seller AND price = a.price AND name = a.name AND description = a.description)");
+                    stSelect.setString(1, productToRemove.getSeller());
+                    stSelect.setInt(2, productToRemove.getPrice());
+                    stSelect.setString(3, productToRemove.getName());
+                    stSelect.setString(4, productToRemove.getDescription());
+                    stSelect.execute();
+                    retval = RemoveProductResult.REMOVED;
+                }
+                else {
+                    PreparedStatement stSelect = dataConn.prepareStatement("DELETE FROM products WHERE id = ?");
+                    stSelect.setInt(1, productToRemove.getId());
+                    stSelect.execute();
+                    retval = RemoveProductResult.REMOVED;
+                }
             } catch (Exception e) {
                 System.out.println(e.toString());
             }
