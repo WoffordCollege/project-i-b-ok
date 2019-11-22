@@ -545,12 +545,20 @@ public class SQLController {
 
     /**
      * This function takes a username and returns the balance of their wallet.
+     * If the user does not exist, returns null
      * If no wallet exists, returns -1
      * @param username the username of the wallet owner
      * @return a {@link BigInteger} denoting the balance of the user's wallet
      */
     BigInteger getUserBalance(String username) {
-        String publicKey = this.retrievePublicKey(username);
-        return publicKey != null ? Utilities.getBalance(publicKey) : BigInteger.valueOf(-1);
+        if (!lookupUser(username)) {
+            return null;
+        }
+        else if (!findWallet(username)) {
+            return BigInteger.valueOf(-1);
+        }
+        else {
+            return Utilities.getBalance(this.retrievePublicKey(username));
+        }
     }
 }

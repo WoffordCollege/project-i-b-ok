@@ -1,5 +1,6 @@
 package edu.wofford.wocoin;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 /**
@@ -320,6 +321,21 @@ public class ConsoleController {
                 return "User has no wallet.";
             default:
                 return "Message reply not sent.";
+        }
+    }
+
+    public String getUserBalance() {
+        BigInteger potentialBalance = sqlController.getUserBalance(this.currentUser);
+
+        if (potentialBalance == null) {
+            return "No such user.";
+        }
+        else if (potentialBalance.signum() < 0) {
+            return "User has no wallet.";
+        }
+        else {
+            String formatString = potentialBalance.equals(new BigInteger("1")) ? "User has %s WoCoin." : "User has %s WoCoins.";
+            return String.format(formatString, potentialBalance.toString());
         }
     }
 }
