@@ -549,9 +549,26 @@ public class SQLController {
      * @return a {@link SendMessageResult} with the result of attempting to send the message.
      */
     SendMessageResult sendMessage(Message message) {
+        SendMessageResult retVal = SendMessageResult.NOTSENT;
+        if(!findWallet(message.getSenderUsername())){
+            retVal = SendMessageResult.INVALIDSENDER;
+        }else if(!findWallet(message.getSenderUsername())){
+            retVal = SendMessageResult.INVALIDRECIPIENT;
+        }else{
+            try(Connection dataConn = DriverManager.getConnection(url)){
+                PreparedStatement stInsert = dataConn.prepareStatement("Insert Into messages (sender, recipient, productid, message) Values (?,?,?,?)");
+                stInsert.setString(1,getName(message.getSenderUsername()));
+                stInsert.setString(2,getName(message.getRecipientUsername()));
+                stInsert.setInt(3,message.getProduct().getId());
+                stInsert.setString(4,message.getMessage());
+                retVal = SendMessageResult.SENT;
+            } catch (Exception e){
+                System.out.println(e.toString());
+            }
+        }
         // TODO Check to make sure sender and recipient have a wallet
         // TODO Add the message to the database
-        return SendMessageResult.NOTSENT;
+        return retVal;
     }
 
     /**
@@ -561,9 +578,16 @@ public class SQLController {
      * @return a {@link DeleteMessageResult} with the result of deleting it from the database.
      */
     DeleteMessageResult deleteMessage(Message message) {
-        // STUB
+        DeleteMessageResult retVal = DeleteMessageResult.NOTDELETED;
+        try(Connection dataConn = DriverManager.getConnection(url)){
+            PreparedStatement stInsert = dataConn.prepareStatement("Delete From messages Where id = ?");
+            stInsert.setInt(1,message.getId());
+            retVal = DeleteMessageResult.DELETED;
+        } catch (Exception e){
+            System.out.println(e.toString());
+        }
         // TODO check if the message exists, and, if so, delete it
-        return DeleteMessageResult.NOTDELETED;
+        return retVal;
     }
 
     /**
