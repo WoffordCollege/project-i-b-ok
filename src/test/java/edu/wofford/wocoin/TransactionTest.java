@@ -20,8 +20,8 @@ public class TransactionTest {
     @Test
     public final void getBalanceSuccessful() {
         try {
-            assertEquals("23",Transaction.getBalance("a615316333ba8622fd5bb60fe39758b3515f774d").toString(10));
-        } catch (Exception e){
+            assertEquals("200",Transaction.getBalance("a615316333ba8622fd5bb60fe39758b3515f774d"));
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
