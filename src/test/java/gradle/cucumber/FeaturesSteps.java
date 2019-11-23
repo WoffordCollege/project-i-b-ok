@@ -12,9 +12,9 @@ import static org.hamcrest.Matchers.*;
 
 import java.io.*;
 import java.sql.*;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.math.BigInteger;
 import edu.wofford.wocoin.main.Main;
 import edu.wofford.wocoin.Utilities;
@@ -446,12 +446,10 @@ public class FeaturesSteps {
             pstmt.setString(3, message);
             pstmt.setInt(4, productId);
             if (datetime.equals("now")) {
-                Instant now = Instant.now();
-                Date early = Date.from(now.minusSeconds(3));
-                Date late = Date.from(now.plusSeconds(3));
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                pstmt.setString(5, formatter.format(early));
-                pstmt.setString(6, formatter.format(late));
+                LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                pstmt.setString(5, formatter.format(now.minusSeconds(3)));
+                pstmt.setString(6, formatter.format(now.plusSeconds(3)));
             } else {
                 pstmt.setString(5, datetime);
             }
@@ -480,12 +478,10 @@ public class FeaturesSteps {
             pstmt.setString(3, message);
             pstmt.setInt(4, productId);
             if (datetime.equals("now")) {
-                Instant now = Instant.now();
-                Date early = Date.from(now.minusSeconds(3));
-                Date late = Date.from(now.plusSeconds(3));
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                pstmt.setString(5, formatter.format(early));
-                pstmt.setString(6, formatter.format(late));
+                LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                pstmt.setString(5, formatter.format(now.minusSeconds(3)));
+                pstmt.setString(6, formatter.format(now.plusSeconds(3)));
             } else {
                 pstmt.setString(5, datetime);
             }
