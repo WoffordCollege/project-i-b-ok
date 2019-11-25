@@ -23,11 +23,6 @@ public class SQLControllerTest {
         Utilities.createTestDatabase("wocoinDatabase.sqlite3");
     }
 
-    /*@AfterClass
-    public static void destroyDB(){
-        new File("wocoinDatabase.sqlite3").delete();
-    }*/
-
     @Test
     public final void testConstructor(){
         SQLController bar = new SQLController("testDB.sqlite3");
@@ -333,6 +328,7 @@ public class SQLControllerTest {
         foobar.addWallet("test","8675309");
         assertEquals(SQLController.TransferWocoinResult.SUCCESS, foobar.transferWocoin("test", 5));
     }
+
     @Test
     public void transferNoUser(){
         assertEquals(SQLController.TransferWocoinResult.NOUSER, foobar.transferWocoin("jonDoe", 5));
@@ -351,5 +347,42 @@ public class SQLControllerTest {
         foobar.removeWallet("test");
         foobar.addWallet("test","8675309");
         assertEquals(SQLController.TransferWocoinResult.NEGATIVEINPUT, foobar.transferWocoin("test", -5));
+    }
+
+    @Ignore
+    @Test
+    public void getMessagesForUserTest(){
+        assertTrue(true);
+    }
+
+    @Test
+    public void sendMessageSuccessfulTest(){
+        Product testProduct = foobar.getPurchasableProductsList("jdoe",10).get(0);
+        Message testMessage = new Message("jdoe", "jsmith","This is a test message.",testProduct);
+        SQLController.SendMessageResult tmp = foobar.sendMessage(testMessage);
+        assertEquals(SQLController.SendMessageResult.SENT, tmp);
+        try(Connection dataConn = DriverManager.getConnection(foobar.getPath())){
+            PreparedStatement stSelect = dataConn.prepareStatement("Select count(*) from messages where message = 'This is a test message.'");
+            ResultSet dtr = stSelect.executeQuery();
+            assertEquals(1,dtr.getInt(1));
+        }catch (Exception e){
+            System.out.println(e.toString());
+        }
+    }
+
+    @Test
+    public void sendMessageBadSenderTest(){
+        foobar.insertUser("userWithoutWallet","12345");
+        Product testProduct = foobar.getPurchasableProductsList("jdoe",10).get(0);
+        Message testMessage = new Message("userWithoutWallet","This is a test message 2.",testProduct);
+        SQLController.SendMessageResult tmp = foobar.sendMessage(testMessage);
+        assertEquals(SQLController.SendMessageResult.INVALIDSENDER, tmp);
+        try(Connection dataConn = DriverManager.getConnection(foobar.getPath())){
+            PreparedStatement stSelect = dataConn.prepareStatement("Select count(*) from messages where message = 'This is a test message 2.'");
+            ResultSet dtr = stSelect.executeQuery();
+            assertEquals(0,dtr.getInt(1));
+        }catch (Exception e){
+            System.out.println(e.toString());
+        }
     }
 }

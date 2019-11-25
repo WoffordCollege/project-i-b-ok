@@ -571,7 +571,7 @@ public class SQLController {
         SendMessageResult retVal = SendMessageResult.NOTSENT;
         if(!findWallet(message.getSenderUsername())){
             retVal = SendMessageResult.INVALIDSENDER;
-        }else if(!findWallet(message.getSenderUsername())){
+        }else if(!findWallet(message.getRecipientUsername())){
             retVal = SendMessageResult.INVALIDRECIPIENT;
         }else{
             try(Connection dataConn = DriverManager.getConnection(url)){
