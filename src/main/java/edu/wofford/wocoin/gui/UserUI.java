@@ -5,6 +5,7 @@ import edu.wofford.wocoin.Message;
 import edu.wofford.wocoin.Product;
 import edu.wofford.wocoin.WalletUtilities;
 import io.bretty.console.view.AbstractView;
+import io.bretty.console.view.Validator;
 import io.bretty.console.view.ViewConfig;
 import org.web3j.abi.datatypes.Int;
 
@@ -210,7 +211,7 @@ public class UserUI extends CustomActionView {
 
         private class GetMessagesAction extends CustomActionView {
 	        public GetMessagesAction(ViewConfig viewConfig, Scanner keyboard) {
-	        	super("Pick a message to reply to or delete.", "get messages", viewConfig, keyboard);
+	        	super("Pick a message to reply to or delete.", "check messages", viewConfig, keyboard);
 	        }
 
 	        @Override
@@ -221,16 +222,23 @@ public class UserUI extends CustomActionView {
 		        for (int i = 0; i < messages.size(); i++) {
 			        this.println(String.format("%d: %s", i + 2, messages.get(i).toString()));
 		        }
-		        int selected = this.prompt("Which message? ", Integer.class);
+
+		        int selected = 0;
+		        boolean validInput = false;
+
+		        while (!validInput) {
+			        selected = this.prompt("Which message? ", Integer.class);
+			        validInput = selected >= 1 && selected - 1 <= messages.size();
+			        if (!validInput){
+				        this.println(String.format("Invalid value. Enter a value between 1 and %d.", messages.size() + 1));
+			        }
+		        }
 
 		        if (selected == 1) {
 			        this.println("Action canceled.");
 		        }
 		        else if (!cc.userHasWallet()) {
 			        this.println("User has no wallet.");
-		        }
-		        else if (selected < 1 || selected - 1 > messages.size()) {
-			        this.println(String.format("Invalid value. Enter a value between 1 and %d.", messages.size() + 1));
 		        }
 		        else {
 			        this.println("1: cancel");

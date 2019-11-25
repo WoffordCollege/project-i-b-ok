@@ -546,12 +546,12 @@ public class SQLController {
     ArrayList<Message> getMessagesForUser(String username) {
         ArrayList<Message> messages = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
-            PreparedStatement stSelect = dataConn.prepareStatement("select a.id messageID, (select id from wallets where publickey = a.sender) senderUserName, (select id, publickey recipientKey from wallets where publickey = a.recipient) recieverUserName, message, a.dt, b.id productID, b.price, b.name productName, b.description productDescription from messages a join products b on a.productid = b.id where a.sender = ? Order By dt Asc;");
+            PreparedStatement stSelect = dataConn.prepareStatement("select a.id messageID, (select id from wallets where publickey = a.sender) senderUserName, (select id from wallets where publickey = a.recipient) receiverUserName, message, a.dt, b.id productID, b.price, b.name productName, b.description productDescription from messages a join products b on a.productid = b.id where a.recipient = ? Order By dt Asc;");
             stSelect.setString(1, retrievePublicKey(username));
             ResultSet dtr = stSelect.executeQuery();
             while (dtr.next()) {
                 Product newProduct = new Product(dtr.getInt("productID"), dtr.getString("senderUserName"), dtr.getInt("price"), dtr.getString("productName"), dtr.getString("productDescription"));
-                Message newMessage = new Message(dtr.getInt("messageID"), dtr.getString("senderUserName"), dtr.getString("recipientKey"), dtr.getString("message"), dtr.getString("dt"), newProduct);
+                Message newMessage = new Message(dtr.getInt("messageID"), dtr.getString("senderUserName"), dtr.getString("receiverUserName"), dtr.getString("message"), dtr.getString("dt"), newProduct);
                 messages.add(newMessage);
             }
         } catch (Exception e) {
@@ -600,7 +600,7 @@ public class SQLController {
         DeleteMessageResult retVal = DeleteMessageResult.NOTDELETED;
         try(Connection dataConn = DriverManager.getConnection(url)){
             PreparedStatement stDelete = dataConn.prepareStatement("Delete From messages Where id = ?");
-            stDelete.setInt(1,message.getId());
+            stDelete.setInt(1, message.getId());
             stDelete.execute();
             retVal = DeleteMessageResult.DELETED;
         } catch (Exception e){
