@@ -91,6 +91,10 @@ public class ConsoleControllerTest {
         assertSame(WalletUtilities.CreateWalletResult.FAILED, cm.addWalletToUser("nouser"));
         assertTrue(cm.userLogin("testwalletcreate", "test"));
         assertSame(WalletUtilities.CreateWalletResult.SUCCESS, cm.addWalletToUser("test/"));
+        File file = new File("test/testwalletcreate/mykeyfile.json");
+        try {
+            file.createNewFile();
+        } catch (IOException e) { }
         assertSame(WalletUtilities.CreateWalletResult.FILEALREADYEXISTS, cm.addWalletToUser("test/"));
         assertSame(WalletUtilities.CreateWalletResult.SUCCESS, cm.addWalletToUser("test/test/"));
         assertTrue(sqlController.findWallet("testwalletcreate"));

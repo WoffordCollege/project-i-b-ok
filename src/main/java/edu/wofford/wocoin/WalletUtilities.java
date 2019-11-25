@@ -3,14 +3,28 @@ package edu.wofford.wocoin;
 import java.io.File;
 
 import org.web3j.crypto.*;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.admin.Admin;
+import org.web3j.protocol.admin.methods.response.PersonalUnlockAccount;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.http.HttpService;
+import org.web3j.tx.Transfer;
+import org.web3j.utils.Convert;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.ExecutionException;
 
 /**
  * This class contains static functions for creating and interfacing with Wallet files.
  */
 public class WalletUtilities {
+
     /**
      * An enumeration of the possible results of attempting to create a wallet file.
      */
@@ -24,7 +38,7 @@ public class WalletUtilities {
 
     /**
      * This function creates a public and private key for a user's wallet which will be stored in a JSON File. The function
-     * returns a pair which is the public key and SUCCESS if the wallet was created, ALREADYEXSITS if the file is already exists,
+     * returns a pair which is the public key and SUCCESS if the wallet was created, FILEALREADYEXISTS if the file is already exists,
      * and FAILED if a file cannot be created
      * @param path the path of the user directory where the JSON file will go
      * @param username the username for which the wallet will be created for
@@ -43,8 +57,6 @@ public class WalletUtilities {
             directoryPath.toFile().mkdirs();
         }
 
-        String wPath = directoryPath.toString();
-
         String walletName;
         Credentials credentials;
 
@@ -52,7 +64,6 @@ public class WalletUtilities {
             walletName = WalletUtils.generateNewWalletFile(password, directoryPath.toFile());
             File walletFile = Paths.get(path, username, walletName).toFile();
             credentials = WalletUtils.loadCredentials(password, walletFile);
-            walletFile.renameTo(finalKeyFile);
         } catch (Exception e) {
             e.printStackTrace();
             return new Pair<>("", CreateWalletResult.FAILED);
@@ -66,6 +77,31 @@ public class WalletUtilities {
             return new Pair<>("", CreateWalletResult.FAILED);
         }
 
+
+    }
+
+    /**
+     * This function adds the specified amount of WoCoins to the balance of the given wallet.
+     * @param wallet the wallet to transfer WoCoins to
+     * @param amt the amount of WoCoin to be transferred.
+     */
+    public static void addWocoinToUser(String wallet, BigInteger amt) {
+        createWocoinTransaction("0x0fce4741f3f54fbffb97837b4ddaa8f769ba0f91", "adminpwd", wallet, amt);
+    }
+
+    private static void createWocoinTransaction(String senderWallet, String senderPassword, String recipientWallet, BigInteger amount) {
+        Admin web3j = Admin.build(new HttpService());
+        PersonalUnlockAccount personalUnlockAccount = null;
+        try {
+            personalUnlockAccount = web3j.personalUnlockAccount(senderWallet, senderPassword).sendAsync().get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        if (personalUnlockAccount != null && personalUnlockAccount.accountUnlocked()) {
+
+            // send a transaction
+        }
 
     }
 
@@ -86,7 +122,7 @@ public class WalletUtilities {
      */
     public static PurchaseProductResult buyProduct(String path, String username, String password, Product boughtProduct, SQLController sqlController){
 
-
+        createWocoinTransaction(username, password, boughtProduct.getSeller(), BigInteger.valueOf(boughtProduct.getPrice()));
         return PurchaseProductResult.FAILED;
     }
 

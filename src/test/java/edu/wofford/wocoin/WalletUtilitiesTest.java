@@ -41,6 +41,11 @@ public class WalletUtilitiesTest {
     @Test
     public final void createWalletALREADYEXISTSTest(){
         WalletUtilities.createWallet("test","Khan", "");
+        File file = new File("test/Khan/mykeyfile.json");
+        try {
+            file.createNewFile();
+        } catch (IOException e) { }
+
         Pair<String,WalletUtilities.CreateWalletResult> val = WalletUtilities.createWallet("test","Khan", "");
         assertEquals(0, val.getFirst().length());
         assertEquals(WalletUtilities.CreateWalletResult.FILEALREADYEXISTS, val.getSecond());

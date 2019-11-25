@@ -4,6 +4,7 @@ import edu.wofford.wocoin.ConsoleController;
 import io.bretty.console.view.AbstractView;
 import io.bretty.console.view.ViewConfig;
 
+import java.math.BigInteger;
 import java.util.Scanner;
 
 /**

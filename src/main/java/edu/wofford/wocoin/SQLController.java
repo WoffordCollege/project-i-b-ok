@@ -512,7 +512,9 @@ public class SQLController {
         } else if (amt <= 0){
             return TransferWocoinResult.NEGATIVEINPUT;
         } else {
-            // TODO do blockchain transaction stuff
+            String wallet = this.retrievePublicKey(username);
+            BigInteger coinAmount = BigInteger.valueOf(amt);
+            WalletUtilities.addWocoinToUser(wallet, coinAmount);
             return TransferWocoinResult.SUCCESS;
         }
 
