@@ -471,7 +471,7 @@ public class SQLController {
     ArrayList<Product> getPurchasableProducts (String username) {
         ArrayList<Product> products = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
-            PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE user <> ?");
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE seller <> ?");
             stSelect.setString(1, this.retrievePublicKey(username));
             createProductsListFromStatement(products, stSelect, Product.DisplayType.SHOWCURRENTUSER);
         } catch (Exception e) {
@@ -546,13 +546,12 @@ public class SQLController {
     ArrayList<Message> getMessagesForUser(String username) {
         ArrayList<Message> messages = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
-            PreparedStatement stSelect = dataConn.prepareStatement("select a.id, (select id from wallets where publickey = a.sender) senderUserName, (select id from wallets where publickey = a.recipient) recieverUserName, message, b.id, b.price, b.name, b.description, a.dt from messages a join products b on a.productid = b.id where sender = ? Order By dt Asc;");
-            stSelect.setString(1,retrievePublicKey(username));
+            PreparedStatement stSelect = dataConn.prepareStatement("select a.id messageID, (select id from wallets where publickey = a.sender) senderUserName, (select id, publickey recipientKey from wallets where publickey = a.recipient) recieverUserName, message, a.dt, b.id productID, b.price, b.name productName, b.description productDescription from messages a join products b on a.productid = b.id where a.sender = ? Order By dt Asc;");
+            stSelect.setString(1, retrievePublicKey(username));
             ResultSet dtr = stSelect.executeQuery();
             while (dtr.next()) {
-                Product newProduct = new Product(dtr.getInt(5),dtr.getString("senderUserName"),dtr.getInt(6),dtr.getString(7),dtr.getString(8));
-                Message newMessage = new Message(dtr.getInt(1), dtr.getString("senderUserName"),dtr.getString("message"),dtr.getString(9),newProduct);
-                newMessage.setRecipient(dtr.getString("recieverUserName"));
+                Product newProduct = new Product(dtr.getInt("productID"), dtr.getString("senderUserName"), dtr.getInt("price"), dtr.getString("productName"), dtr.getString("productDescription"));
+                Message newMessage = new Message(dtr.getInt("messageID"), dtr.getString("senderUserName"), dtr.getString("recipientKey"), dtr.getString("message"), dtr.getString("dt"), newProduct);
                 messages.add(newMessage);
             }
         } catch (Exception e) {
@@ -577,10 +576,10 @@ public class SQLController {
         }else{
             try(Connection dataConn = DriverManager.getConnection(url)){
                 PreparedStatement stInsert = dataConn.prepareStatement("Insert Into messages (sender, recipient, productid, message) Values (?,?,?,?)");
-                stInsert.setString(1,getName(message.getSenderUsername()));
-                stInsert.setString(2,getName(message.getRecipientUsername()));
-                stInsert.setInt(3,message.getProduct().getId());
-                stInsert.setString(4,message.getMessage());
+                stInsert.setString(1, this.retrievePublicKey(message.getSenderUsername()));
+                stInsert.setString(2, this.retrievePublicKey(message.getRecipientUsername()));
+                stInsert.setInt(3, message.getProduct().getId());
+                stInsert.setString(4, message.getMessage());
                 stInsert.execute();
                 retVal = SendMessageResult.SENT;
             } catch (Exception e){

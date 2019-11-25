@@ -13,16 +13,17 @@ public class Message {
 	private String submitDateTime;
 	private Product product;
 
-	public Message(int id, String senderUsername, String message, String submitDateTime, Product product) {
+	public Message(int id, String senderUsername, String recipientUsername, String message, String submitDateTime, Product product) {
 		this.id = id;
 		this.senderUsername = senderUsername;
+		this.recipientUsername = recipientUsername;
 		this.submitDateTime = submitDateTime;
 		this.message = message;
 		this.product = product;
 	}
 
-	public Message(String senderUsername, String message, Product product) {
-		this(-1, senderUsername, message, null, product);
+	public Message(String senderUsername, String recipientID, String message, Product product) {
+		this(-1, senderUsername, recipientID, message, null, product);
 	}
 
 	public int getId() {

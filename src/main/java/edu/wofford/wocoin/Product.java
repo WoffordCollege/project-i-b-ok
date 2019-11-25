@@ -37,7 +37,7 @@ public class Product implements Comparable<Product>{
      * @param currentUser The wallet address of the user using this product
      */
     public Product(int id, String seller, int price, String name, String description, String currentUser) {
-        this(-1, seller, price, name, description, currentUser, DisplayType.HIDECURRENTUSER);
+        this(id, seller, price, name, description, currentUser, DisplayType.HIDECURRENTUSER);
     }
 
     /**
