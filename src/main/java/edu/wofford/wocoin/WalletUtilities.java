@@ -116,16 +116,15 @@ public class WalletUtilities {
      * Then checks if the user balance is more than the price of the product, if not, returns {@link PurchaseProductResult#INSUFFICIENTFUNDS}
      * If all criteria are met, it transfers the funds from the current user's wallet to the wallet of the seller of the product,
      * then updates the seller id of the product in the Wocoin database to the ID of the user who bought the product
-     * @param path the path of the directory holding the user's subdirectory
-     * @param username the username of the user buying the product
+     * @param walletPath the path of the directory holding the user's subdirectory
      * @param password the password of the user buying the product
      * @param boughtProduct the product the user wants to buy
      * @param sqlController the {@link SQLController} of the current Wocoin database
      * @return a {@link PurchaseProductResult} indicating the operation that occurred.
      */
-    public static PurchaseProductResult buyProduct(String path, String username, String password, Product boughtProduct, SQLController sqlController){
+    public static PurchaseProductResult buyProduct(String walletPath, String password, Product boughtProduct, SQLController sqlController){
 
-        createWocoinTransaction(username, password, boughtProduct.getSeller(), BigInteger.valueOf(boughtProduct.getPrice()));
+        createWocoinTransaction(walletPath, password, boughtProduct.getSeller(), BigInteger.valueOf(boughtProduct.getPrice()));
         return PurchaseProductResult.FAILED;
     }
 
