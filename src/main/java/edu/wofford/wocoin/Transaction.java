@@ -32,11 +32,30 @@ public class Transaction {
         TransactionReceipt transferReceipt = Transfer.sendFunds(
                 web3j, credentials,
                 "0xa615316333ba8622fd5bb60fe39758b3515f774d",
-                BigDecimal.valueOf(77), Convert.Unit.ETHER).sendAsync()
+                BigDecimal.valueOf(1), Convert.Unit.ETHER).sendAsync()
                 .get();
         log.info("Transaction complete : "
                 + transferReceipt.getTransactionHash());
     }
+
+    /*public static void send() throws Exception {
+        Web3j web3j = Web3j.build(new HttpService());
+        log.info("Connected to Ethereum client version: "
+                + web3j.web3ClientVersion().send().getWeb3ClientVersion());
+        Credentials credentials =
+                WalletUtils.loadCredentials(
+                        "jsmith",
+                        "C:\\Users\\cburd\\project-i-b-ok\\ethereum\\node0\\keystore\\UTC--2019-08-14T05-39-33.567000000Z--a615316333ba8622fd5bb60fe39758b3515f774d.json");
+        log.info("Credentials loaded");
+        log.info("Sending Ether ..");
+        TransactionReceipt transferReceipt = Transfer.sendFunds(
+                web3j, credentials,
+                "0x0fce4741f3f54fbffb97837b4ddaa8f769ba0f91",
+                BigDecimal.valueOf(.0997), Convert.Unit.ETHER).sendAsync()
+                .get();
+        log.info("Transaction complete : "
+                + transferReceipt.getTransactionHash());
+    }*/
 
     public static String getBalance(String publicKey) {
         try {
