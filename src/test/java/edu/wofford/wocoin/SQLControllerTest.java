@@ -374,7 +374,7 @@ public class SQLControllerTest {
     public void sendMessageBadSenderTest(){
         foobar.insertUser("userWithoutWallet","12345");
         Product testProduct = foobar.getPurchasableProductsList("jdoe",10).get(0);
-        Message testMessage = new Message("userWithoutWallet","This is a test message 2.",testProduct);
+        Message testMessage = new Message("userWithoutWallet", "stupidRecipient", "This is a test message 2.", testProduct);
         SQLController.SendMessageResult tmp = foobar.sendMessage(testMessage);
         assertEquals(SQLController.SendMessageResult.INVALIDSENDER, tmp);
         try(Connection dataConn = DriverManager.getConnection(foobar.getPath())){
