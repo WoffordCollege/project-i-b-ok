@@ -294,8 +294,6 @@ public class ConsoleController {
         switch (sqlController.deleteMessage(message)){
             case DELETED:
                 return "Message deleted.";
-            case DOESNOTEXIST:
-                return "Message does not exist.";
             default:
                 return "Message not deleted.";
         }
