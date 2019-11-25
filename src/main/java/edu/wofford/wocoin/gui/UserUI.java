@@ -179,29 +179,31 @@ public class UserUI extends CustomActionView {
 
             @Override
             public void executeCustomAction() {
-	            ArrayList<Product> products = cc.getPurchasableProducts();
-	            products.sort(Product::compareToWithPrice);
+            	if (!cc.userHasWallet()) {
+            		this.println("User has no wallet.");
+	            }
+            	else {
+		            ArrayList<Product> products = cc.getPurchasableProducts();
+		            products.sort(Product::compareToWithPrice);
 
-	            this.println("1: cancel");
-	            for (int i = 0; i < products.size(); i++) {
-		            this.println(String.format("%d: %s", i + 2, products.get(i).toString()));
-	            }
+		            this.println("1: cancel");
+		            for (int i = 0; i < products.size(); i++) {
+			            this.println(String.format("%d: %s", i + 2, products.get(i).toString()));
+		            }
 
-	            int selected = this.prompt("Which product number is the subject of the message? ", Integer.class);
+		            int selected = this.prompt("Which product number is the subject of the message? ", Integer.class);
 
-	            if (selected == 1) {
-		            this.println("Action canceled.");
-	            }
-	            else if (!cc.userHasWallet()) {
-		            this.println("User has no wallet.");
-	            }
-	            else if (selected < 1 || selected - 1 > products.size()) {
-		            this.println(String.format("Invalid value. Enter a value between 1 and %d.", products.size() + 1));
-		            this.println("Action canceled.");
-	            }
-	            else {
-	            	String userMessage = this.prompt("What is the message? ", String.class);
-		            this.println(cc.sendMessage(products.get(selected - 2), userMessage));
+		            if (selected == 1) {
+			            this.println("Action canceled.");
+		            } else if (!cc.userHasWallet()) {
+			            this.println("User has no wallet.");
+		            } else if (selected < 1 || selected - 1 > products.size()) {
+			            this.println(String.format("Invalid value. Enter a value between 1 and %d.", products.size() + 1));
+			            this.println("Action canceled.");
+		            } else {
+			            String userMessage = this.prompt("What is the message? ", String.class);
+			            this.println(cc.sendMessage(products.get(selected - 2), userMessage));
+		            }
 	            }
             }
         }

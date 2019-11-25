@@ -263,7 +263,7 @@ public class ConsoleController {
      * @return a string describing the operation that occurred.
      */
     public String sendMessage(Product product, String message) {
-        Message newMessage = new Message(this.currentUser, message, product);
+        Message newMessage = new Message(this.currentUser, product.getSeller(), message, product);
         switch (sqlController.sendMessage(newMessage)){
             case SENT:
                 return "Message sent.";
@@ -307,7 +307,7 @@ public class ConsoleController {
      * @return a String representing what happened when sending the message.
      */
     public String replyToMessage(Message originalMessage, String messageReply) {
-        Message newMessage = new Message(this.currentUser, originalMessage.getSenderUsername(), originalMessage.getProduct());
+        Message newMessage = new Message(this.currentUser, originalMessage.getSenderUsername(), messageReply, originalMessage.getProduct());
 
         switch (sqlController.sendMessage(newMessage)){
             case SENT:
