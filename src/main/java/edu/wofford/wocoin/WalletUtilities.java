@@ -9,6 +9,7 @@ import org.web3j.protocol.admin.methods.response.PersonalUnlockAccount;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
@@ -86,21 +87,23 @@ public class WalletUtilities {
      * @param amt the amount of WoCoin to be transferred.
      */
     public static void addWocoinToUser(String wallet, BigInteger amt) {
-        createWocoinTransaction("0x0fce4741f3f54fbffb97837b4ddaa8f769ba0f91", "adminpwd", wallet, amt);
+        createWocoinTransaction("ethereum/node0/keystore/UTC--2019-08-07T17-24-10.532680697Z--0fce4741f3f54fbffb97837b4ddaa8f769ba0f91.json", "adminpwd", "0x" + wallet, amt);
     }
 
-    private static void createWocoinTransaction(String senderWallet, String senderPassword, String recipientWallet, BigInteger amount) {
-        Admin web3j = Admin.build(new HttpService());
-        PersonalUnlockAccount personalUnlockAccount = null;
+    private static void createWocoinTransaction(String walletPath, String senderPassword, String recipientWallet, BigInteger amount) {
+        Web3j web3 = Web3j.build(new HttpService());
+
+        Credentials senderCredentials = null;
         try {
-            personalUnlockAccount = web3j.personalUnlockAccount(senderWallet, senderPassword).sendAsync().get();
-        } catch (InterruptedException | ExecutionException e) {
+            senderCredentials = WalletUtils.loadCredentials(senderPassword, walletPath);
+        } catch (IOException | CipherException e) {
             e.printStackTrace();
         }
 
-        if (personalUnlockAccount != null && personalUnlockAccount.accountUnlocked()) {
-
-            // send a transaction
+        try {
+            TransactionReceipt receipt = Transfer.sendFunds(web3, senderCredentials, recipientWallet, new BigDecimal(amount), Convert.Unit.WEI).sendAsync().get();
+        } catch (InterruptedException | ExecutionException | IOException | TransactionException e) {
+            e.printStackTrace();
         }
 
     }
