@@ -519,6 +519,25 @@ public class SQLController {
     }
 
     /**
+     * This function takes a username and returns the balance of their wallet.
+     * If the user does not exist, returns null
+     * If no wallet exists, returns -1
+     * @param username the username of the wallet owner
+     * @return a {@link BigInteger} denoting the balance of the user's wallet
+     */
+    BigInteger getUserBalance(String username) {
+        if (!lookupUser(username)) {
+            return null;
+        }
+        else if (!findWallet(username)) {
+            return BigInteger.valueOf(-1);
+        }
+        else {
+            return Utilities.getBalance(this.retrievePublicKey(username));
+        }
+    }
+
+    /**
      * This function takes a username and returns an {@link ArrayList} of the {@link Message}s sent to the user.
      * The Messages returned are fully populated (id, recipient, sender, message, product)
      * @param username the username of the user receiving messages
@@ -527,7 +546,8 @@ public class SQLController {
     ArrayList<Message> getMessagesForUser(String username) {
         ArrayList<Message> messages = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
-            PreparedStatement stSelect = dataConn.prepareStatement("select a.id, (select id from wallets where publickey = a.sender) senderUserName, (select id from wallets where publickey = a.recipient) recieverUserName, message, b.id, b.price, b.name, b.description, a.dt from messages a join products b on a.productid = b.id Order By dt Asc;");
+            PreparedStatement stSelect = dataConn.prepareStatement("select a.id, (select id from wallets where publickey = a.sender) senderUserName, (select id from wallets where publickey = a.recipient) recieverUserName, message, b.id, b.price, b.name, b.description, a.dt from messages a join products b on a.productid = b.id where sender = ? Order By dt Asc;");
+            stSelect.setString(1,retrievePublicKey(username));
             ResultSet dtr = stSelect.executeQuery();
             while (dtr.next()) {
                 Product newProduct = new Product(dtr.getInt(5),dtr.getString("senderUserName"),dtr.getInt(6),dtr.getString(7),dtr.getString(8));
@@ -561,6 +581,7 @@ public class SQLController {
                 stInsert.setString(2,getName(message.getRecipientUsername()));
                 stInsert.setInt(3,message.getProduct().getId());
                 stInsert.setString(4,message.getMessage());
+                stInsert.execute();
                 retVal = SendMessageResult.SENT;
             } catch (Exception e){
                 System.out.println(e.toString());
@@ -579,8 +600,9 @@ public class SQLController {
     DeleteMessageResult deleteMessage(Message message) {
         DeleteMessageResult retVal = DeleteMessageResult.NOTDELETED;
         try(Connection dataConn = DriverManager.getConnection(url)){
-            PreparedStatement stInsert = dataConn.prepareStatement("Delete From messages Where id = ?");
-            stInsert.setInt(1,message.getId());
+            PreparedStatement stDelete = dataConn.prepareStatement("Delete From messages Where id = ?");
+            stDelete.setInt(1,message.getId());
+            stDelete.execute();
             retVal = DeleteMessageResult.DELETED;
         } catch (Exception e){
             System.out.println(e.toString());
@@ -589,22 +611,4 @@ public class SQLController {
         return retVal;
     }
 
-    /**
-     * This function takes a username and returns the balance of their wallet.
-     * If the user does not exist, returns null
-     * If no wallet exists, returns -1
-     * @param username the username of the wallet owner
-     * @return a {@link BigInteger} denoting the balance of the user's wallet
-     */
-    BigInteger getUserBalance(String username) {
-        if (!lookupUser(username)) {
-            return null;
-        }
-        else if (!findWallet(username)) {
-            return BigInteger.valueOf(-1);
-        }
-        else {
-            return Utilities.getBalance(this.retrievePublicKey(username));
-        }
-    }
 }
