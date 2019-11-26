@@ -1,9 +1,11 @@
 package edu.wofford.wocoin.gui;
 
 import edu.wofford.wocoin.ConsoleController;
+import edu.wofford.wocoin.SQLController;
 import io.bretty.console.view.AbstractView;
 import io.bretty.console.view.ViewConfig;
 
+import java.math.BigInteger;
 import java.util.Scanner;
 
 /**
@@ -48,10 +50,12 @@ public class AdminUI extends CustomActionView {
 
             AddUserAction addUserAction = new AddUserAction(viewConfig, keyboard);
             RemoveUserAction removeUserAction = new RemoveUserAction(viewConfig, keyboard);
+            TransferFundsAction transferFundsAction = new TransferFundsAction(viewConfig, keyboard);
 
 
             this.addMenuItem(addUserAction);
             this.addMenuItem(removeUserAction);
+            this.addMenuItem(transferFundsAction);
         }
     }
 
@@ -107,6 +111,7 @@ public class AdminUI extends CustomActionView {
 					this.println(cc.transferWocoinsToUser(username, coinsToTransfer));
                 }
                 else {
+                    this.println("Invalid value.");
                     this.println("Expected an integer value greater than or equal to 1.");
                 }
             }

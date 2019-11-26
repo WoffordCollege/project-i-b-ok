@@ -62,6 +62,6 @@ public class Message {
 
 	@Override
 	public String toString() {
-		return String.format("%s [%s] %s", message, product.getName(), this.submitDateTime);
+		return String.format("%s  [%s]  %s", message, product.getName(), this.submitDateTime);
 	}
 }

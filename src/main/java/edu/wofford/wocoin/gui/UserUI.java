@@ -5,9 +5,11 @@ import edu.wofford.wocoin.Message;
 import edu.wofford.wocoin.Product;
 import edu.wofford.wocoin.WalletUtilities;
 import io.bretty.console.view.AbstractView;
+import io.bretty.console.view.Validator;
 import io.bretty.console.view.ViewConfig;
 import org.web3j.abi.datatypes.Int;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -55,6 +57,7 @@ public class UserUI extends CustomActionView {
             this.addMenuItem(new SendMessageAction(viewConfig, keyboard));
             this.addMenuItem(new GetMessagesAction(viewConfig, keyboard));
             this.addMenuItem(new GetBalanceAction(viewConfig, keyboard));
+            this.addMenuItem(new BuyProductAction(viewConfig, keyboard));
         }
 
 
@@ -183,7 +186,7 @@ public class UserUI extends CustomActionView {
             		this.println("User has no wallet.");
 	            }
             	else {
-		            ArrayList<Product> products = cc.getPurchasableProducts();
+		            ArrayList<Product> products = cc.getPurchasableProducts(false);
 		            products.sort(Product::compareToWithPrice);
 
 		            this.println("1: cancel");
@@ -210,7 +213,7 @@ public class UserUI extends CustomActionView {
 
         private class GetMessagesAction extends CustomActionView {
 	        public GetMessagesAction(ViewConfig viewConfig, Scanner keyboard) {
-	        	super("Pick a message to reply to or delete.", "get messages", viewConfig, keyboard);
+	        	super("Pick a message to reply to or delete.", "check messages", viewConfig, keyboard);
 	        }
 
 	        @Override
@@ -221,16 +224,23 @@ public class UserUI extends CustomActionView {
 		        for (int i = 0; i < messages.size(); i++) {
 			        this.println(String.format("%d: %s", i + 2, messages.get(i).toString()));
 		        }
-		        int selected = this.prompt("Which message? ", Integer.class);
+
+		        int selected = 0;
+		        boolean validInput = false;
+
+		        while (!validInput) {
+			        selected = this.prompt("Which message? ", Integer.class);
+			        validInput = selected >= 1 && selected - 1 <= messages.size();
+			        if (!validInput){
+				        this.println(String.format("Invalid value. Enter a value between 1 and %d.", messages.size() + 1));
+			        }
+		        }
 
 		        if (selected == 1) {
 			        this.println("Action canceled.");
 		        }
 		        else if (!cc.userHasWallet()) {
 			        this.println("User has no wallet.");
-		        }
-		        else if (selected < 1 || selected - 1 > messages.size()) {
-			        this.println(String.format("Invalid value. Enter a value between 1 and %d.", messages.size() + 1));
 		        }
 		        else {
 			        this.println("1: cancel");
@@ -261,6 +271,47 @@ public class UserUI extends CustomActionView {
 	        @Override
 	        public void executeCustomAction() {
 				this.println(cc.getUserBalance());
+	        }
+        }
+
+        private class BuyProductAction extends CustomActionView {
+
+	        public BuyProductAction(ViewConfig viewConfig, Scanner keyboard) {
+		        super("Pick a product to buy", "purchase product", viewConfig, keyboard);
+	        }
+
+	        @Override
+	        public void executeCustomAction() {
+	        	if (cc.userHasWallet()) {
+	        		String walletPath = this.prompt("What is the directory to your wallet? ", String.class);
+					if (!cc.walletInDBMatchesGivenPath(walletPath)) {
+							this.println("Invalid wallet.");
+					}
+					else {
+						ArrayList<Product> products = cc.getPurchasableProducts(true);
+						products.sort(Product::compareToWithPrice);
+
+						this.println("1: cancel");
+						for (int i = 0; i < products.size(); i++) {
+							this.println(String.format("%d: %s", i + 2, products.get(i).toString()));
+						}
+
+						int selected = this.prompt("Which product would you like to buy? ", Integer.class);
+
+						if (selected == 1) {
+							this.println("Action canceled.");
+						} else if (selected < 1 || selected - 1 > products.size()) {
+							this.println(String.format("Invalid value. Enter a value between 1 and %d.", products.size() + 1));
+							this.println("Action canceled.");
+						} else {
+							String userMessage = this.prompt("What is the message? ", String.class);
+							this.println(cc.buyProduct(walletPath, products.get(selected - 2)));
+						}
+					}
+		        }
+	        	else {
+			        this.println("User has no wallet.");
+		        }
 	        }
         }
     }

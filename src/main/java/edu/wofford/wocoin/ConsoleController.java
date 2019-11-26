@@ -1,6 +1,13 @@
 package edu.wofford.wocoin;
 
+import gherkin.lexer.Fi;
+import org.web3j.crypto.WalletUtils;
+
+import java.io.File;
+import java.io.FilenameFilter;
 import java.math.BigInteger;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 /**
@@ -215,8 +222,8 @@ public class ConsoleController {
      * Gets the ArrayList of products that the current user can purchase
      * @return an ArrayList with all products not owned by the user
      */
-    public ArrayList<Product> getPurchasableProducts() {
-        return sqlController.getPurchasableProducts(this.currentUser);
+    public ArrayList<Product> getPurchasableProducts(boolean lessThanUserBalance) {
+        return sqlController.getPurchasableProducts(this.currentUser, lessThanUserBalance);
     }
 
     /**
@@ -322,6 +329,10 @@ public class ConsoleController {
         }
     }
 
+    /**
+     * This function gets the current user balance and returns a String based on the balance of the user
+     * @return A string representing the balance of the user
+     */
     public String getUserBalance() {
         BigInteger potentialBalance = sqlController.getUserBalance(this.currentUser);
 
@@ -335,5 +346,62 @@ public class ConsoleController {
             String formatString = potentialBalance.equals(new BigInteger("1")) ? "User has %s WoCoin." : "User has %s WoCoins.";
             return String.format(formatString, potentialBalance.toString());
         }
+    }
+
+    public boolean walletInDBMatchesGivenPath(String filepath) {
+        File walletDirectory = Paths.get(filepath, this.currentUser).toFile();
+        File [] files = walletDirectory.listFiles((dir, name) -> name.endsWith(".json"));
+
+        if (files != null && files.length > 0) {
+            File walletFile = files[0];
+            return WalletUtilities.walletInFilepathHasSamePublicKey(walletFile, sqlController.retrievePublicKey(this.currentUser), this.currentPassword);
+        }
+        else {
+            return false;
+        }
+    }
+
+    public String getWalletAddressInGivenPath(String filepath) {
+        File walletDirectory = Paths.get(filepath, this.currentUser).toFile();
+        File [] files = walletDirectory.listFiles((dir, name) -> name.endsWith(".json"));
+        if (files != null && files.length > 0) {
+            File walletFile = files[0];
+            return WalletUtilities.getWalletAddressFromFile(walletFile, this.currentPassword);
+        }
+        else {
+            return null;
+        }
+    }
+
+    public String buyProduct(String walletSubdirectory, Product boughtProduct) {
+        if (!userHasWallet()) {
+            return "User has no wallet.";
+        }
+        else {
+            if (!walletInDBMatchesGivenPath(walletSubdirectory)) {
+                return "Invalid wallet.";
+            }
+            else{
+                File walletDirectory = Paths.get(walletSubdirectory, this.currentUser).toFile();
+                File [] files = walletDirectory.listFiles((dir, name) -> name.endsWith(".json"));
+                if (files != null && files.length > 0) {
+                    File walletFile = files[0];
+                    switch (WalletUtilities.buyProduct(walletFile, this.currentPassword, boughtProduct)) {
+                        case SUCCESS:
+                            return "Product purchased.";
+                        case INSUFFICIENTFUNDS:
+                            return "Insufficient Funds.";
+                        case NOWALLETFILE:
+                            return "Invalid wallet.";
+                        default:
+                            return "Transaction cancelled.";
+                    }
+                }
+                else {
+                    return "Invalid wallet.";
+                }
+            }
+        }
+
     }
 }

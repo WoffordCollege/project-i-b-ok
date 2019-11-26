@@ -1,6 +1,8 @@
 package edu.wofford.wocoin;
 
 import org.junit.*;
+import org.testng.annotations.BeforeTest;
+
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -9,24 +11,13 @@ import java.util.ArrayList;
 
 public class SQLControllerTest {
 
-    // TODO change this variable name, smh
-    private SQLController foobar;
-
-    @Before
-    public void setup(){
-        foobar = new SQLController();
-    }
+    private SQLController foobar = new SQLController();
 
     @BeforeClass
     public static void setupDB(){
         new File("wocoinDatabase.sqlite3").delete();
         Utilities.createTestDatabase("wocoinDatabase.sqlite3");
     }
-
-    /*@AfterClass
-    public static void destroyDB(){
-        new File("wocoinDatabase.sqlite3").delete();
-    }*/
 
     @Test
     public final void testConstructor(){
@@ -109,19 +100,20 @@ public class SQLControllerTest {
     @Test
     public final void successfulProductAdd(){
         foobar.insertUser("john","Wofford1854");
-        foobar.addWallet("john","j12345");
+        foobar.addWallet("john","john");
 
         Product newProduct = new Product("john", 20, "x", "This is the description.");
         assertEquals(SQLController.AddProductResult.ADDED, foobar.addProduct(newProduct));
+
         try (Connection dataConn = DriverManager.getConnection(foobar.getPath())) {
-            PreparedStatement stSelect = dataConn.prepareStatement("SELECT * FROM products order by id desc limit 1");
+            PreparedStatement stSelect = dataConn.prepareStatement("SELECT * FROM products WHERE seller = 'j12345' order by id desc limit 1");
             ResultSet dtr = stSelect.executeQuery();
-            assertEquals("j12345", dtr.getString(2));
-            assertEquals(20, dtr.getInt(3));
-            assertEquals("x", dtr.getString(4));
-            assertEquals("This is the description.", dtr.getString(5));
+            assertEquals("j12345", dtr.getString("seller"));
+            assertEquals(20, dtr.getInt("price"));
+            assertEquals("x", dtr.getString("name"));
+            assertEquals("This is the description.", dtr.getString("description"));
         } catch (Exception e) {
-            System.out.println("HERE" + e.toString());
+            e.printStackTrace();
         }
     }
 
@@ -175,7 +167,7 @@ public class SQLControllerTest {
     @Test
     public final void removeProductInDB() {
         foobar.insertUser("testseller","Wofford1854");
-        foobar.addWallet("testseller","j12345");
+        foobar.addWallet("testseller","testseller");
 
         Product newProduct = new Product("testseller", 20, "x", "This is the description.");
         assertEquals(SQLController.AddProductResult.ADDED, foobar.addProduct(newProduct));
@@ -333,6 +325,7 @@ public class SQLControllerTest {
         foobar.addWallet("test","8675309");
         assertEquals(SQLController.TransferWocoinResult.SUCCESS, foobar.transferWocoin("test", 5));
     }
+
     @Test
     public void transferNoUser(){
         assertEquals(SQLController.TransferWocoinResult.NOUSER, foobar.transferWocoin("jonDoe", 5));
@@ -351,5 +344,41 @@ public class SQLControllerTest {
         foobar.removeWallet("test");
         foobar.addWallet("test","8675309");
         assertEquals(SQLController.TransferWocoinResult.NEGATIVEINPUT, foobar.transferWocoin("test", -5));
+    }
+
+    @Test
+    public void getMessagesForUserTest(){
+        assertTrue(true);
+    }
+
+    @Test
+    public void sendMessageSuccessfulTest(){
+        Product testProduct = foobar.getPurchasableProductsList("jdoe",10).get(0);
+        Message testMessage = new Message("jdoe", "jsmith","This is a test message.",testProduct);
+        SQLController.SendMessageResult tmp = foobar.sendMessage(testMessage);
+        assertEquals(SQLController.SendMessageResult.SENT, tmp);
+        try(Connection dataConn = DriverManager.getConnection(foobar.getPath())){
+            PreparedStatement stSelect = dataConn.prepareStatement("Select count(*) from messages where message = 'This is a test message.'");
+            ResultSet dtr = stSelect.executeQuery();
+            assertEquals(1,dtr.getInt(1));
+        }catch (Exception e){
+            System.out.println(e.toString());
+        }
+    }
+
+    @Test
+    public void sendMessageBadSenderTest(){
+        foobar.insertUser("userWithoutWallet","12345");
+        Product testProduct = foobar.getPurchasableProductsList("jdoe",10).get(0);
+        Message testMessage = new Message("userWithoutWallet", "stupidRecipient", "This is a test message 2.", testProduct);
+        SQLController.SendMessageResult tmp = foobar.sendMessage(testMessage);
+        assertEquals(SQLController.SendMessageResult.INVALIDSENDER, tmp);
+        try(Connection dataConn = DriverManager.getConnection(foobar.getPath())){
+            PreparedStatement stSelect = dataConn.prepareStatement("Select count(*) from messages where message = 'This is a test message 2.'");
+            ResultSet dtr = stSelect.executeQuery();
+            assertEquals(0,dtr.getInt(1));
+        }catch (Exception e){
+            System.out.println(e.toString());
+        }
     }
 }

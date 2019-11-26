@@ -1,5 +1,6 @@
 package edu.wofford.wocoin;
 import java.io.File;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.*;
 import java.util.ArrayList;
@@ -368,7 +369,7 @@ public class SQLController {
                 stInsert.execute();
                 retVal = AddProductResult.ADDED;
             } catch (Exception e) {
-                System.out.println(e.toString());
+                System.out.println("fail + " + e.toString());
             }
         }
 
@@ -468,12 +469,21 @@ public class SQLController {
      * Gets a list of a user's purchasable products in the database
      * @return An ArrayList of the {@link Product} in the database
      */
-    ArrayList<Product> getPurchasableProducts (String username) {
+    ArrayList<Product> getPurchasableProducts (String username, boolean lessThanUserBalance) {
         ArrayList<Product> products = new ArrayList<>();
+        BigDecimal currentBalance = new BigDecimal(this.getUserBalance(username));
         try (Connection dataConn = DriverManager.getConnection(url)) {
-            PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE seller <> ?");
-            stSelect.setString(1, this.retrievePublicKey(username));
-            createProductsListFromStatement(products, stSelect, Product.DisplayType.SHOWCURRENTUSER);
+            if (lessThanUserBalance) {
+                PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE seller <> ? AND price <= ?");
+                stSelect.setString(1, this.retrievePublicKey(username));
+                stSelect.setBigDecimal(2, currentBalance);
+                createProductsListFromStatement(products, stSelect, Product.DisplayType.SHOWCURRENTUSER);
+            }
+            else {
+                PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE seller <> ?");
+                stSelect.setString(1, this.retrievePublicKey(username));
+                createProductsListFromStatement(products, stSelect, Product.DisplayType.SHOWCURRENTUSER);
+            }
         } catch (Exception e) {
             System.out.println("NOT_HERE" + e.toString());
         }
@@ -512,7 +522,9 @@ public class SQLController {
         } else if (amt <= 0){
             return TransferWocoinResult.NEGATIVEINPUT;
         } else {
-            // TODO do blockchain transaction stuff
+            String wallet = this.retrievePublicKey(username);
+            BigInteger coinAmount = BigInteger.valueOf(amt);
+            WalletUtilities.addWocoinToUser(wallet, coinAmount);
             return TransferWocoinResult.SUCCESS;
         }
 
@@ -546,18 +558,17 @@ public class SQLController {
     ArrayList<Message> getMessagesForUser(String username) {
         ArrayList<Message> messages = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
-            PreparedStatement stSelect = dataConn.prepareStatement("select a.id messageID, (select id from wallets where publickey = a.sender) senderUserName, (select id, publickey recipientKey from wallets where publickey = a.recipient) recieverUserName, message, a.dt, b.id productID, b.price, b.name productName, b.description productDescription from messages a join products b on a.productid = b.id where a.sender = ? Order By dt Asc;");
+            PreparedStatement stSelect = dataConn.prepareStatement("select a.id messageID, (select id from wallets where publickey = a.sender) senderUserName, (select id from wallets where publickey = a.recipient) receiverUserName, message, a.dt, b.id productID, b.price, b.name productName, b.description productDescription from messages a join products b on a.productid = b.id where a.recipient = ? Order By dt Asc;");
             stSelect.setString(1, retrievePublicKey(username));
             ResultSet dtr = stSelect.executeQuery();
             while (dtr.next()) {
                 Product newProduct = new Product(dtr.getInt("productID"), dtr.getString("senderUserName"), dtr.getInt("price"), dtr.getString("productName"), dtr.getString("productDescription"));
-                Message newMessage = new Message(dtr.getInt("messageID"), dtr.getString("senderUserName"), dtr.getString("recipientKey"), dtr.getString("message"), dtr.getString("dt"), newProduct);
+                Message newMessage = new Message(dtr.getInt("messageID"), dtr.getString("senderUserName"), dtr.getString("receiverUserName"), dtr.getString("message"), dtr.getString("dt"), newProduct);
                 messages.add(newMessage);
             }
         } catch (Exception e) {
             System.out.println("NOT_HERE" + e.toString());
         }
-        // TODO Get messages from DB ordered by submitDateTime where newer messages are first
         return messages;
     }
 
@@ -586,7 +597,6 @@ public class SQLController {
                 System.out.println(e.toString());
             }
         }
-        // TODO Add the message to the database
         return retVal;
     }
 
@@ -600,13 +610,12 @@ public class SQLController {
         DeleteMessageResult retVal = DeleteMessageResult.NOTDELETED;
         try(Connection dataConn = DriverManager.getConnection(url)){
             PreparedStatement stDelete = dataConn.prepareStatement("Delete From messages Where id = ?");
-            stDelete.setInt(1,message.getId());
+            stDelete.setInt(1, message.getId());
             stDelete.execute();
             retVal = DeleteMessageResult.DELETED;
         } catch (Exception e){
             System.out.println(e.toString());
         }
-        // TODO check if the message exists, and, if so, delete it
         return retVal;
     }
 
