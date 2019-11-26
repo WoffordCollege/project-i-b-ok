@@ -1,5 +1,6 @@
 package edu.wofford.wocoin;
 import java.io.File;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.*;
 import java.util.ArrayList;
@@ -368,7 +369,7 @@ public class SQLController {
                 stInsert.execute();
                 retVal = AddProductResult.ADDED;
             } catch (Exception e) {
-                System.out.println(e.toString());
+                System.out.println("fail + " + e.toString());
             }
         }
 
@@ -468,12 +469,21 @@ public class SQLController {
      * Gets a list of a user's purchasable products in the database
      * @return An ArrayList of the {@link Product} in the database
      */
-    ArrayList<Product> getPurchasableProducts (String username) {
+    ArrayList<Product> getPurchasableProducts (String username, boolean lessThanUserBalance) {
         ArrayList<Product> products = new ArrayList<>();
+        BigDecimal currentBalance = new BigDecimal(this.getUserBalance(username));
         try (Connection dataConn = DriverManager.getConnection(url)) {
-            PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE seller <> ?");
-            stSelect.setString(1, this.retrievePublicKey(username));
-            createProductsListFromStatement(products, stSelect, Product.DisplayType.SHOWCURRENTUSER);
+            if (lessThanUserBalance) {
+                PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE seller <> ? AND price <= ?");
+                stSelect.setString(1, this.retrievePublicKey(username));
+                stSelect.setBigDecimal(2, currentBalance);
+                createProductsListFromStatement(products, stSelect, Product.DisplayType.SHOWCURRENTUSER);
+            }
+            else {
+                PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE seller <> ?");
+                stSelect.setString(1, this.retrievePublicKey(username));
+                createProductsListFromStatement(products, stSelect, Product.DisplayType.SHOWCURRENTUSER);
+            }
         } catch (Exception e) {
             System.out.println("NOT_HERE" + e.toString());
         }
@@ -559,7 +569,6 @@ public class SQLController {
         } catch (Exception e) {
             System.out.println("NOT_HERE" + e.toString());
         }
-        // TODO Get messages from DB ordered by submitDateTime where newer messages are first
         return messages;
     }
 
@@ -588,7 +597,6 @@ public class SQLController {
                 System.out.println(e.toString());
             }
         }
-        // TODO Add the message to the database
         return retVal;
     }
 
@@ -608,7 +616,6 @@ public class SQLController {
         } catch (Exception e){
             System.out.println(e.toString());
         }
-        // TODO check if the message exists, and, if so, delete it
         return retVal;
     }
 

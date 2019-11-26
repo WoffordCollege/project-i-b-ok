@@ -4,10 +4,6 @@ import java.io.File;
 
 import org.web3j.crypto.*;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.admin.Admin;
-import org.web3j.protocol.admin.methods.response.PersonalUnlockAccount;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.protocol.http.HttpService;
@@ -34,7 +30,7 @@ public class WalletUtilities {
     /**
      * An enumeration of the possible results of attempting to purchase products.
      */
-    public enum PurchaseProductResult{SUCCESS, INSUFFICIENTFUNDS, NOWALLET, NOWALLETFILE, WALLETKEYSDONTMATCH, FAILED}
+    public enum PurchaseProductResult{SUCCESS, INSUFFICIENTFUNDS, NOWALLETFILE, FAILED}
 
 
     /**
@@ -87,46 +83,86 @@ public class WalletUtilities {
      * @param amt the amount of WoCoin to be transferred.
      */
     public static void addWocoinToUser(String wallet, BigInteger amt) {
-        createWocoinTransaction("ethereum/node0/keystore/UTC--2019-08-07T17-24-10.532680697Z--0fce4741f3f54fbffb97837b4ddaa8f769ba0f91.json", "adminpwd", "0x" + wallet, amt);
+        createWocoinTransaction(new File("ethereum/node0/keystore/UTC--2019-08-07T17-24-10.532680697Z--0fce4741f3f54fbffb97837b4ddaa8f769ba0f91.json"), "adminpwd", "0x" + wallet, amt);
     }
 
-    private static void createWocoinTransaction(String walletPath, String senderPassword, String recipientWallet, BigInteger amount) {
+    private static boolean createWocoinTransaction(File walletFile, String senderPassword, String recipientWallet, BigInteger amount) {
         Web3j web3 = Web3j.build(new HttpService());
 
-        Credentials senderCredentials = null;
+        Credentials senderCredentials;
         try {
-            senderCredentials = WalletUtils.loadCredentials(senderPassword, walletPath);
-        } catch (IOException | CipherException e) {
-            e.printStackTrace();
-        }
+            senderCredentials = WalletUtils.loadCredentials(senderPassword, walletFile);
+        } catch (Exception ignored) {return false;}
 
+        TransactionReceipt receipt = null;
         try {
-            TransactionReceipt receipt = Transfer.sendFunds(web3, senderCredentials, recipientWallet, new BigDecimal(amount), Convert.Unit.WEI).sendAsync().get();
-        } catch (InterruptedException | ExecutionException | IOException | TransactionException e) {
-            e.printStackTrace();
+            if (senderCredentials != null) {
+                receipt = Transfer.sendFunds(web3, senderCredentials, recipientWallet, new BigDecimal(amount), Convert.Unit.WEI).sendAsync().get();
+            }
+        } catch (Exception ignored) {return false;}
+
+        return receipt != null && receipt.isStatusOK();
+    }
+
+    /**
+     * This function takes a wallet file, password, and product to allow a user to buy a specified product with their ethereum balance.
+     * Then checks if there is a valid wallet file in the given path with a subdirectory of username and returns {@link PurchaseProductResult#NOWALLETFILE} if not
+     * Then checks if the user balance is more than the price of the product, if not, returns {@link PurchaseProductResult#INSUFFICIENTFUNDS}
+     * If all criteria are met, it transfers the funds from the current user's wallet to the wallet of the seller of the product,
+     * then updates the seller id of the product in the Wocoin database to the ID of the user who bought the product
+     * @param walletFile the file of the directory holding the user's subdirectory
+     * @param password the password of the user buying the product
+     * @param boughtProduct the product the user wants to buy
+     * @return a {@link PurchaseProductResult} indicating the operation that occurred.
+     */
+    public static PurchaseProductResult buyProduct(File walletFile, String password, Product boughtProduct) {
+        if (!walletFile.exists()) {
+            return PurchaseProductResult.NOWALLETFILE;
+        } else {
+            BigInteger userBalance = Utilities.getBalance(getWalletAddressFromFile(walletFile, password));
+            BigInteger productPrice = BigInteger.valueOf(boughtProduct.getPrice());
+            if (userBalance.compareTo(productPrice) < 0) {
+                return PurchaseProductResult.INSUFFICIENTFUNDS;
+            }
+            else {
+                if (createWocoinTransaction(walletFile, password, boughtProduct.getSeller(), BigInteger.valueOf(boughtProduct.getPrice()))) {
+                    return PurchaseProductResult.SUCCESS;
+                }
+                else {
+                    return PurchaseProductResult.FAILED;
+                }
+            }
         }
 
     }
 
     /**
-     * This function takes a path, username, password, product, and sqlController to allow a user to buy a product with their ethereum balance.
-     * If first checks if the user has a wallet in the database and returns {@link PurchaseProductResult#NOWALLET} if not
-     * Then checks if there is a valid wallet file in the given path with a subdirectory of username and returns {@link PurchaseProductResult#NOWALLETFILE} if not
-     * Then checks if the wallet file address and the wallet address in the database are the same, if not, returns {@link PurchaseProductResult#WALLETKEYSDONTMATCH}
-     * Then checks if the user balance is more than the price of the product, if not, returns {@link PurchaseProductResult#INSUFFICIENTFUNDS}
-     * If all criteria are met, it transfers the funds from the current user's wallet to the wallet of the seller of the product,
-     * then updates the seller id of the product in the Wocoin database to the ID of the user who bought the product
-     * @param walletPath the path of the directory holding the user's subdirectory
-     * @param password the password of the user buying the product
-     * @param boughtProduct the product the user wants to buy
-     * @param sqlController the {@link SQLController} of the current Wocoin database
-     * @return a {@link PurchaseProductResult} indicating the operation that occurred.
+     * This function checks that the given file exists and tests if the public key in the file is the same as the given public key.
+     * @param walletFile the wallet file to retrieve credentials from
+     * @param publicKey the public key to compare the credentials
+     * @param userPassword the password of the user owning the wallet file.
+     * @return true if the wallet file credentials match the given public key and false otherwise
      */
-    public static PurchaseProductResult buyProduct(String walletPath, String password, Product boughtProduct, SQLController sqlController){
-
-        createWocoinTransaction(walletPath, password, boughtProduct.getSeller(), BigInteger.valueOf(boughtProduct.getPrice()));
-        return PurchaseProductResult.FAILED;
+    public static boolean walletInFilepathHasSamePublicKey(File walletFile, String publicKey, String userPassword) {
+        String fileWalletAddress = WalletUtilities.getWalletAddressFromFile(walletFile, userPassword);
+        return fileWalletAddress != null && fileWalletAddress.equals(publicKey);
     }
 
+    /**
+     * This function returns the public key of the given wallet file if it is valid.
+     * @param walletFile the wallet file to retrieve credentials from
+     * @param userPassword the password of the user owning the wallet file.
+     * @return a string containing the address of the wallet file
+     */
+    public static String getWalletAddressFromFile(File walletFile, String userPassword) {
+        Credentials credentials;
+        try {
+            credentials = WalletUtils.loadCredentials(userPassword, walletFile);
+        } catch (IOException | CipherException ignored) {
+            return null;
+        }
+
+        return credentials != null ? credentials.getAddress().substring(2) : null;
+    }
 
 }
