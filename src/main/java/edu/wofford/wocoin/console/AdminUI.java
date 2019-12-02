@@ -3,7 +3,10 @@ package edu.wofford.wocoin.console;
 import edu.wofford.wocoin.ConsoleController;
 import edu.wofford.wocoin.SQLController;
 import io.bretty.console.view.AbstractView;
+import io.bretty.console.view.Validator;
 import io.bretty.console.view.ViewConfig;
+import jnr.ffi.annotations.In;
+import org.web3j.abi.datatypes.Int;
 
 import java.math.BigInteger;
 import java.util.Scanner;
@@ -106,14 +109,17 @@ public class AdminUI extends CustomActionView {
                 this.println("User has no wallet.");
             }
             else {
-                int coinsToTransfer = this.prompt("Enter the amount of WoCoins to transfer to the user: ", Integer.class);
-                if (coinsToTransfer > 0) {
-					this.println(cc.transferWocoinsToUser(username, coinsToTransfer));
-                }
-                else {
-                    this.println("Invalid value.");
-                    this.println("Expected an integer value greater than or equal to 1.");
-                }
+                int coinsToTransfer;
+
+                do {
+                    coinsToTransfer = this.prompt("Enter the amount of WoCoins to transfer to the user: ", Integer.class);
+                    if (coinsToTransfer <= 0) {
+                        this.println("Invalid value.");
+                        this.println("Expected an integer value greater than or equal to 1.");
+                    }
+                } while (coinsToTransfer <= 0);
+
+                this.println(cc.transferWocoinsToUser(username, coinsToTransfer));
             }
         }
     }

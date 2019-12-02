@@ -1,6 +1,6 @@
 package edu.wofford.wocoin.main;
 
-import edu.wofford.wocoin.gui.MainMenu;
+import edu.wofford.wocoin.console.MainMenu;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
