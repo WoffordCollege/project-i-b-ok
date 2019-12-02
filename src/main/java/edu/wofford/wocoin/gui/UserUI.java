@@ -304,7 +304,6 @@ public class UserUI extends CustomActionView {
 							this.println(String.format("Invalid value. Enter a value between 1 and %d.", products.size() + 1));
 							this.println("Action canceled.");
 						} else {
-							String userMessage = this.prompt("What is the message? ", String.class);
 							this.println(cc.buyProduct(walletPath, products.get(selected - 2)));
 						}
 					}
