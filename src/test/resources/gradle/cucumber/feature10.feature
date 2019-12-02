@@ -93,7 +93,7 @@ Feature: Allow users to purchase products with their WoCoins.
     And the database contains a product "A Wrinkle in Time" with description "a book" and price 3 added by "a615316333ba8622fd5bb60fe39758b3515f774d" 
     And the database contains a product "Time magazine" with description "issue 42" and price 7 added by "a615316333ba8622fd5bb60fe39758b3515f774d" 
     # jsmith has 7 WoCoins from feature 8
-    And the user "jdoe" has 2 WoCoins using administrator password "adminpwd"
+    And the user "jdoe" has 3 WoCoins using administrator password "adminpwd"
     # jdoe now has 3 WoCoins because 1 was added to escape the invalid scenario from feature 8
     And I attempt to perform as a user with username "jdoe" and password "jdoe"
     When I purchase a product
