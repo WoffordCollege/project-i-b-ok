@@ -474,6 +474,7 @@ public class SQLController {
         try (Connection dataConn = DriverManager.getConnection(url)) {
             if (lessThanUserBalance) {
                 BigDecimal currentBalance = new BigDecimal(this.getUserBalance(username));
+                System.out.println(currentBalance);
                 PreparedStatement stSelect = dataConn.prepareStatement("SELECT id, price, name, description, (SELECT id FROM wallets WHERE wallets.publickey = products.seller) user FROM products WHERE seller <> ? AND price <= ?");
                 stSelect.setString(1, this.retrievePublicKey(username));
                 stSelect.setBigDecimal(2, currentBalance);

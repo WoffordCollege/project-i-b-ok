@@ -17,7 +17,7 @@ public class UserUI extends CustomActionView {
     private ConsoleController cc;
 
     public UserUI(ConsoleController cc, ViewConfig viewConfig) {
-        super("Please enter your username and password separated by a space.", "user", viewConfig);
+        super("", "user", viewConfig);
         this.cc = cc;
     }
 
@@ -28,11 +28,8 @@ public class UserUI extends CustomActionView {
 
     @Override
     public void executeCustomAction() {
-        this.print("Enter your username: ");
-        String username = this.prompt("", String.class);
-
-        this.print("Enter your password: ");
-        String password = this.prompt("", String.class);
+        String username = this.prompt("Please enter your username: ", String.class);
+        String password = this.prompt("Please enter your password: ", String.class);
 
         if (!cc.userLogin(username, password)){
             this.println("No such user.");
@@ -46,7 +43,7 @@ public class UserUI extends CustomActionView {
     private class UserRootMenu extends CustomMenuView {
 
         public UserRootMenu(AbstractView parentView, String user, ViewConfig viewConfig, Scanner keyboard) {
-            super("Welcome, " + user, "", viewConfig, keyboard);
+            super("Welcome back, " + user, "", viewConfig, keyboard);
 
             this.parentView = parentView;
 

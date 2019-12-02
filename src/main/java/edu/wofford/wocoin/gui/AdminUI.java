@@ -15,19 +15,19 @@ public class AdminUI extends CustomActionView {
     private ConsoleController cc;
 
     public AdminUI(ConsoleController cc) {
-        super("Enter the administrator password: ", "administrator");
+        super("", "administrator");
         this.cc = cc;
     }
 
     public AdminUI(ConsoleController cc, ViewConfig viewConfig, Scanner keyboard) {
-        super("Enter the administrator password: ", "administrator", viewConfig, keyboard);
+        super("", "administrator", viewConfig, keyboard);
         this.cc = cc;
     }
 
 
     @Override
     public void executeCustomAction() {
-        String password = this.prompt("", String.class);
+        String password = this.prompt("Please provide the administrator password: ", String.class);
 
         if (cc.adminLogin(password)) {
             new AdminRootMenu(this.parentView, cc, this.viewConfig, this.keyboard).display();
@@ -43,7 +43,7 @@ public class AdminUI extends CustomActionView {
         private ConsoleController cc;
 
         public AdminRootMenu(AbstractView parentView, ConsoleController cc, ViewConfig viewConfig, Scanner keyboard) {
-            super("Welcome, Administrator", "", viewConfig);
+            super("Welcome back, Administrator", "", viewConfig);
 
             this.parentView = parentView;
             this.keyboard = keyboard;

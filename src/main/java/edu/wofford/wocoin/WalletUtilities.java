@@ -83,7 +83,7 @@ public class WalletUtilities {
      * @param amt the amount of WoCoin to be transferred.
      */
     public static void addWocoinToUser(String wallet, BigInteger amt) {
-        createWocoinTransaction(new File("ethereum/node0/keystore/UTC--2019-08-07T17-24-10.532680697Z--0fce4741f3f54fbffb97837b4ddaa8f769ba0f91.json"), "adminpwd", "0x" + wallet, amt);
+        createWocoinTransaction(new File("ethereum/node0/keystore/UTC--2019-08-07T17-24-10.532680697Z--0fce4741f3f54fbffb97837b4ddaa8f769ba0f91.json"), "adminpwd", wallet, amt);
     }
 
     private static boolean createWocoinTransaction(File walletFile, String senderPassword, String recipientWallet, BigInteger amount) {
@@ -92,12 +92,15 @@ public class WalletUtilities {
         Credentials senderCredentials;
         try {
             senderCredentials = WalletUtils.loadCredentials(senderPassword, walletFile);
-        } catch (Exception ignored) {return false;}
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
 
         TransactionReceipt receipt = null;
         try {
             if (senderCredentials != null) {
-                receipt = Transfer.sendFunds(web3, senderCredentials, recipientWallet, new BigDecimal(amount), Convert.Unit.WEI).sendAsync().get();
+                receipt = Transfer.sendFunds(web3, senderCredentials, "0x" + recipientWallet, new BigDecimal(amount), Convert.Unit.WEI).sendAsync().get();
             }
         } catch (Exception ignored) {return false;}
 
@@ -115,7 +118,7 @@ public class WalletUtilities {
      * @param boughtProduct the product the user wants to buy
      * @return a {@link PurchaseProductResult} indicating the operation that occurred.
      */
-    public static PurchaseProductResult buyProduct(File walletFile, String password, Product boughtProduct) {
+    public static PurchaseProductResult buyProduct(File walletFile, String password, Product boughtProduct, String sellerWallet) {
         if (!walletFile.exists()) {
             return PurchaseProductResult.NOWALLETFILE;
         } else {
@@ -125,7 +128,7 @@ public class WalletUtilities {
                 return PurchaseProductResult.INSUFFICIENTFUNDS;
             }
             else {
-                if (createWocoinTransaction(walletFile, password, boughtProduct.getSeller(), BigInteger.valueOf(boughtProduct.getPrice()))) {
+                if (createWocoinTransaction(walletFile, password, sellerWallet, BigInteger.valueOf(boughtProduct.getPrice()))) {
                     return PurchaseProductResult.SUCCESS;
                 }
                 else {

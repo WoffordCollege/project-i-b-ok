@@ -386,9 +386,11 @@ public class ConsoleController {
                 File [] files = walletDirectory.listFiles((dir, name) -> name.endsWith(".json"));
                 if (files != null && files.length > 0) {
                     File walletFile = files[0];
-                    switch (WalletUtilities.buyProduct(walletFile, this.currentPassword, boughtProduct)) {
+                    String sellerWallet = sqlController.retrievePublicKey(boughtProduct.getSeller());
+                    switch (WalletUtilities.buyProduct(walletFile, this.currentPassword, boughtProduct, sellerWallet)) {
                         case SUCCESS:
-                            return "Product purchased.";
+                            sqlController.removeProduct(boughtProduct);
+                            return "Item purchased.";
                         case INSUFFICIENTFUNDS:
                             return "Insufficient Funds.";
                         case NOWALLETFILE:
