@@ -381,4 +381,20 @@ public class SQLControllerTest {
             System.out.println(e.toString());
         }
     }
+
+    @Test
+    public void sendMessageBadRecipientTest(){
+        foobar.insertUser("userWithoutWallet","12345");
+        Product testProduct = foobar.getPurchasableProductsList("jdoe",10).get(0);
+        Message testMessage = new Message("jdoe", "userWithoutWallet", "This is a test message 3.", testProduct);
+        SQLController.SendMessageResult tmp = foobar.sendMessage(testMessage);
+        assertEquals(SQLController.SendMessageResult.INVALIDRECIPIENT, tmp);
+        try(Connection dataConn = DriverManager.getConnection(foobar.getPath())){
+            PreparedStatement stSelect = dataConn.prepareStatement("Select count(*) from messages where message = 'This is a test message 3.'");
+            ResultSet dtr = stSelect.executeQuery();
+            assertEquals(0,dtr.getInt(1));
+        }catch (Exception e){
+            System.out.println(e.toString());
+        }
+    }
 }
