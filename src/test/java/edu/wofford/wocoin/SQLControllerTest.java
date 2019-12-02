@@ -347,11 +347,6 @@ public class SQLControllerTest {
     }
 
     @Test
-    public void getMessagesForUserTest(){
-        assertTrue(true);
-    }
-
-    @Test
     public void sendMessageSuccessfulTest(){
         Product testProduct = foobar.getPurchasableProductsList("jdoe",10).get(0);
         Message testMessage = new Message("jdoe", "jsmith","This is a test message.",testProduct);
@@ -396,5 +391,38 @@ public class SQLControllerTest {
         }catch (Exception e){
             System.out.println(e.toString());
         }
+    }
+
+    @Ignore
+    @Test
+    public void getMessageTest(){
+        int nextId = -1;
+        try(Connection dataConn = DriverManager.getConnection(foobar.getPath())){
+            PreparedStatement stSelect = dataConn.prepareStatement("Select max(id) from products");
+            ResultSet dtr = stSelect.executeQuery();
+            nextId = dtr.getInt(1);
+        }catch (Exception e){
+            System.out.println(e.toString());
+        }
+        ArrayList<Message> srogers = new ArrayList<>();
+        ArrayList<Message> hjones = new ArrayList<>();
+        Product newTestProduct = new Product(nextId, "srogers", 256, "Shield", "Made of a steel vibranium alloy");
+        Message messageToSend = new Message("srogers","hjones","abcd",newTestProduct);
+        hjones.add(messageToSend);
+        foobar.sendMessage(messageToSend);
+
+        messageToSend = new Message("hjones","srogers","efgh",newTestProduct);
+        srogers.add(messageToSend);
+        foobar.sendMessage(messageToSend);
+
+        messageToSend = new Message("srogers","hjones","ijkl",newTestProduct);
+        hjones.add(messageToSend);
+        foobar.sendMessage(messageToSend);
+
+        messageToSend = new Message("hjones","srogers","mnop",newTestProduct);
+        srogers.add(messageToSend);
+        foobar.sendMessage(messageToSend);
+        assertEquals(hjones,foobar.getMessagesForUser("hjones"));
+        assertEquals(srogers,foobar.getMessagesForUser("srogers"));
     }
 }
