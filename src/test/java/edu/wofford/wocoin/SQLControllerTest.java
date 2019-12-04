@@ -434,4 +434,31 @@ public class SQLControllerTest {
         assertEquals(srogers.get(0).toStringWithoutDate(),srogersActual.get(0).toStringWithoutDate());
         assertEquals(srogers.get(1).toStringWithoutDate(),srogersActual.get(1).toStringWithoutDate());
     }
+
+    @Test
+    public void deleteMessageTest(){
+        Product testProduct = foobar.getPurchasableProductsList("jsmith",10).get(0);
+        Message testMessage = new Message("jsmith", "jdoe","This is another test message.",testProduct);
+        SQLController.SendMessageResult tmp = foobar.sendMessage(testMessage);
+        assertEquals(SQLController.SendMessageResult.SENT, tmp);
+
+        int nextId = -1;
+        try(Connection dataConn = DriverManager.getConnection(foobar.getPath())){
+            PreparedStatement stSelect = dataConn.prepareStatement("Select max(id) from messages");
+            ResultSet dtr = stSelect.executeQuery();
+            nextId = dtr.getInt(1);
+        }catch (Exception e){
+            System.out.println(e.toString());
+        }
+
+        testMessage.setId(nextId);
+        assertEquals(SQLController.DeleteMessageResult.DELETED, foobar.deleteMessage(testMessage));
+        try(Connection dataConn = DriverManager.getConnection(foobar.getPath())){
+            PreparedStatement stSelect = dataConn.prepareStatement("Select count(*) from messages where message = 'This is another test message.'");
+            ResultSet dtr = stSelect.executeQuery();
+            assertEquals(0,dtr.getInt(1));
+        }catch (Exception e){
+            System.out.println(e.toString());
+        }
+    }
 }
