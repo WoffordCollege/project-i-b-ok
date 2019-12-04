@@ -28,6 +28,8 @@ public class AdminUI extends JPanel implements ActionListener {
 
 		adminRootMenu = new AdminRootMenu();
 		this.add(adminRootMenu, "user control screen");
+
+
 	}
 
 	public void setupLoginPanel(JPanel pnlLogin) {
@@ -48,6 +50,7 @@ public class AdminUI extends JPanel implements ActionListener {
 		this.txtPassword.setText("");
 		this.loginScreenLayout.show(this, "login screen");
 	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand().equals("Logout")) {
@@ -72,24 +75,32 @@ public class AdminUI extends JPanel implements ActionListener {
 		private HashMap<String, UserActionPanel> actionPanels;
 
 		public AdminRootMenu() {
-			JPanel adminOptionsView = new JPanel();
-			adminOptionsView.setLayout(new GridLayout(0, 3));
+			userOptionsMenu = new JPanel();
+			userOptionsMenu.setLayout(new GridLayout(0, 3));
 			JButton btnAddUser = new JButton("Add a User");
 			btnAddUser.addActionListener(this);
-			adminOptionsView.add(btnAddUser);
+			userOptionsMenu.add(btnAddUser);
 
 			JButton btnRemoveUser = new JButton("Remove a User");
 			btnRemoveUser.addActionListener(this);
-			adminOptionsView.add(btnRemoveUser);
+			userOptionsMenu.add(btnRemoveUser);
 
 			JButton btnTransferFunds = new JButton("Transfer Funds");
 			btnTransferFunds.addActionListener(this);
-			adminOptionsView.add(btnTransferFunds);
+			userOptionsMenu.add(btnTransferFunds);
 
-			this.add(adminOptionsView, "admin options menu");
+			rootMenuLayout = new CardLayout();
+			this.setLayout(rootMenuLayout);
+			this.add(userOptionsMenu, "admin options menu");
 
 			AddUserPanel addUserPanel = new AddUserPanel(this);
 			this.add(addUserPanel, "Add a User");
+
+			RemoveUserPanel removeUserPanel = new RemoveUserPanel(this);
+			this.add(removeUserPanel, "Remove a User");
+
+			TransferFundsPanel transferFundsPanel = new TransferFundsPanel(this);
+			this.add(transferFundsPanel, "Transfer Funds");
 
 		}
 
@@ -141,12 +152,16 @@ public class AdminUI extends JPanel implements ActionListener {
 			public void actionPerformed(ActionEvent e) {
 				String actionName = e.getActionCommand();
 				if (actionName.equals("Back")) {
+					txtNewUser.setText("");
+					txtNewPassword.setText("");
 					parentPanel.showRootMenu();
 				}
 				else {
 					String addUserResult = gc.addUser(txtNewUser.getText(), new String(txtNewPassword.getPassword()));
 					JOptionPane.showMessageDialog(null, addUserResult);
-					if (addUserResult.equals("User added.")) {
+					if (addUserResult.equals(txtNewUser.getText() + " was added.")) {
+						txtNewUser.setText("");
+						txtNewPassword.setText("");
 						this.parentPanel.showRootMenu();
 					}
 				}
@@ -156,84 +171,107 @@ public class AdminUI extends JPanel implements ActionListener {
 		private class RemoveUserPanel extends JPanel implements ActionListener {
 			private final AdminRootMenu parentPanel;
 
+			private JTextField txtRemoveUser;
+
+
 			public RemoveUserPanel(AdminRootMenu parentPanel) {
 				this.parentPanel = parentPanel;
+				JButton backButton = new JButton("Back");
+				backButton.addActionListener(this);
+
+				this.setLayout(new GridBagLayout());
+				GridBagConstraints gridBagConstraints = new GridBagConstraints();
+				gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+				gridBagConstraints.insets = new Insets(10, 10, 10, 10);
+
+				gridBagConstraints.gridx = 0;
+				gridBagConstraints.gridy = 0;
+				gridBagConstraints.anchor = GridBagConstraints.PAGE_START;
+				this.add(backButton, gridBagConstraints);
+
+				txtRemoveUser = new JTextField(20);
+				gridBagConstraints.gridy = 1;
+				gridBagConstraints.anchor = GridBagConstraints.CENTER;
+				this.add(txtRemoveUser, gridBagConstraints);
+
+				JButton btnAddNewUser = new JButton("Remove User");
+				btnAddNewUser.addActionListener(this);
+				gridBagConstraints.gridx = 1;
+				this.add(btnAddNewUser, gridBagConstraints);
 			}
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
+				String actionName = e.getActionCommand();
+				if (actionName.equals("Back")) {
+					txtRemoveUser.setText("");
+					parentPanel.showRootMenu();
+				}
+				else {
+					String removeUserResult = gc.removeUser(txtRemoveUser.getText());
+					JOptionPane.showMessageDialog(null, removeUserResult);
+					if (removeUserResult.equals(txtRemoveUser.getText() + " was removed.")) {
+						txtRemoveUser.setText("");
+						this.parentPanel.showRootMenu();
+					}
+				}
 			}
 		}
 
 		private class TransferFundsPanel extends JPanel implements ActionListener {
 			private final AdminRootMenu parentPanel;
 
+			private JTextField txtUser;
+			private JSpinner txtWocoinAmount;
+
 			public TransferFundsPanel(AdminRootMenu parentPanel) {
 				this.parentPanel = parentPanel;
+				JButton backButton = new JButton("Back");
+				backButton.addActionListener(this);
+
+				this.setLayout(new GridBagLayout());
+				GridBagConstraints gridBagConstraints = new GridBagConstraints();
+				gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+				gridBagConstraints.insets = new Insets(10, 10, 10, 10);
+
+				gridBagConstraints.gridx = 0;
+				gridBagConstraints.gridy = 0;
+				gridBagConstraints.anchor = GridBagConstraints.PAGE_START;
+				this.add(backButton, gridBagConstraints);
+
+				txtUser = new JTextField(20);
+				gridBagConstraints.gridy = 1;
+				gridBagConstraints.anchor = GridBagConstraints.CENTER;
+				this.add(txtUser, gridBagConstraints);
+
+				txtWocoinAmount = new JSpinner(new SpinnerNumberModel(1, 1, Integer.MAX_VALUE, 1));
+				gridBagConstraints.gridx = 1;
+				this.add(txtWocoinAmount, gridBagConstraints);
+
+				JButton btnAddNewUser = new JButton("Transfer Funds to User");
+				btnAddNewUser.addActionListener(this);
+				gridBagConstraints.gridx = 2;
+				this.add(btnAddNewUser, gridBagConstraints);
 			}
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
+				String actionName = e.getActionCommand();
+				if (actionName.equals("Back")) {
+					txtUser.setText("");
+					txtWocoinAmount.setValue(1);
+					parentPanel.showRootMenu();
+				}
+				else {
+					String transferCoinResult = gc.transferWocoinsToUser(txtUser.getText(), (Integer) txtWocoinAmount.getValue());
+					JOptionPane.showMessageDialog(null, transferCoinResult);
+					if (transferCoinResult.equals("Transfer complete.")) {
+						txtUser.setText("");
+						txtWocoinAmount.setValue(1);
+						parentPanel.showRootMenu();
+					}
+				}
 			}
 		}
-
-		/*
-		private class AddUserAction extends CustomActionView {
-        public AddUserAction(ViewConfig viewConfig, Scanner keyboard) {
-            super("Add User", "add user", viewConfig, keyboard);
-        }
-
-        @Override
-        public void executeCustomAction() {
-            String username = this.prompt("Enter a username to add: ", String.class);
-            String password = this.prompt("Enter a password for the user: ", String.class);
-
-            this.println(cc.addUser(username, password));
-        }
-    }
-
-    private class RemoveUserAction extends CustomActionView {
-        public RemoveUserAction(ViewConfig viewConfig, Scanner keyboard) {
-            super("Remove User", "remove user", viewConfig, keyboard);
-        }
-
-        @Override
-        public void executeCustomAction() {
-            String username = this.prompt("Please enter the username of the account to be removed: ", String.class);
-            this.println(cc.removeUser(username));
-        }
-    }
-
-    private class TransferFundsAction extends CustomActionView {
-        public TransferFundsAction(ViewConfig viewConfig, Scanner keyboard) {
-            super("Transfer WoCoins to User", "transfer WoCoins", viewConfig, keyboard);
-        }
-
-        @Override
-        public void executeCustomAction() {
-            String username = this.prompt("Enter the username of the user to transfer WoCoins to: ", String.class);
-            if (!cc.getSqlController().lookupUser(username)) {
-                this.println("No such user.");
-            }
-            else if (!cc.getSqlController().findWallet(username)){
-                this.println("User has no wallet.");
-            }
-            else {
-                int coinsToTransfer;
-
-                do {
-                    coinsToTransfer = this.prompt("Enter the amount of WoCoins to transfer to the user: ", Integer.class);
-                    if (coinsToTransfer <= 0) {
-                        this.println("Invalid value.");
-                        this.println("Expected an integer value greater than or equal to 1.");
-                    }
-                } while (coinsToTransfer <= 0);
-
-                this.println(cc.transferWocoinsToUser(username, coinsToTransfer));
-            }
-        }
-		 */
 	}
 }

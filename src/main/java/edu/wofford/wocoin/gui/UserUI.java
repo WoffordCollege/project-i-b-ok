@@ -633,6 +633,7 @@ public class UserUI extends JPanel implements ActionListener {
 				}
 			}
 		}
+
 		private class BuyProductPanel extends JPanel implements UserActionPanel, ActionListener {
 			private final UserRootMenu parentPanel;
 
