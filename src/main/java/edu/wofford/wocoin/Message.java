@@ -31,7 +31,7 @@ public class Message {
 	}
 
 	public String getRecipientUsername() {
-		return product.getSeller();
+		return recipientUsername;
 	}
 
 	public String getSenderUsername() {

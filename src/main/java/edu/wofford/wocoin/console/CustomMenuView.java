@@ -1,4 +1,4 @@
-package edu.wofford.wocoin.gui;
+package edu.wofford.wocoin.console;
 
 import io.bretty.console.view.MenuView;
 import io.bretty.console.view.Validator;

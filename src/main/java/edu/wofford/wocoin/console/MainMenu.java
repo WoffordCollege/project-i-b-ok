@@ -1,4 +1,4 @@
-package edu.wofford.wocoin.gui;
+package edu.wofford.wocoin.console;
 
 import edu.wofford.wocoin.ConsoleController;
 import edu.wofford.wocoin.SQLController;
