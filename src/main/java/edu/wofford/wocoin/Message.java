@@ -5,7 +5,7 @@ package edu.wofford.wocoin;
  * If id is negative, the field has not been populated.
  * If submitDateTime is null, the field has not been populated.
  */
-public class Message {
+public class Message implements Comparable<Message>{
 	private int id;
 	private String message;
 	private String senderUsername;
@@ -61,7 +61,13 @@ public class Message {
 	}
 
 	@Override
+	public int compareTo(Message otherMessage){
+		return this.id - otherMessage.getId();
+	}
+
+	@Override
 	public String toString() {
 		return String.format("%s  [%s]  %s", message, product.getName(), this.submitDateTime);
 	}
+
 }

@@ -567,6 +567,7 @@ public class SQLController {
                 Message newMessage = new Message(dtr.getInt("messageID"), dtr.getString("senderUserName"), dtr.getString("receiverUserName"), dtr.getString("message"), dtr.getString("dt"), newProduct);
                 messages.add(newMessage);
             }
+            messages.sort(Message::compareTo);
         } catch (Exception e) {
             System.out.println("NOT_HERE" + e.toString());
         }

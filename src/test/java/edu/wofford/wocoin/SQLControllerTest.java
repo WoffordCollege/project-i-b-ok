@@ -422,6 +422,10 @@ public class SQLControllerTest {
         messageToSend = new Message("hjones","srogers","mnop",newTestProduct);
         srogers.add(messageToSend);
         foobar.sendMessage(messageToSend);
+
+        hjones.sort(Message::compareTo);
+        srogers.sort(Message::compareTo);
+
         assertEquals(hjones,foobar.getMessagesForUser("hjones"));
         assertEquals(srogers,foobar.getMessagesForUser("srogers"));
     }
