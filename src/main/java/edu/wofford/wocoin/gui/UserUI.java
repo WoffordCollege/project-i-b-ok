@@ -173,6 +173,16 @@ public class UserUI extends JPanel implements ActionListener {
 
 				this.add(backButton);
 				this.add(Box.createVerticalStrut(15));
+
+				fileChooser = new JFileChooser();
+				fileChooser.setCurrentDirectory(new java.io.File("."));
+				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				fileChooser.setAcceptAllFileFilterUsed(false);
+				fileChooser.setAlignmentX(LEFT_ALIGNMENT);
+				fileChooser.addActionListener(this);
+
+				this.add(fileChooser);
+
 			}
 
 			public void showPanel() {
@@ -184,22 +194,6 @@ public class UserUI extends JPanel implements ActionListener {
 					if (!userStillCreatingWallet) {
 						parentPanel.showRootMenu();
 					}
-				}
-
-				if (userStillCreatingWallet) {
-					fileChooser = new JFileChooser();
-					fileChooser.setCurrentDirectory(new java.io.File("."));
-					fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-					fileChooser.setAcceptAllFileFilterUsed(false);
-					fileChooser.setAlignmentX(LEFT_ALIGNMENT);
-					fileChooser.addActionListener(this);
-
-					this.add(fileChooser);
-					JButton selectDirectoryButton = new JButton("Create Wallet");
-					selectDirectoryButton.addActionListener(this);
-					selectDirectoryButton.setAlignmentX(LEFT_ALIGNMENT);
-					this.add(selectDirectoryButton);
-					this.updateUI();
 				}
 			}
 
