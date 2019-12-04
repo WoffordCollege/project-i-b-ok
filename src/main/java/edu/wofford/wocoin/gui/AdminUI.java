@@ -3,8 +3,10 @@ package edu.wofford.wocoin.gui;
 import edu.wofford.wocoin.GUIController;
 
 import javax.swing.JPanel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class AdminUI extends JPanel {
+public class AdminUI extends JPanel implements ActionListener {
 
 	/**
 	 * Create the panel.
@@ -14,4 +16,8 @@ public class AdminUI extends JPanel {
 
 	}
 
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+	}
 }

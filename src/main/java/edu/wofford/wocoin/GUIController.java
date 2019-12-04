@@ -340,7 +340,7 @@ public class GUIController {
             return "User has no wallet.";
         }
         else {
-            String formatString = potentialBalance.equals(new BigInteger("1")) ? "User has %s WoCoin." : "User has %s WoCoins.";
+            String formatString = potentialBalance.equals(new BigInteger("1")) ? this.currentUser + " has %s WoCoin." : this.currentUser + " has %s WoCoins.";
             return String.format(formatString, potentialBalance.toString());
         }
     }

@@ -3,14 +3,10 @@
  */
 package edu.wofford.wocoin.gui;
 
-import javax.swing.JFrame;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-
-import javax.swing.JComboBox;
-
-import javax.swing.JPanel;
 
 import edu.wofford.wocoin.GUIController;
 import edu.wofford.wocoin.SQLController;
@@ -31,10 +27,15 @@ public class RootFrame implements ItemListener {
         JComboBox<String> cb = new JComboBox<>(comboBoxItems);
         cb.setEditable(false);
         cb.addItemListener(this);
-        comboBoxPane.add(cb);
-        
+
         userPanel = new UserUI(new GUIController(new SQLController()));
         adminPanel = new AdminUI(new GUIController(new SQLController()));
+
+        JButton btnLogout = new JButton("Logout");
+        btnLogout.addActionListener(userPanel);
+        btnLogout.addActionListener(adminPanel);
+        comboBoxPane.add(btnLogout);
+        comboBoxPane.add(cb);
 
         cards = new JPanel(new CardLayout());
         cards.add(userPanel, "User");
