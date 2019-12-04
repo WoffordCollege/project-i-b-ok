@@ -97,7 +97,7 @@ public class WalletUtilities {
         TransactionReceipt receipt = null;
         try {
             if (senderCredentials != null) {
-                receipt = Transfer.sendFunds(web3, senderCredentials, recipientWallet, new BigDecimal(amount), Convert.Unit.WEI).sendAsync().get();
+                receipt = Transfer.sendFunds(web3, senderCredentials, recipientWallet, new BigDecimal(amount), Convert.Unit.ETHER).sendAsync().get();
             }
         } catch (Exception ignored) {return false;}
 
