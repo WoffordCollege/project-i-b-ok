@@ -1,6 +1,7 @@
 package edu.wofford.wocoin.main;
 
 import edu.wofford.wocoin.console.MainMenu;
+import edu.wofford.wocoin.gui.RootFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,9 @@ public class Main {
             }
             else if (consoleFeatures.indexOf(args[0]) >= 0) {
                 MainMenu.main(new String[] {args[1]});
+            }
+            else if (args[0].equals("11")) {
+                RootFrame.main(new String[] {args[1]});
             }
             else {
                 System.out.println("Feature " + args[0] + " is not valid.");
