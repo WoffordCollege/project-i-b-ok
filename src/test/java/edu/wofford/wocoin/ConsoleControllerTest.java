@@ -228,6 +228,23 @@ public class ConsoleControllerTest {
     }
 
     @Test
+    public final void buyProductWithoutWallet(){
+        ConsoleController cc = new ConsoleController(sqlController);
+        String tmp = cc.buyProduct("",new Product("john", 20, "x", "This is the description."));
+        assertEquals("User has no wallet.", tmp);
+    }
+
+    @Test
+    public final void buyProductWithBadWallet(){
+        sqlController.insertUser("userWithBadWallet", "xyz");
+        sqlController.addWallet("userWithBadWallet","0x1234");
+        ConsoleController cc = new ConsoleController(sqlController);
+        cc.userLogin("userWithBadWallet","xyz");
+        String tmp = cc.buyProduct("",new Product("john", 20, "x", "This is the description."));
+        assertEquals("Invalid wallet.", tmp);
+    }
+
+    @Test
     public void testTransferWoCoins() {
         ConsoleController cc = new ConsoleController(sqlController);
         cc.addUser("testtransfer", "password");
