@@ -60,6 +60,8 @@ public class Message implements Comparable<Message>{
 		this.submitDateTime = submitDateTime;
 	}
 
+	public String toStringWithoutDate(){return String.format("%s  [%s]", message, product.getName());}
+
 	@Override
 	public int compareTo(Message otherMessage){
 		return this.id - otherMessage.getId();
