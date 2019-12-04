@@ -92,6 +92,7 @@ public class UserUI extends JPanel implements ActionListener {
 			this.setLayout(rootMenuLayout);
 
 			userOptionsMenu = new JPanel();
+			userOptionsMenu.setLayout(new GridBagLayout());
 			reloadUserMenu();
 			this.add(userOptionsMenu, "user options menu");
 
@@ -126,23 +127,32 @@ public class UserUI extends JPanel implements ActionListener {
 
 		public void reloadUserMenu() {
 			userOptionsMenu.removeAll();
+			GridBagConstraints gridBagConstraints = new GridBagConstraints();
+			gridBagConstraints.gridx = 0;
+			gridBagConstraints.gridy = 0;
+			gridBagConstraints.anchor = GridBagConstraints.CENTER;
+
 			String[] buttonNames;
 			if (!gc.userHasWallet()) {
 				buttonNames = new String[]{"Create a Wallet"};
 			} else {
 				JLabel balanceLabel = new JLabel(gc.getUserBalance());
-				userOptionsMenu.add(balanceLabel);
+				gridBagConstraints.ipady = 7;
+				userOptionsMenu.add(balanceLabel, gridBagConstraints);
+				gridBagConstraints.gridy = 1;
 				buttonNames = new String[] {"Create a Wallet", "Add a Product", "Remove a Product", "Display Products",
 						"Send a Message", "Check Messages", "Buy a Product"
 				};
 			}
 
 			JButton newButton;
+
 			for (String buttonName : buttonNames) {
 				newButton = new JButton(buttonName);
 				newButton.addActionListener(this);
 				newButton.setAlignmentX(CENTER_ALIGNMENT);
-				userOptionsMenu.add(newButton);
+				userOptionsMenu.add(newButton, gridBagConstraints);
+				gridBagConstraints.gridy++;
 			}
 		}
 
@@ -173,6 +183,16 @@ public class UserUI extends JPanel implements ActionListener {
 
 				this.add(backButton);
 				this.add(Box.createVerticalStrut(15));
+
+				fileChooser = new JFileChooser();
+				fileChooser.setCurrentDirectory(new java.io.File("."));
+				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				fileChooser.setAcceptAllFileFilterUsed(false);
+				fileChooser.setAlignmentX(LEFT_ALIGNMENT);
+				fileChooser.addActionListener(this);
+
+				this.add(fileChooser);
+
 			}
 
 			public void showPanel() {
@@ -184,22 +204,6 @@ public class UserUI extends JPanel implements ActionListener {
 					if (!userStillCreatingWallet) {
 						parentPanel.showRootMenu();
 					}
-				}
-
-				if (userStillCreatingWallet) {
-					fileChooser = new JFileChooser();
-					fileChooser.setCurrentDirectory(new java.io.File("."));
-					fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-					fileChooser.setAcceptAllFileFilterUsed(false);
-					fileChooser.setAlignmentX(LEFT_ALIGNMENT);
-					fileChooser.addActionListener(this);
-
-					this.add(fileChooser);
-					JButton selectDirectoryButton = new JButton("Create Wallet");
-					selectDirectoryButton.addActionListener(this);
-					selectDirectoryButton.setAlignmentX(LEFT_ALIGNMENT);
-					this.add(selectDirectoryButton);
-					this.updateUI();
 				}
 			}
 
