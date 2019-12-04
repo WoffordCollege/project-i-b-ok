@@ -87,7 +87,7 @@ public class UserUI extends JPanel implements ActionListener {
 
 		public UserRootMenu() {
 			rootMenuLayout = new CardLayout();
-			actionPanels = new HashMap<String, UserActionPanel>();
+			actionPanels = new HashMap<>();
 			this.setLayout(rootMenuLayout);
 
 			userOptionsMenu = new JPanel();
