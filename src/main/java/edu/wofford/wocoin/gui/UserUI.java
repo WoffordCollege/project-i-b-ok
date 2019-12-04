@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.swing.*;
+import javax.swing.DefaultListModel;
 
 public class UserUI extends JPanel implements ActionListener {
 	private GUIController gc;
@@ -347,7 +348,9 @@ public class UserUI extends JPanel implements ActionListener {
 				ArrayList<Product> products = gc.getUserProducts();
 
 				listModel = new DefaultListModel<>();
-				listModel.addAll(products);
+				for (Product product : products) {
+					listModel.addElement(product);
+				}
 
 				productJList = new JList<>(listModel);
 				productJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -386,7 +389,9 @@ public class UserUI extends JPanel implements ActionListener {
 			public void showPanel() {
 				ArrayList<Product> products = gc.getUserProducts();
 				listModel = new DefaultListModel<>();
-				listModel.addAll(products);
+				for (Product product : products) {
+					listModel.addElement(product);
+				}
 				productJList.setModel(listModel);
 				productJList.updateUI();
 				this.updateUI();
@@ -418,7 +423,9 @@ public class UserUI extends JPanel implements ActionListener {
 				ArrayList<Product> products = gc.getUserProducts();
 
 				listModel = new DefaultListModel<>();
-				listModel.addAll(products);
+				for (Product product : products) {
+					listModel.addElement(product);
+				}
 
 				productJList = new JList<>(listModel);
 				productJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -447,7 +454,9 @@ public class UserUI extends JPanel implements ActionListener {
 				});
 
 				listModel = new DefaultListModel<>();
-				listModel.addAll(products);
+				for (Product product : products) {
+					listModel.addElement(product);
+				}
 				productJList.setModel(listModel);
 				productJList.updateUI();
 				this.updateUI();
@@ -478,7 +487,9 @@ public class UserUI extends JPanel implements ActionListener {
 
 				ArrayList<Product> products = getProductsList();
 				DefaultListModel<Product> listModel = new DefaultListModel<>();
-				listModel.addAll(products);
+				for (Product product : products) {
+					listModel.addElement(product);
+				}
 
 				productJList = new JList<>(listModel);
 				productJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -514,7 +525,9 @@ public class UserUI extends JPanel implements ActionListener {
 			public void showPanel() {
 				ArrayList<Product> products = getProductsList();
 				DefaultListModel<Product> listModel = new DefaultListModel<>();
-				listModel.addAll(products);
+				for (Product product : products) {
+					listModel.addElement(product);
+				}
 				productJList.setModel(listModel);
 				productJList.setSelectedIndex(0);
 				productJList.updateUI();
@@ -570,7 +583,9 @@ public class UserUI extends JPanel implements ActionListener {
 
 				ArrayList<Message> messages = gc.getUserMessages();
 				DefaultListModel<Message> listModel = new DefaultListModel<>();
-				listModel.addAll(messages);
+				for (Message message : messages) {
+					listModel.addElement(message);
+				}
 
 				messageJList = new JList<>(listModel);
 				messageJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -600,7 +615,9 @@ public class UserUI extends JPanel implements ActionListener {
 			public void showPanel() {
 				ArrayList<Message> messages = gc.getUserMessages();
 				DefaultListModel<Message> listModel = new DefaultListModel<>();
-				listModel.addAll(messages);
+				for (Message message : messages) {
+					listModel.addElement(message);
+				}
 				messageJList.setModel(listModel);
 				messageJList.setSelectedIndex(0);
 				messageJList.updateUI();
@@ -682,7 +699,9 @@ public class UserUI extends JPanel implements ActionListener {
 				ArrayList<Product> products = gc.getPurchasableProducts(true);
 				products.sort(Product::compareToWithPrice);
 				DefaultListModel<Product> listModel = new DefaultListModel<>();
-				listModel.addAll(products);
+				for (Product product : products) {
+					listModel.addElement(product);
+				}
 
 				productJList = new JList<>(listModel);
 				productJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -736,9 +755,11 @@ public class UserUI extends JPanel implements ActionListener {
 			}
 
 			private void updateProducts() {
-				ArrayList<Product> messages = gc.getPurchasableProducts(true);
+				ArrayList<Product> products = gc.getPurchasableProducts(true);
 				DefaultListModel<Product> listModel = new DefaultListModel<>();
-				listModel.addAll(messages);
+				for (Product product : products) {
+					listModel.addElement(product);
+				}
 				productJList.setModel(listModel);
 				productJList.setSelectedIndex(0);
 				productJList.updateUI();
