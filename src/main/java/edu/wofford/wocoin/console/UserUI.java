@@ -5,11 +5,8 @@ import edu.wofford.wocoin.Message;
 import edu.wofford.wocoin.Product;
 import edu.wofford.wocoin.WalletUtilities;
 import io.bretty.console.view.AbstractView;
-import io.bretty.console.view.Validator;
 import io.bretty.console.view.ViewConfig;
-import org.web3j.abi.datatypes.Int;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -157,7 +154,6 @@ public class UserUI extends CustomActionView {
             public void executeCustomAction() {
                 ArrayList<Product> products = cc.getSqlController().getAllProductsList();
                 products.sort(Product::compareToWithPrice);
-
                 for (int i = 0; i < products.size(); i++) {
                     Product product = products.get(i);
                     product.setCurrentUser(cc.getCurrentUser());

@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * This class stores the helper methods that can be used to create a Console style GUI
  * It stores a SQLController which is used to perform the necessary operations on the database
  */
-public class ConsoleController {
+public class GUIController {
 
     private SQLController sqlController;
 
@@ -22,7 +22,7 @@ public class ConsoleController {
      * Constructs a new ConsoleController with the given {@link SQLController}. Sets the current state of the UI to Login
      * @param sqlController The {@link SQLController} with a given WocoinDatabase that is modified with the Controller
      */
-    public ConsoleController(SQLController sqlController) {
+    public GUIController(SQLController sqlController) {
         this.sqlController = sqlController;
         this.currentUser = null;
     }
