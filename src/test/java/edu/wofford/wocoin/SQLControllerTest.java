@@ -393,10 +393,11 @@ public class SQLControllerTest {
         }
     }
 
-    @Ignore
     @Test
     public void getMessageTest(){
         int nextId = -1;
+        Product TestProduct = new Product("srogers", 256, "Shield", "Made of a steel vibranium alloy");
+        assertEquals(SQLController.AddProductResult.ADDED, foobar.addProduct(TestProduct));
         try(Connection dataConn = DriverManager.getConnection(foobar.getPath())){
             PreparedStatement stSelect = dataConn.prepareStatement("Select max(id) from products");
             ResultSet dtr = stSelect.executeQuery();
@@ -425,8 +426,12 @@ public class SQLControllerTest {
 
         hjones.sort(Message::compareTo);
         srogers.sort(Message::compareTo);
+        ArrayList<Message> hjonesActual = foobar.getMessagesForUser("hjones");
+        ArrayList<Message> srogersActual = foobar.getMessagesForUser("srogers");
 
-        assertEquals(hjones,foobar.getMessagesForUser("hjones"));
-        assertEquals(srogers,foobar.getMessagesForUser("srogers"));
+        assertEquals(hjones.get(0).toStringWithoutDate(), hjonesActual.get(0).toStringWithoutDate());
+        assertEquals(hjones.get(1).toStringWithoutDate(), hjonesActual.get(1).toStringWithoutDate());
+        assertEquals(srogers.get(0).toStringWithoutDate(),srogersActual.get(0).toStringWithoutDate());
+        assertEquals(srogers.get(1).toStringWithoutDate(),srogersActual.get(1).toStringWithoutDate());
     }
 }
