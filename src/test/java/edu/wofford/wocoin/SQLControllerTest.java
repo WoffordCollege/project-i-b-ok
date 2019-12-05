@@ -371,6 +371,7 @@ public class SQLControllerTest {
     public void sendMessageSuccessfulTest(){
         Product testProduct = foobar.getPurchasableProductsList("jdoe",10).get(0);
         Message testMessage = new Message("jdoe", "jsmith","This is a test message.",testProduct);
+        assertEquals("This is a test message.  [Zombieland]  null",testMessage.toString());
         SQLController.SendMessageResult tmp = foobar.sendMessage(testMessage);
         assertEquals(SQLController.SendMessageResult.SENT, tmp);
         try(Connection dataConn = DriverManager.getConnection(foobar.getPath())){
