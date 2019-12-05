@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import static org.junit.Assert.*;
 import static org.testng.Assert.assertEquals;
 
+import java.sql.*;
+
 public class ConsoleControllerTest {
 
     private SQLController sqlController;
@@ -242,6 +244,49 @@ public class ConsoleControllerTest {
         cc.userLogin("userWithBadWallet","xyz");
         String tmp = cc.buyProduct("",new Product("john", 20, "x", "This is the description."));
         assertEquals("Invalid wallet.", tmp);
+    }
+
+    @Test
+    public final void sendAndDeleteMessage(){
+        sqlController.insertUser("user7","abc");
+        sqlController.insertUser("user8","123");
+        Product newProduct = new Product("user7", 20, "y", "This is not product x.");
+        sqlController.addProduct(newProduct);
+        sqlController.addWallet("user7","7");
+        sqlController.addWallet("user8","8");
+
+        int nextId = -1;
+
+        assertEquals(SQLController.AddProductResult.ADDED, sqlController.addProduct(newProduct));
+
+        try(Connection dataConn = DriverManager.getConnection(sqlController.getPath())){
+            PreparedStatement stSelect = dataConn.prepareStatement("Select max(id) from products");
+            ResultSet dtr = stSelect.executeQuery();
+            nextId = dtr.getInt(1);
+        }catch (Exception e){
+            System.out.println(e.toString());
+        }
+        Product newProductWithId = new Product(nextId,"user7", 20, "y", "This is not product x.");
+        ConsoleController cc = new ConsoleController(sqlController);
+        cc.userLogin("user8","123");
+        assertEquals("Message sent.",cc.sendMessage(newProductWithId,"This is a test."));
+
+        try(Connection dataConn = DriverManager.getConnection(sqlController.getPath())){
+            PreparedStatement stSelect = dataConn.prepareStatement("Select max(id) from messages");
+            ResultSet dtr = stSelect.executeQuery();
+            nextId = dtr.getInt(1);
+        }catch (Exception e){
+            System.out.println(e.toString());
+        }
+        Message messageToDelete = new Message(nextId,"user8","user7","This is a test.","",newProductWithId);
+        assertEquals("Message deleted.",cc.deleteMessage(messageToDelete));
+    }
+
+    @Test
+    public final void getUserMessages(){
+        ConsoleController cc = new ConsoleController(sqlController);
+        cc.userLogin("user7","abc");
+        assertEquals(sqlController.getMessagesForUser("user7"),cc.getUserMessages());
     }
 
     @Test
