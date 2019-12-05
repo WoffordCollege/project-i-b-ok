@@ -188,6 +188,27 @@ public class SQLControllerTest {
     }
 
     @Test
+    public final void removeProductWithID() {
+        foobar.insertUser("testseller2","Wofford1854");
+        foobar.addWallet("testseller2","0x8a6e4b");
+        int nextId = -1;
+
+        Product newProduct = new Product("testseller2", 20, "y", "This is not product x.");
+        assertEquals(SQLController.AddProductResult.ADDED, foobar.addProduct(newProduct));
+
+        try(Connection dataConn = DriverManager.getConnection(foobar.getPath())){
+            PreparedStatement stSelect = dataConn.prepareStatement("Select max(id) from products");
+            ResultSet dtr = stSelect.executeQuery();
+            nextId = dtr.getInt(1);
+        }catch (Exception e){
+            System.out.println(e.toString());
+        }
+        Product newProductWithId = new Product(nextId,"testseller2", 20, "y", "This is not product x.");
+
+        assertEquals(SQLController.RemoveProductResult.REMOVED, foobar.removeProduct(newProductWithId));
+    }
+
+    @Test
     public final void removeProductNoWallet() {
         Product newProduct = new Product("nowallet", 20, "x", "This is the description.");
         assertEquals(SQLController.RemoveProductResult.NOWALLET, foobar.removeProduct(newProduct));
