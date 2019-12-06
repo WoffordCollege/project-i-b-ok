@@ -85,7 +85,7 @@ public class WalletUtilities {
         createWocoinTransaction(new File("ethereum/node0/keystore/UTC--2019-08-07T17-24-10.532680697Z--0fce4741f3f54fbffb97837b4ddaa8f769ba0f91.json"), "adminpwd", wallet, amt);
     }
 
-    private static boolean createWocoinTransaction(File walletFile, String senderPassword, String recipientWallet, BigInteger amount) {
+    public static boolean createWocoinTransaction(File walletFile, String senderPassword, String recipientWallet, BigInteger amount) {
         Web3j web3 = Web3j.build(new HttpService());
 
         Credentials senderCredentials;
