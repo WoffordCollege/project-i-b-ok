@@ -38,10 +38,6 @@ public class Message implements Comparable<Message>{
 		return senderUsername;
 	}
 
-	public String getSubmitDateTime() {
-		return submitDateTime;
-	}
-
 	public Product getProduct() {
 		return product;
 	}
@@ -54,11 +50,7 @@ public class Message implements Comparable<Message>{
 		this.id = id;
 	}
 
-	public void setRecipient(String username){ this.recipientUsername = username;}
-
-	public void setSubmitDateTime(String submitDateTime) {
-		this.submitDateTime = submitDateTime;
-	}
+	public String toStringWithoutDate(){return String.format("%s  [%s]", message, product.getName());}
 
 	@Override
 	public int compareTo(Message otherMessage){

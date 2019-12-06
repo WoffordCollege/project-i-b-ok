@@ -11,9 +11,10 @@ import static org.testng.Assert.assertEquals;
 
 import java.sql.*;
 
-public class ConsoleControllerTest {
+public class GUIControllerTest {
 
     private SQLController sqlController;
+    private GUIController guiCon;
 
     @BeforeClass
     public static void rebuildTestDB() {
@@ -28,6 +29,7 @@ public class ConsoleControllerTest {
     @Before
     public void setUp(){
         sqlController = new SQLController("test.db");
+        guiCon = new GUIController(sqlController);
     }
 
     @AfterClass
@@ -40,65 +42,60 @@ public class ConsoleControllerTest {
 
     @Test
     public void testAddUser() {
-        ConsoleController cm = new ConsoleController(sqlController);
-        cm.adminLogin("adminpwd");
-        assertEquals(cm.addUser("testadduser", "test"), "testadduser was added.");
-        assertEquals(cm.addUser("testadduser", "test"), "testadduser already exists.");
+        guiCon.adminLogin("adminpwd");
+        assertEquals(guiCon.addUser("testadduser", "test"), "testadduser was added.");
+        assertEquals(guiCon.addUser("testadduser", "test"), "testadduser already exists.");
     }
 
     @Test
     public void testRemoveUser() {
-        ConsoleController cm = new ConsoleController(sqlController);
-        cm.adminLogin("adminpwd");
-        cm.addUser("testadduser", "test");
-        assertEquals(cm.removeUser("testadduser"), "testadduser was removed.");
-        assertEquals(cm.removeUser("testadduser"), "testadduser does not exist.");
+        guiCon.adminLogin("adminpwd");
+        guiCon.addUser("testadduser", "test");
+        assertEquals(guiCon.removeUser("testadduser"), "testadduser was removed.");
+        assertEquals(guiCon.removeUser("testadduser"), "testadduser does not exist.");
     }
 
     @Test
     public void testUserLogin() {
         sqlController.insertUser("testlogin", "testpass");
-        ConsoleController cm = new ConsoleController(sqlController);
-        assertFalse(cm.userLogin("baduser", "badpass"));
-        assertTrue(cm.userLogin("testlogin", "testpass"));
-        cm.doLogout();
+        assertFalse(guiCon.userLogin("baduser", "badpass"));
+        assertTrue(guiCon.userLogin("testlogin", "testpass"));
+        guiCon.doLogout();
     }
 
     @Test
     public void testAddWallet() {
         sqlController.insertUser("testwallet", "testpass");
         ConsoleController cm = new ConsoleController(sqlController);
-        cm.userLogin("testwallet", "testpass");
-        assertEquals(cm.getCurrentUser(), "testwallet");
+        guiCon.userLogin("testwallet", "testpass");
+        assertEquals(guiCon.getCurrentUser(), "testwallet");
     }
 
     @Test
     public void testUserWithWallet() {
         sqlController.insertUser("testuserwithwallet", "testpassword");
-        ConsoleController cm = new ConsoleController(sqlController);
-        assertFalse(cm.userHasWallet());
-        assertTrue(cm.userLogin("testuserwithwallet", "testpassword"));
-        assertFalse(cm.userHasWallet());
+        assertFalse(guiCon.userHasWallet());
+        assertTrue(guiCon.userLogin("testuserwithwallet", "testpassword"));
+        assertFalse(guiCon.userHasWallet());
         sqlController.addWallet("testuserwithwallet", "testkey");
-        assertTrue(cm.userHasWallet());
-        assertTrue(cm.deleteUserWallet());
-        cm.doLogout();
-        cm.removeUser("testuserwithwallet");
+        assertTrue(guiCon.userHasWallet());
+        assertTrue(guiCon.deleteUserWallet());
+        guiCon.doLogout();
+        guiCon.removeUser("testuserwithwallet");
     }
 
     @Test
     public void testWalletCreation() {
         sqlController.insertUser("testwalletcreate", "test");
-        ConsoleController cm = new ConsoleController(sqlController);
-        assertSame(WalletUtilities.CreateWalletResult.FAILED, cm.addWalletToUser("nouser"));
-        assertTrue(cm.userLogin("testwalletcreate", "test"));
-        assertSame(WalletUtilities.CreateWalletResult.SUCCESS, cm.addWalletToUser("test/"));
+        assertSame(WalletUtilities.CreateWalletResult.FAILED, guiCon.addWalletToUser("nouser"));
+        assertTrue(guiCon.userLogin("testwalletcreate", "test"));
+        assertSame(WalletUtilities.CreateWalletResult.SUCCESS, guiCon.addWalletToUser("test/"));
         File file = new File("test/testwalletcreate/mykeyfile.json");
         try {
             file.createNewFile();
         } catch (IOException e) { }
-        assertSame(WalletUtilities.CreateWalletResult.FILEALREADYEXISTS, cm.addWalletToUser("test/"));
-        assertSame(WalletUtilities.CreateWalletResult.SUCCESS, cm.addWalletToUser("test/test/"));
+        assertSame(WalletUtilities.CreateWalletResult.FILEALREADYEXISTS, guiCon.addWalletToUser("test/"));
+        assertSame(WalletUtilities.CreateWalletResult.SUCCESS, guiCon.addWalletToUser("test/test/"));
         assertTrue(sqlController.findWallet("testwalletcreate"));
 
         try {
@@ -114,21 +111,20 @@ public class ConsoleControllerTest {
         sqlController.insertUser("paul","Wofford1854");
         sqlController.insertUser("john","Wofford1854");
         sqlController.addWallet("john","j12345");
-        ConsoleController cm = new ConsoleController(sqlController);
 
-        cm.userLogin("paul", "Wofford1854");
-        assertEquals(cm.addNewProduct("testitem","This is the description.", 20), "User has no wallet.");
+        guiCon.userLogin("paul", "Wofford1854");
+        assertEquals(guiCon.addNewProduct("testitem","This is the description.", 20), "User has no wallet.");
 
-        cm.userLogin("john", "Wofford1854");
+        guiCon.userLogin("john", "Wofford1854");
 
         Product newProduct = new Product("john", 20, "testitem", "testdescription");
-        assertEquals(cm.addNewProduct("testitem", "testdescription", 20), "Product added.");
+        assertEquals(guiCon.addNewProduct("testitem", "testdescription", 20), "Product added.");
         assertTrue(sqlController.productExistsInDatabase(newProduct));
 
-        assertEquals(cm.addNewProduct("", "testdescription", 20), "Invalid value.\nExpected a string with at least 1 character.");
-        assertEquals(cm.addNewProduct("testitem", "", 20), "Invalid value.\nExpected a string with at least 1 character.");
-        assertEquals(cm.addNewProduct("testitem", "testdescription", 0), "Invalid value.\nExpected an integer value greater than or equal to 1.");
-        assertEquals(cm.addNewProduct("testitem", "testdescription", -1), "Invalid value.\nExpected an integer value greater than or equal to 1.");
+        assertEquals(guiCon.addNewProduct("", "testdescription", 20), "Invalid value.\nExpected a string with at least 1 character.");
+        assertEquals(guiCon.addNewProduct("testitem", "", 20), "Invalid value.\nExpected a string with at least 1 character.");
+        assertEquals(guiCon.addNewProduct("testitem", "testdescription", 0), "Invalid value.\nExpected an integer value greater than or equal to 1.");
+        assertEquals(guiCon.addNewProduct("testitem", "testdescription", -1), "Invalid value.\nExpected an integer value greater than or equal to 1.");
     }
 
     @Test
@@ -136,23 +132,19 @@ public class ConsoleControllerTest {
         sqlController.insertUser("paul","Wofford1854");
         sqlController.insertUser("john","Wofford1854");
         sqlController.addWallet("john","j12345");
-        ConsoleController cm = new ConsoleController(sqlController);
-
 
         Product newProduct = new Product("john", 20, "testitem", "testdescription");
-        cm.userLogin("paul", "Wofford1854");
-        assertEquals(cm.removeProduct(new Product("paul", 20, "testitem", "testdescription")), "User has no wallet.");
+        guiCon.userLogin("paul", "Wofford1854");
+        assertEquals(guiCon.removeProduct(new Product("paul", 20, "testitem", "testdescription")), "User has no wallet.");
 
-        cm.userLogin("john", "Wofford1854");
-        cm.addNewProduct(newProduct.getName(), newProduct.getDescription(), newProduct.getPrice());
+        guiCon.userLogin("john", "Wofford1854");
+        guiCon.addNewProduct(newProduct.getName(), newProduct.getDescription(), newProduct.getPrice());
 
-        assertEquals(cm.removeProduct(newProduct), "Product removed.");
+        assertEquals(guiCon.removeProduct(newProduct), "Product removed.");
     }
 
     @Test
     public void testGetUserProducts() {
-        ConsoleController cc = new ConsoleController(sqlController);
-
         Product skittles1 = new Product("jsmith", 1, "skittles", "a half-eaten bag");
         Product chalk2 = new Product("jdoe", 2, "chalk", "taken from a classroom");
         Product zombieland3 = new Product("jsmith", 2, "Zombieland", "DVD");
@@ -176,11 +168,11 @@ public class ConsoleControllerTest {
         expectedJsmithProducts.sort(Product::compareTo);
         expectedJdoeProducts.sort(Product::compareTo);
 
-        assertTrue(cc.userLogin("jdoe", "jdoe"));
-        ArrayList<Product> actualJdoeProducts = cc.getUserProducts();
+        assertTrue(guiCon.userLogin("jdoe", "jdoe"));
+        ArrayList<Product> actualJdoeProducts = guiCon.getUserProducts();
 
-        cc.userLogin("jsmith", "jsmith");
-        ArrayList<Product> actualJsmithProducts = cc.getUserProducts();
+        guiCon.userLogin("jsmith", "jsmith");
+        ArrayList<Product> actualJsmithProducts = guiCon.getUserProducts();
 
         actualJdoeProducts.sort(Product::compareTo);
         actualJsmithProducts.sort(Product::compareTo);
@@ -194,7 +186,6 @@ public class ConsoleControllerTest {
     @Test
     public void testGetAllProducts() {
         rebuildTestDB();
-        ConsoleController cc = new ConsoleController(sqlController);
 
         Product skittles1 = new Product("jsmith", 1, "skittles", "a half-eaten bag");
         Product chalk2 = new Product("jdoe", 2, "chalk", "taken from a classroom");
@@ -214,7 +205,7 @@ public class ConsoleControllerTest {
         expectedProducts.add(risk6);
         expectedProducts.add(tripToCharlotte7);
 
-        ArrayList<Product> actualProducts = cc.getAllProducts();
+        ArrayList<Product> actualProducts = guiCon.getAllProducts();
 
         expectedProducts.sort(Product::compareToWithPrice);
         actualProducts.sort(Product::compareToWithPrice);
@@ -225,14 +216,12 @@ public class ConsoleControllerTest {
 
     @Test
     public void testGetSQLController() {
-        ConsoleController cc = new ConsoleController(sqlController);
-        assertSame(cc.getSqlController(), sqlController);
+        assertSame(guiCon.getSqlController(), sqlController);
     }
 
     @Test
     public final void buyProductWithoutWallet(){
-        ConsoleController cc = new ConsoleController(sqlController);
-        String tmp = cc.buyProduct("",new Product("john", 20, "x", "This is the description."));
+        String tmp = guiCon.buyProduct("",new Product("john", 20, "x", "This is the description."));
         assertEquals("User has no wallet.", tmp);
     }
 
@@ -240,9 +229,8 @@ public class ConsoleControllerTest {
     public final void buyProductWithBadWallet(){
         sqlController.insertUser("userWithBadWallet", "xyz");
         sqlController.addWallet("userWithBadWallet","0x1234");
-        ConsoleController cc = new ConsoleController(sqlController);
-        cc.userLogin("userWithBadWallet","xyz");
-        String tmp = cc.buyProduct("",new Product("john", 20, "x", "This is the description."));
+        guiCon.userLogin("userWithBadWallet","xyz");
+        String tmp = guiCon.buyProduct("",new Product("john", 20, "x", "This is the description."));
         assertEquals("Invalid wallet.", tmp);
     }
 
@@ -267,9 +255,8 @@ public class ConsoleControllerTest {
             System.out.println(e.toString());
         }
         Product newProductWithId = new Product(nextId,"user7", 20, "y", "This is not product x.");
-        ConsoleController cc = new ConsoleController(sqlController);
-        cc.userLogin("user8","123");
-        assertEquals("Message sent.",cc.sendMessage(newProductWithId,"This is a test."));
+        guiCon.userLogin("user8","123");
+        assertEquals("Message sent.",guiCon.sendMessage(newProductWithId,"This is a test."));
 
         try(Connection dataConn = DriverManager.getConnection(sqlController.getPath())){
             PreparedStatement stSelect = dataConn.prepareStatement("Select max(id) from messages");
@@ -279,28 +266,25 @@ public class ConsoleControllerTest {
             System.out.println(e.toString());
         }
         Message messageToDelete = new Message(nextId,"user8","user7","This is a test.","",newProductWithId);
-        assertEquals("Message deleted.",cc.deleteMessage(messageToDelete));
+        assertEquals("Message deleted.",guiCon.deleteMessage(messageToDelete));
     }
 
     @Test
     public final void getUserMessages(){
-        ConsoleController cc = new ConsoleController(sqlController);
-        cc.userLogin("user7","abc");
-        assertEquals(sqlController.getMessagesForUser("user7"),cc.getUserMessages());
+        guiCon.userLogin("user7","abc");
+        assertEquals(sqlController.getMessagesForUser("user7"),guiCon.getUserMessages());
     }
 
     @Test
     public void testTransferWoCoins() {
-        ConsoleController cc = new ConsoleController(sqlController);
-        cc.addUser("testtransfer", "password");
-        cc.addUser("testtransfernowallet", "password");
-        cc.userLogin("testtransfer", "password");
-        cc.addWalletToUser("test");
-        assertEquals(cc.transferWocoinsToUser("testtransfer", 10), "Transfer complete.");
-        assertEquals(cc.transferWocoinsToUser("notauser", 10), "No such user.");
-        assertEquals(cc.transferWocoinsToUser("testtransfernowallet", 10), "User has no wallet.");
-        assertEquals(cc.transferWocoinsToUser("testtransfer", -10), "Expected an integer value greater than or equal to 1.");
-
-        // TODO When the transfer in SQLController is done, check to make sure the balance correctly reflects the transaction
+        guiCon.addUser("testtransfer", "password");
+        guiCon.addUser("testtransfernowallet", "password");
+        guiCon.userLogin("testtransfer", "password");
+        guiCon.addWalletToUser("test");
+        assertEquals(guiCon.transferWocoinsToUser("testtransfer", 10), "Transfer complete.");
+        assertEquals(guiCon.transferWocoinsToUser("notauser", 10), "No such user.");
+        assertEquals(guiCon.transferWocoinsToUser("testtransfernowallet", 10), "User has no wallet.");
+        assertEquals(guiCon.transferWocoinsToUser("testtransfer", -10), "Expected an integer value greater than or equal to 1.");
     }
+
 }
