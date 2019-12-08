@@ -54,7 +54,7 @@ public class Message implements Comparable<Message>{
 
 	@Override
 	public int compareTo(Message otherMessage){
-		return this.id - otherMessage.getId();
+		return otherMessage.getId() - this.id;
 	}
 
 	@Override
