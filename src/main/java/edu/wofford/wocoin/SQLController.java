@@ -559,7 +559,7 @@ public class SQLController {
     ArrayList<Message> getMessagesForUser(String username) {
         ArrayList<Message> messages = new ArrayList<>();
         try (Connection dataConn = DriverManager.getConnection(url)) {
-            PreparedStatement stSelect = dataConn.prepareStatement("select a.id messageID, (select id from wallets where publickey = a.sender) senderUserName, (select id from wallets where publickey = a.recipient) receiverUserName, message, a.dt, b.id productID, b.price, b.name productName, b.description productDescription from messages a join products b on a.productid = b.id where a.recipient = ? Order By dt Asc;");
+            PreparedStatement stSelect = dataConn.prepareStatement("select a.id messageID, (select id from wallets where publickey = a.sender) senderUserName, (select id from wallets where publickey = a.recipient) receiverUserName, message, a.dt, b.id productID, b.price, b.name productName, b.description productDescription from messages a join products b on a.productid = b.id where a.recipient = ? Order By dt DESC;");
             stSelect.setString(1, retrievePublicKey(username));
             ResultSet dtr = stSelect.executeQuery();
             while (dtr.next()) {

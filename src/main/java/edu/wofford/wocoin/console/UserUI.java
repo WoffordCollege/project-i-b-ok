@@ -23,6 +23,12 @@ public class UserUI extends CustomActionView {
         this.cc = cc;
     }
 
+	@Override
+	protected void onBack() {
+		cc.doLogout();
+		super.onBack();
+	}
+
     @Override
     public void executeCustomAction() {
         String username = this.prompt("Please enter your username: ", String.class);

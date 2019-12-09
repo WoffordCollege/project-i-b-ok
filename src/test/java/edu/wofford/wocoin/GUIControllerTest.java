@@ -66,7 +66,7 @@ public class GUIControllerTest {
     @Test
     public void testAddWallet() {
         sqlController.insertUser("testwallet", "testpass");
-        ConsoleController cm = new ConsoleController(sqlController);
+        GUIController cm = new GUIController(sqlController);
         guiCon.userLogin("testwallet", "testpass");
         assertEquals(guiCon.getCurrentUser(), "testwallet");
     }

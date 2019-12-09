@@ -30,10 +30,12 @@ public class MainMenu extends CustomMenuView {
 
     @Override
     protected void onQuit() {
+
     }
 
     public static void main(String[] args) {
         MainMenu cc;
+        //System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n");
         if (args.length == 1) {
             cc = new MainMenu(new ConsoleController(new SQLController(args[0])), new Scanner(System.in));
         }

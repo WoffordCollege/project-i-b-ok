@@ -48,6 +48,7 @@ public class RootFrame implements ItemListener {
     @Override
     public void itemStateChanged(ItemEvent evt) {
         CardLayout cl = (CardLayout)(cards.getLayout());
+        adminPanel.logout();
         userPanel.logout();
         cl.show(cards, (String)evt.getItem());
     }

@@ -416,48 +416,6 @@ public class SQLControllerTest {
     }
 
     @Test
-    public void getMessageTest(){
-        int nextId = -1;
-        Product TestProduct = new Product("srogers", 256, "Shield", "Made of a steel vibranium alloy");
-        assertEquals(SQLController.AddProductResult.ADDED, foobar.addProduct(TestProduct));
-        try(Connection dataConn = DriverManager.getConnection(foobar.getPath())){
-            PreparedStatement stSelect = dataConn.prepareStatement("Select max(id) from products");
-            ResultSet dtr = stSelect.executeQuery();
-            nextId = dtr.getInt(1);
-        }catch (Exception e){
-            System.out.println(e.toString());
-        }
-        ArrayList<Message> srogers = new ArrayList<>();
-        ArrayList<Message> hjones = new ArrayList<>();
-        Product newTestProduct = new Product(nextId, "srogers", 256, "Shield", "Made of a steel vibranium alloy");
-        Message messageToSend = new Message("srogers","hjones","abcd",newTestProduct);
-        hjones.add(messageToSend);
-        foobar.sendMessage(messageToSend);
-
-        messageToSend = new Message("hjones","srogers","efgh",newTestProduct);
-        srogers.add(messageToSend);
-        foobar.sendMessage(messageToSend);
-
-        messageToSend = new Message("srogers","hjones","ijkl",newTestProduct);
-        hjones.add(messageToSend);
-        foobar.sendMessage(messageToSend);
-
-        messageToSend = new Message("hjones","srogers","mnop",newTestProduct);
-        srogers.add(messageToSend);
-        foobar.sendMessage(messageToSend);
-
-        hjones.sort(Message::compareTo);
-        srogers.sort(Message::compareTo);
-        ArrayList<Message> hjonesActual = foobar.getMessagesForUser("hjones");
-        ArrayList<Message> srogersActual = foobar.getMessagesForUser("srogers");
-
-        assertEquals(hjones.get(0).toStringWithoutDate(), hjonesActual.get(0).toStringWithoutDate());
-        assertEquals(hjones.get(1).toStringWithoutDate(), hjonesActual.get(1).toStringWithoutDate());
-        assertEquals(srogers.get(0).toStringWithoutDate(),srogersActual.get(0).toStringWithoutDate());
-        assertEquals(srogers.get(1).toStringWithoutDate(),srogersActual.get(1).toStringWithoutDate());
-    }
-
-    @Test
     public void deleteMessageTest(){
         Product testProduct = foobar.getPurchasableProductsList("jsmith",10).get(0);
         Message testMessage = new Message("jsmith", "jdoe","This is another test message.",testProduct);
